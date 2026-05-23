@@ -1,324 +1,165 @@
-import React, { useState } from 'react';
+import React from 'react';
+import TopBar from './TopBar';
 
 export default function Dashboard({ applications, dsaProgress, goals, setGoals, setActiveTab }) {
-  const [editingGoals, setEditingGoals] = useState(false);
-  const [tempGoals, setTempGoals] = useState({ ...goals });
-
-  // Counts
   const totalApps = applications.length;
-  const interviewingCount = applications.filter(a => a.status === 'interviewing').length;
-  const offersCount = applications.filter(a => a.status === 'offered').length;
-  const rejectedCount = applications.filter(a => a.status === 'rejected').length;
-  const appliedCount = applications.filter(a => a.status === 'applied').length;
+  const interviewing = applications.filter(a => a.status === 'interviewing').length;
+  const offered = applications.filter(a => a.status === 'offered').length;
+  const activeLeads = interviewing + offered;
+  const dsaSolved = dsaProgress.questions.filter(q => q.status === 'Solved').length;
   
-  const dsaSolvedCount = dsaProgress.questions.filter(q => q.status === 'Solved').length;
-
-  // Goals calculations
-  // Count applications submitted in the last 7 days
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  const appsThisWeek = applications.filter(a => new Date(a.date) >= sevenDaysAgo).length;
-
-  const appGoalProgress = Math.min(Math.round((appsThisWeek / goals.weeklyApplications) * 100), 100);
-  const dsaGoalProgress = Math.min(Math.round((dsaSolvedCount / goals.weeklyDSAQuestions) * 100), 100);
-
-  // SVG Donut Chart calculations
-  const totalChart = appliedCount + interviewingCount + offersCount + rejectedCount;
-  const data = [
-    { value: appliedCount, color: 'var(--accent-cyan)', label: 'Applied' },
-    { value: interviewingCount, color: 'var(--accent-purple)', label: 'Interviewing' },
-    { value: offersCount, color: 'var(--accent-emerald)', label: 'Offered' },
-    { value: rejectedCount, color: 'var(--accent-rose)', label: 'Rejected' },
-  ];
-
-  let cumulativePercent = 0;
-  const donutSegments = data.map((d, index) => {
-    if (totalChart === 0) return null;
-    const percent = d.value / totalChart;
-    const startPercent = cumulativePercent;
-    cumulativePercent += percent;
-
-    // Radius = 40, circumference = 2 * PI * 40 ≈ 251.2
-    const strokeDash = 251.2;
-    const dashOffset = strokeDash * (1 - percent);
-    const rotation = startPercent * 360;
-
-    return {
-      ...d,
-      dashOffset,
-      rotation,
-      percentStr: `${Math.round(percent * 100)}%`
-    };
-  }).filter(Boolean);
-
-  const handleGoalSave = (e) => {
-    e.preventDefault();
-    setGoals(tempGoals);
-    setEditingGoals(false);
-  };
+  const funnelPct = totalApps > 0 ? Math.round((activeLeads / totalApps) * 100) : 0;
+  
+  const upcomingApps = [...applications]
+    .filter(a => a.status === 'interviewing')
+    .sort((a,b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 3);
 
   return (
-    <div>
-      {/* Welcome & Stats Row */}
-      <div className="page-title-row">
-        <div>
-          <h1 className="page-title">Career Dashboard</h1>
-          <p className="page-subtitle">Welcome back, Vansh. Here is your application overview.</p>
-        </div>
-        <button className="btn btn-primary" onClick={() => setEditingGoals(true)}>
-          ⚙️ Adjust Goals
-        </button>
-      </div>
+    <main className="flex-1 flex flex-col">
+      <TopBar />
 
-      {/* Metrics Grid */}
-      <div className="metrics-grid">
-        <div className="glass-panel metric-card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-          <div>
-            <span className="form-label" style={{ fontSize: '0.75rem' }}>Total Applications</span>
-            <div className="metric-value">{totalApps}</div>
-          </div>
-          <div className="metric-icon-box" style={{ background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-cyan)' }}>
-            💼
-          </div>
-        </div>
-
-        <div className="glass-panel metric-card" style={{ borderLeft: '4px solid var(--accent-purple)' }}>
-          <div>
-            <span className="form-label" style={{ fontSize: '0.75rem' }}>Interviewing</span>
-            <div className="metric-value">{interviewingCount}</div>
-          </div>
-          <div className="metric-icon-box" style={{ background: 'rgba(157, 78, 221, 0.1)', color: 'var(--accent-purple)' }}>
-            🎙️
-          </div>
-        </div>
-
-        <div className="glass-panel metric-card" style={{ borderLeft: '4px solid var(--accent-emerald)' }}>
-          <div>
-            <span className="form-label" style={{ fontSize: '0.75rem' }}>Offers Received</span>
-            <div className="metric-value">{offersCount}</div>
-          </div>
-          <div className="metric-icon-box" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-emerald)' }}>
-            🏆
-          </div>
-        </div>
-
-        <div className="glass-panel metric-card" style={{ borderLeft: '4px solid var(--accent-amber)' }}>
-          <div>
-            <span className="form-label" style={{ fontSize: '0.75rem' }}>DSA Solved</span>
-            <div className="metric-value">{dsaSolvedCount}</div>
-          </div>
-          <div className="metric-icon-box" style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--accent-amber)' }}>
-            🧩
-          </div>
-        </div>
-      </div>
-
-      {/* Main Section */}
-      <div className="dashboard-sections">
-        {/* Left Side: Goal Progress & Recent Apps */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Goals Tracker */}
-          <div className="glass-panel">
-            <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              🎯 Weekly Targets
-            </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                  <span style={{ fontWeight: '500' }}>Applications Submitted (This Week)</span>
-                  <span style={{ color: 'var(--accent-purple)', fontWeight: '600' }}>{appsThisWeek} / {goals.weeklyApplications} ({appGoalProgress}%)</span>
-                </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${appGoalProgress}%`, height: '100%', background: 'var(--grad-purple)', borderRadius: '4px', transition: 'width 0.5s ease' }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                  <span style={{ fontWeight: '500' }}>DSA Coding Targets (Total Solved)</span>
-                  <span style={{ color: 'var(--accent-emerald)', fontWeight: '600' }}>{dsaSolvedCount} / {goals.weeklyDSAQuestions} ({dsaGoalProgress}%)</span>
-                </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${dsaGoalProgress}%`, height: '100%', background: 'var(--grad-emerald)', borderRadius: '4px', transition: 'width 0.5s ease' }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Applications Table */}
-          <div className="glass-panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontFamily: 'Space Grotesk, sans-serif' }}>💼 Recent Applications</h3>
-              <button 
-                className="btn btn-secondary" 
-                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                onClick={() => setActiveTab('applications')}
-              >
-                View All
-              </button>
-            </div>
-            
-            {applications.length === 0 ? (
-              <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '1.5rem' }}>No job applications added yet.</p>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                      <th style={{ padding: '0.75rem 0.5rem' }}>Company</th>
-                      <th style={{ padding: '0.75rem 0.5rem' }}>Role</th>
-                      <th style={{ padding: '0.75rem 0.5rem' }}>Date</th>
-                      <th style={{ padding: '0.75rem 0.5rem' }}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {applications.slice(0, 4).map((app) => (
-                      <tr key={app.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                        <td style={{ padding: '0.75rem 0.5rem', fontWeight: '600' }}>{app.company}</td>
-                        <td style={{ padding: '0.75rem 0.5rem', color: 'var(--text-secondary)' }}>{app.title}</td>
-                        <td style={{ padding: '0.75rem 0.5rem', color: 'var(--text-muted)' }}>{app.date}</td>
-                        <td style={{ padding: '0.75rem 0.5rem' }}>
-                          <span className={`badge badge-${app.status}`}>{app.status}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Side: Charts & Quick Links */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Applications Breakdown Chart */}
-          <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', width: '100%', textAlign: 'left', marginBottom: '1.5rem' }}>
-              📊 Application Breakdown
-            </h3>
-            
-            {totalApps === 0 ? (
-              <div style={{ height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                No applications to chart
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', width: '100%', justifyContent: 'space-around', flexWrap: 'wrap' }}>
-                {/* SVG Donut */}
-                <div style={{ position: 'relative', width: '120px', height: '120px' }}>
-                  <svg width="100%" height="100%" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="rgba(255,255,255,0.03)" strokeWidth="12" />
-                    {donutSegments.map((seg, i) => (
-                      <circle
-                        key={i}
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="transparent"
-                        stroke={seg.color}
-                        strokeWidth="12"
-                        strokeDasharray="251.2"
-                        strokeDashoffset={seg.dashOffset}
-                        transform={`rotate(${seg.rotation - 90} 50 50)`}
-                        strokeLinecap="round"
-                        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-                      />
-                    ))}
-                  </svg>
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    textAlign: 'center',
-                    fontFamily: 'Space Grotesk',
-                    fontWeight: '700',
-                    fontSize: '1.2rem'
-                  }}>
-                    {totalApps}
-                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '400', textTransform: 'uppercase' }}>
-                      Total
-                    </div>
+      <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* Career Pulse Hero */}
+        <section className="bg-[#ffffff08] border border-[#ffffff15] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-8 rounded-xl relative overflow-hidden">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6 z-10">
+              <h2 className="font-sora text-3xl font-bold text-white">Career Pulse</h2>
+              <p className="font-inter text-lg text-slate-400">
+                Your application ecosystem is vibrating with potential. {activeLeads} active leads identified in your pipeline.
+              </p>
+              <div className="flex gap-4">
+                <div className="bg-[#ffffff08] border border-[#ffffff15] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-4 rounded-lg flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-indigo-400" style={{ fontVariationSettings: "'FILL' 1" }}>trending_up</span>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-indigo-300">{totalApps}</p>
+                    <p className="text-xs font-mono text-slate-400 uppercase tracking-widest">Applications</p>
                   </div>
                 </div>
-
-                {/* Donut Legend */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '100px' }}>
-                  {data.map((d, index) => {
-                    const count = d.value;
-                    const percent = totalApps > 0 ? Math.round((count / totalApps) * 100) : 0;
-                    return (
-                      <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: d.color }}></span>
-                        <span style={{ color: 'var(--text-secondary)', flexGrow: 1 }}>{d.label}</span>
-                        <span style={{ fontWeight: '600' }}>{count} ({percent}%)</span>
-                      </div>
-                    );
-                  })}
+                <div className="bg-[#ffffff08] border border-[#ffffff15] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-4 rounded-lg flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-purple-400" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-purple-400">{activeLeads}</p>
+                    <p className="text-xs font-mono text-slate-400 uppercase tracking-widest">Active Leads</p>
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
+            
+            {/* Funnel Chart */}
+            <div className="relative flex justify-center items-center">
+              <svg className="w-72 h-72 drop-shadow-2xl" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" fill="transparent" r="45" stroke="rgba(255,255,255,0.05)" strokeWidth="10"></circle>
+                <circle className="transition-all duration-1000" cx="50" cy="50" fill="transparent" r="45" stroke="#818cf8" strokeDasharray="282.7" strokeDashoffset={282.7 - (funnelPct/100)*282.7} strokeLinecap="round" strokeWidth="10" transform="rotate(-90 50 50)" style={{ filter: 'drop-shadow(0 0 12px rgba(129,140,248,0.5))' }}></circle>
+                <circle className="transition-all duration-1000" cx="50" cy="50" fill="transparent" r="34" stroke="#c084fc" strokeDasharray="213.6" strokeDashoffset={213.6 - ((offered/Math.max(totalApps,1))*100/100)*213.6} strokeLinecap="round" strokeWidth="8" transform="rotate(-90 50 50)" style={{ filter: 'drop-shadow(0 0 8px rgba(192,132,252,0.5))' }}></circle>
+              </svg>
+              <div className="absolute text-center flex flex-col items-center">
+                <span className="block font-sora text-4xl font-bold text-white leading-none">{funnelPct}%</span>
+                <span className="text-xs font-mono text-slate-400 uppercase tracking-widest mt-2 font-semibold">PIPELINE</span>
+              </div>
+              {/* Floating Labels */}
+              <div className="absolute -top-4 -right-4 bg-[#ffffff08] border border-[#ffffff15] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-4 py-2 rounded-full text-xs font-bold animate-bounce text-indigo-300">
+                Active Funnel
+              </div>
+            </div>
+          </div>
+          {/* Background Accent */}
+          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+        </section>
+
+        {/* Bento Grid Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* Weekly Targets Card */}
+          <div className="bg-[#ffffff08] border border-[#ffffff15] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-8 rounded-xl flex flex-col justify-between hover:scale-[1.02] transition-all duration-300">
+            <div>
+              <div className="flex justify-between items-start mb-6">
+                <h3 className="font-sora text-xl text-white font-bold">Weekly Targets</h3>
+                <span className="material-symbols-outlined text-indigo-400">target</span>
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-bold text-white">Applications</span>
+                    <span className="text-sm text-indigo-300 font-mono">{totalApps}/{goals.weeklyApplications}</span>
+                  </div>
+                  <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-700" style={{ width: `${Math.min((totalApps/Math.max(goals.weeklyApplications, 1))*100, 100)}%`, boxShadow: '0 0 10px rgba(99,102,241,0.5)' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-bold text-white">DSA Questions</span>
+                    <span className="text-sm text-purple-400 font-mono">{dsaSolved}/{goals.weeklyDSAQuestions}</span>
+                  </div>
+                  <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-700" style={{ width: `${Math.min((dsaSolved/Math.max(goals.weeklyDSAQuestions, 1))*100, 100)}%`, boxShadow: '0 0 10px rgba(168,85,247,0.5)' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-8 pt-6 border-t border-white/10 text-center">
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-widest font-semibold">RESET IN 3 DAYS</span>
+            </div>
           </div>
 
-          {/* Quick AI Scouting Panel */}
-          <div className="glass-panel" style={{ background: 'var(--grad-dark)', border: '1px solid rgba(157, 78, 221, 0.3)' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', color: 'white', marginBottom: '0.5rem' }}>
-              🔍 Match Job Profiles
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#c084fc', marginBottom: '1.25rem' }}>
-              Paste a job description or scan job boards to identify skills gaps and customize your preparation.
-            </p>
-            <button className="btn btn-primary" style={{ width: '100%', background: '#fff', color: '#1e1b4b' }} onClick={() => setActiveTab('analyzer')}>
-              Open JD Analyzer
+          {/* Upcoming Interviews */}
+          <div className="bg-[#ffffff08] border border-[#ffffff15] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-8 rounded-xl lg:col-span-1 hover:scale-[1.02] transition-all duration-300 flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-sora text-xl text-white font-bold">Upcoming</h3>
+              <button className="text-xs font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer" onClick={() => setActiveTab('applications')}>VIEW ALL</button>
+            </div>
+            <div className="space-y-4 flex-1">
+              {upcomingApps.map((app) => {
+                const dateObj = new Date(app.date);
+                const month = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
+                const day = dateObj.getDate();
+                return (
+                  <div key={app.id} className="flex items-center gap-4 py-3 border-b border-white/10 last:border-none">
+                    <div className="w-12 h-12 rounded-xl bg-[#ffffff08] border border-[#ffffff15] backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-indigo-400 shrink-0">
+                      <span className="text-[10px] font-bold leading-none mt-1">{month}</span>
+                      <span className="text-lg font-bold leading-none mt-1">{day}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-white truncate">{app.title}</p>
+                      <p className="text-xs text-slate-400 truncate">{app.company} • Pending Time</p>
+                    </div>
+                    <span className="material-symbols-outlined text-slate-400/40 text-[18px]">arrow_forward_ios</span>
+                  </div>
+                );
+              })}
+              {upcomingApps.length === 0 && (
+                <div className="flex-1 flex flex-col items-center justify-center text-slate-400 py-8">
+                  <span className="material-symbols-outlined text-4xl mb-2 opacity-50">event_busy</span>
+                  <p className="text-sm font-medium">No upcoming interviews</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Market Insights */}
+          <div className="rounded-xl p-8 relative overflow-hidden flex flex-col justify-between group cursor-pointer lg:col-span-1 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]"
+            style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(168,85,247,0.2) 100%)' }}>
+            <div className="absolute inset-0 bg-black/20 transition-opacity group-hover:opacity-0 pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-6 border border-white/20">
+                <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>insights</span>
+              </div>
+              <h3 className="font-sora text-xl text-white mb-2 font-bold">Market Insights</h3>
+              <p className="text-white/80 text-sm leading-relaxed">
+                Tech salaries in your sector have surged by 15% this quarter. See how your applications compare.
+              </p>
+            </div>
+            <button className="relative z-10 w-full bg-white text-indigo-600 font-bold py-3 rounded-xl hover:bg-white/90 transition-colors mt-8 cursor-pointer shadow-lg shadow-white/10">
+              View Analysis
             </button>
           </div>
         </div>
       </div>
-
-      {/* Adjust Goals Modal */}
-      {editingGoals && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2 className="modal-title">⚙️ Adjust Weekly Targets</h2>
-              <button className="modal-close" onClick={() => setEditingGoals(false)}>&times;</button>
-            </div>
-            <form onSubmit={handleGoalSave}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Weekly Application Target</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={tempGoals.weeklyApplications}
-                    onChange={(e) => setTempGoals({ ...tempGoals, weeklyApplications: parseInt(e.target.value) || 0 })}
-                    min="1" 
-                    required 
-                  />
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>How many job applications do you plan to submit each week?</p>
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label">DSA Target (Solved Coding Questions)</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={tempGoals.weeklyDSAQuestions}
-                    onChange={(e) => setTempGoals({ ...tempGoals, weeklyDSAQuestions: parseInt(e.target.value) || 0 })}
-                    min="1" 
-                    required 
-                  />
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Target number of coding exercises solved to date.</p>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setEditingGoals(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Targets</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+    </main>
   );
 }

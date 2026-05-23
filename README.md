@@ -1,6 +1,6 @@
 # 🌌 PlacementOS
 
-**PlacementOS** is a comprehensive, local-first web-based dashboard designed to streamline, track, and optimize software engineering placement preparation. Built with a sleek, glassmorphic dark theme, it acts as a unified command center for students and job seekers managing their career search.
+**PlacementOS** is a comprehensive, local-first web-based dashboard designed to streamline, track, and optimize software engineering placement preparation. It acts as a unified command center for students and job seekers managing their career search.
 
 ---
 
