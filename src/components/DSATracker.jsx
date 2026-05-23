@@ -44,7 +44,7 @@ export default function DSATracker({ dsaProgress, setDsaProgress }) {
             <h2 className="text-xs font-mono text-slate-400 mb-6 uppercase tracking-widest font-bold">Global Solve Rate</h2>
             
             <div className="relative flex items-center justify-center">
-              <svg className="w-64 h-64 -rotate-90">
+              <svg className="w-64 h-64 -rotate-90" viewBox="0 0 256 256" style={{ overflow: 'visible' }}>
                 <circle className="text-white/5" cx="128" cy="128" fill="transparent" r="120" stroke="currentColor" strokeWidth="12"></circle>
                 <circle className="text-indigo-400 transition-all duration-1000" cx="128" cy="128" fill="transparent" r="120" stroke="currentColor" strokeLinecap="round" strokeWidth="12" strokeDasharray="753.9" strokeDashoffset={753.9 - (solveRate/100)*753.9} style={{ filter: 'drop-shadow(0 0 10px rgba(129,140,248,0.5))' }}></circle>
               </svg>
@@ -156,9 +156,9 @@ export default function DSATracker({ dsaProgress, setDsaProgress }) {
                       <td className="px-8 py-5">
                         {getDifficultyBadge(q.difficulty)}
                       </td>
-                      <td className="px-8 py-5 text-sm text-slate-400">{q.topic}</td>
+                      <td className="px-8 py-5 text-sm text-slate-400">{q.topic || 'Data Structures'}</td>
                       <td className="px-8 py-5 text-right">
-                        <span className="material-symbols-outlined text-indigo-400 opacity-0 group-hover:opacity-100 transition-all text-[20px]">open_in_new</span>
+                        <span className="material-symbols-outlined text-indigo-400 opacity-30 group-hover:opacity-100 transition-all text-[20px]">open_in_new</span>
                       </td>
                     </tr>
                   );
