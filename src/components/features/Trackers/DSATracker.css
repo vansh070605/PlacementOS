@@ -1,0 +1,113 @@
+/* DSATracker.css - Airy modern DSA tracker page styling */
+
+.dsa-topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.dsa-topic-card {
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dsa-topic-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.dsa-topic-card.completed {
+  border-color: var(--success);
+  background: var(--success-light);
+}
+
+.dsa-topic-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.dsa-topic-card.completed .dsa-topic-checkbox {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.dsa-topic-card.completed .dsa-topic-checkbox .material-symbols-outlined {
+  color: #ffffff;
+  font-size: 0.9rem;
+  display: block;
+}
+
+.dsa-topic-checkbox .material-symbols-outlined {
+  display: none;
+}
+
+.dsa-topic-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+/* Question list table styling */
+.question-table-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.question-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.question-table th {
+  padding: 1rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
+  letter-spacing: 0.05em;
+}
+
+.question-table td {
+  padding: 1.15rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.question-table tr:hover td {
+  background: var(--bg-primary);
+}
+
+.difficulty-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  display: inline-block;
+  letter-spacing: 0.02em;
+}
+
+.difficulty-easy { background: var(--success-light); color: var(--success); }
+.difficulty-medium { background: var(--warning-light); color: var(--warning); }
+.difficulty-hard { background: var(--danger-light); color: var(--danger); }

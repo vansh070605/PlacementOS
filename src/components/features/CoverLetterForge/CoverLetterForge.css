@@ -1,0 +1,259 @@
+/* ============================================================
+   CoverLetterForge.css — Cover Letter Forge (Agent 8)
+   Premium bento-box: form, style selector, document card,
+   hooks panel, copy + download actions.
+   ============================================================ */
+
+.clf-wrapper {
+  padding: 2.5rem;
+}
+
+.clf-header { margin-bottom: 2.5rem; }
+
+/* ── Form Card ───────────────────────────────────────────── */
+.clf-form-card {
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-premium);
+  padding: 2.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.clf-field { margin-bottom: 1.5rem; }
+
+.clf-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 0.55rem;
+}
+
+.clf-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-primary);
+  font-size: 0.93rem;
+  color: var(--text-main);
+  font-weight: 500;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  line-height: 1.65;
+}
+
+.clf-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.clf-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .clf-input-row { grid-template-columns: 1fr; }
+}
+
+.clf-input {
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-primary);
+  font-size: 0.93rem;
+  color: var(--text-main);
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+}
+
+.clf-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* Style Selector */
+.clf-style-group {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.clf-style-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clf-style-btn .material-symbols-outlined { font-size: 1rem; }
+
+.clf-style-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.clf-style-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
+}
+
+/* Form action bar */
+.clf-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Results ─────────────────────────────────────────────── */
+.clf-results-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .clf-results-layout { grid-template-columns: 1fr; }
+}
+
+/* Document-style letter card */
+.clf-letter-card {
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-premium);
+  padding: 2.5rem 3rem;
+  animation: clf-card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes clf-card-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.clf-letter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.clf-letter-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.clf-word-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.clf-style-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.clf-letter-body {
+  font-size: 0.975rem;
+  line-height: 1.9;
+  color: var(--text-main);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-weight: 400;
+}
+
+.clf-letter-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+/* ── Side Panel: Key Hooks ───────────────────────────────── */
+.clf-hooks-card {
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-premium);
+  padding: 1.75rem;
+  animation: clf-card-in 0.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.clf-hook-item {
+  background: linear-gradient(135deg, var(--primary-light) 0%, #f8fbff 100%);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  margin-top: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--text-main);
+  font-weight: 500;
+  font-style: italic;
+  position: relative;
+}
+
+.clf-hook-item::before {
+  content: '"';
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  font-size: 2.5rem;
+  color: var(--primary);
+  opacity: 0.25;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+/* Reset link at bottom */
+.clf-reset-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}

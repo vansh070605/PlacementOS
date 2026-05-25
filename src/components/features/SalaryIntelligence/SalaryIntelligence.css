@@ -1,0 +1,409 @@
+/* ============================================================
+   SalaryIntelligence.css — Salary Intelligence Agent
+   Bento-box design — salary band bars, negotiation range,
+   script card, market insights. Inherits PlacementOS tokens.
+   ============================================================ */
+
+.si-wrapper {
+  padding: 2.5rem;
+}
+
+.si-header {
+  margin-bottom: 2.5rem;
+}
+
+/* ── Input Form Card ─────────────────────────────────────── */
+.si-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (max-width: 700px) {
+  .si-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.si-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.si-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.si-input {
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-primary);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  font-weight: 500;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+.si-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* Experience Level pill toggle group */
+.si-level-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.si-level-btn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.si-level-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.si-level-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+/* Years slider */
+.si-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.si-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--border-strong);
+  outline: none;
+  cursor: pointer;
+}
+
+.si-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.si-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.si-slider-value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary);
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+/* ── Results Layout ──────────────────────────────────────── */
+.si-results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .si-results-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Compensation Band Bar Card ──────────────────────────── */
+.si-band-card {
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-premium);
+  padding: 2rem;
+}
+
+.si-band-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.si-band-title .material-symbols-outlined {
+  font-size: 1.1rem;
+  color: var(--primary);
+}
+
+.si-band-bar-wrapper {
+  position: relative;
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: 9999px;
+  margin: 1.75rem 0 0.5rem;
+}
+
+.si-band-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* P25 / median / P75 markers */
+.si-band-markers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+}
+
+.si-band-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.si-band-marker-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.si-band-marker-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.si-band-marker-value.median {
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+/* ── Negotiation Range Card ──────────────────────────────── */
+.si-negot-card {
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-premium);
+  padding: 2rem;
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .si-negot-card {
+    grid-column: span 1;
+  }
+}
+
+.si-negot-range {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 1.25rem 0;
+  flex-wrap: wrap;
+}
+
+.si-negot-box {
+  flex: 1;
+  min-width: 140px;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+}
+
+.si-negot-box-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.si-negot-box-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.si-negot-box.floor .si-negot-box-value {
+  color: var(--warning);
+}
+
+.si-negot-box.ceiling .si-negot-box-value {
+  color: var(--success);
+}
+
+.si-negot-arrow {
+  font-size: 1.5rem;
+  color: var(--border-strong);
+}
+
+/* ── Compensation extras (equity / signing) ──────────────── */
+.si-extra-row {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.si-extra-chip {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: var(--primary-light);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 14px;
+  padding: 0.9rem 1.1rem;
+}
+
+.si-extra-chip .material-symbols-outlined {
+  font-size: 1.1rem;
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.si-extra-chip-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--primary);
+  margin-bottom: 0.15rem;
+}
+
+.si-extra-chip-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+/* ── Negotiation Script Card ─────────────────────────────── */
+.si-script-card {
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-premium);
+  padding: 2rem;
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .si-script-card {
+    grid-column: span 1;
+  }
+}
+
+.si-script-bubble {
+  background: linear-gradient(135deg, #f0f7ff 0%, #eff6ff 100%);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  border-left: 4px solid var(--primary);
+  border-radius: 0 14px 14px 0;
+  padding: 1.5rem 1.75rem;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text-main);
+  font-style: italic;
+  font-weight: 500;
+  position: relative;
+  margin-top: 1rem;
+}
+
+/* ── Market Insights ─────────────────────────────────────── */
+.si-insights-card {
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-premium);
+  padding: 2rem;
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .si-insights-card {
+    grid-column: span 1;
+  }
+}
+
+.si-insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.si-insight-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.si-insight-num {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+
+.si-insight-text {
+  font-size: 0.915rem;
+  line-height: 1.65;
+  color: var(--text-secondary, var(--text-muted));
+  font-weight: 500;
+}

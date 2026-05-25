@@ -1,0 +1,23 @@
+[
+  {
+    "id": "littervision",
+    "title": "LitterVision",
+    "description": "An AI-powered computer vision system developed to automate waste classification and sorting. Implemented real-time object detection models using YOLOv8 trained on custom imagery. Leveraged Deep Convolutional Generative Adversarial Networks (DCGAN) in PyTorch to synthesize training data for underrepresented waste categories, improving overall mean Average Precision (mAP) by 14%. Created a PyTorch inference pipeline for edge deployment.",
+    "technologies": ["YOLOv8", "DCGAN", "PyTorch", "Computer Vision", "Python"],
+    "metrics": "Boosted mAP by 14% using GAN-generated training data; achieved 30 FPS inference on edge hardware."
+  },
+  {
+    "id": "quakeintel",
+    "title": "QuakeIntel",
+    "description": "A dynamic, real-time seismic visualization and intelligence platform built using React 19 and Vite. Utilized Three.js to render interactive 3D globes illustrating earthquake magnitudes, depths, and fault lines. Integrated geographic information systems (GIS) API feeds for live data parsing and mapped temporal overlays. Implemented state management, custom hooks, and optimized canvas rendering for interactive performance.",
+    "technologies": ["React 19", "Vite", "Three.js", "GIS APIs", "JavaScript", "HTML5", "CSS3"],
+    "metrics": "Visualized over 5,000 active seismic events in real time with sub-100ms canvas rendering latency."
+  },
+  {
+    "id": "vinometrix",
+    "title": "VinoMetrix",
+    "description": "An end-to-end machine learning platform predicting wine quality and price points based on chemical analysis. Built a fast, asynchronous FastAPI microservice to serve ML models. Developed and trained a classification and regression pipeline using XGBoost in Python. Integrated automated testing, logging, and CORS middleware for seamless consumption by front-end clients.",
+    "technologies": ["FastAPI", "XGBoost", "Scikit-Learn", "Python", "REST APIs", "Docker"],
+    "metrics": "Model achieved a 92% accuracy rating for quality classification; API handles up to 500 requests per second."
+  }
+]

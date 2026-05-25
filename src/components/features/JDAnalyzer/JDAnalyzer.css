@@ -1,0 +1,322 @@
+/* JDAnalyzer.css - Unified Bento Design System Integration */
+
+.jda-header {
+  margin-bottom: 2.5rem;
+}
+
+/* Bento Box Grid adaptation */
+.jda-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.75rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .jda-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Input Area Form */
+.jda-textarea {
+  width: 100%;
+  height: 280px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  background: var(--bg-primary);
+  outline: none;
+  resize: none;
+  transition: all 0.2s ease;
+}
+
+.jda-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  background: var(--surface);
+}
+
+/* Action Button Panel */
+.jda-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Score Display Card */
+.jda-score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+}
+
+.jda-score-number {
+  font-family: 'Sora', sans-serif;
+  font-size: 5.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.jda-score-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.jda-progress-container {
+  width: 100%;
+  height: 10px;
+  background: var(--bg-secondary);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 1.75rem;
+}
+
+.jda-progress-bar {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 9999px;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Skills Matching Grid */
+.jda-skills-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.jda-skill-card {
+  border: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.jda-skill-card:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-secondary);
+}
+
+.jda-skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+}
+
+.jda-skill-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  flex-grow: 1;
+}
+
+.jda-skill-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.jda-badge-matched {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.jda-badge-partial {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.jda-badge-missing {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+.jda-skill-evidence {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.jda-skill-evidence .material-symbols-outlined {
+  font-size: 0.85rem;
+  color: var(--primary);
+}
+
+/* Bullet Points lists */
+.jda-bullets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.jda-bullet-item {
+  padding: 1.25rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.jda-bullet-item:hover {
+  border-color: var(--primary-light);
+  background: var(--primary-light);
+}
+
+.jda-bullet-icon {
+  color: var(--primary);
+  font-size: 1.25rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.jda-bullet-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  flex-grow: 1;
+}
+
+.jda-btn-copy {
+  background: #ffffff;
+  border: 1px solid var(--border-strong);
+  border-radius: 9999px;
+  padding: 0.4rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.jda-btn-copy:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: #ffffff;
+  transform: scale(1.05);
+}
+
+/* Study items */
+.jda-study-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jda-study-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jda-study-item:hover {
+  background: var(--warning-light);
+  border-color: var(--warning);
+}
+
+.jda-study-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 2px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.jda-study-checkbox.checked {
+  background: var(--warning);
+  border-color: var(--warning);
+}
+
+.jda-study-checkbox.checked .material-symbols-outlined {
+  color: #ffffff;
+  font-size: 0.85rem;
+  display: block;
+}
+
+.jda-study-checkbox .material-symbols-outlined {
+  display: none;
+}
+
+.jda-study-text {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.jda-study-item.completed .jda-study-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Error States */
+.jda-error-banner {
+  background: var(--danger-light);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.jda-error-banner .material-symbols-outlined {
+  font-size: 1.5rem;
+}
+
+/* Skeleton loader structure details */
+.jda-skeleton-circle {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: jda-shimmer 1.5s infinite ease-in-out;
+  border-radius: 50%;
+  width: 90px;
+  height: 90px;
+}
+
+@keyframes jda-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

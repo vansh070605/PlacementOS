@@ -1,0 +1,227 @@
+/* OutreachAgent.css - Autonomous Outreach Agent Bento Card Styles
+   Designed to match the premium, airy bento-box design system.
+   Off-white surfaces · 24px radius · soft shadows · pill buttons · no dark mode.
+*/
+
+/* ── Wrapper & Section Header ── */
+.outreach-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+
+.outreach-section-label .material-symbols-outlined {
+  color: var(--primary);
+  font-size: 1.4rem;
+}
+
+.outreach-section-label span:last-child {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+/* ── Tone Selector Pills Row ── */
+.tone-selector {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  align-items: center;
+}
+
+.tone-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 0.25rem;
+  white-space: nowrap;
+}
+
+.tone-btn {
+  padding: 0.45rem 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tone-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.tone-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+/* ── Message Bubble Cards ── */
+.message-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.75rem;
+}
+
+.message-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.message-block-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.message-block-label .material-symbols-outlined {
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+/* Character count badge for LinkedIn request */
+.char-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+.char-badge.over-limit {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* The bubble itself */
+.message-bubble {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.35rem 1.5rem;
+  font-size: 0.97rem;
+  line-height: 1.75;
+  color: var(--text-main);
+  white-space: pre-wrap;      /* Preserve newlines from the API */
+  word-break: break-word;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  position: relative;
+}
+
+.message-bubble:hover {
+  border-color: var(--border-strong);
+  background: #ffffff;
+}
+
+/* Subject line variant — smaller, accented */
+.subject-bubble {
+  background: var(--primary-light);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: 12px;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.01em;
+}
+
+/* Copy button inside bubble header */
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--border-strong);
+  background: #ffffff;
+  color: var(--text-muted);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.copy-btn .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.copy-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.copy-btn.copied {
+  border-color: var(--success);
+  color: var(--success);
+  background: var(--success-light);
+}
+
+/* ── Regenerate Footer ── */
+.outreach-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.outreach-footer-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.outreach-footer-note .material-symbols-outlined {
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+/* ── Skeleton Loader for Outreach Card ── */
+.outreach-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 0.5rem;
+}
+
+.outreach-skeleton-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Pulsing gentle ring animation for the card while loading */
+@keyframes outreach-pulse {
+  0%, 100% { box-shadow: var(--shadow-premium); }
+  50%       { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.06); }
+}
+
+.outreach-loading-card {
+  animation: outreach-pulse 2s ease-in-out infinite;
+}

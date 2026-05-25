@@ -1,0 +1,356 @@
+/* ============================================================
+   OnboardingModal.css — Animated 3-Step Onboarding Overlay
+   Full-screen backdrop, slide transitions between steps,
+   feature highlight cards, progress dots. Light-mode only.
+   ============================================================ */
+
+/* ── Backdrop ────────────────────────────────────────────── */
+.onboard-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: onboard-fade-in 0.35s ease both;
+}
+
+@keyframes onboard-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Modal Container ────────────────────────────────────── */
+.onboard-modal {
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 40px 80px -20px rgba(15, 23, 42, 0.25),
+              0 0 0 1px rgba(15, 23, 42, 0.05);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: onboard-modal-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes onboard-modal-in {
+  from { opacity: 0; transform: scale(0.94) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Top Progress Bar ────────────────────────────────────── */
+.onboard-progress-bar {
+  height: 4px;
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.onboard-progress-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, var(--primary), #60a5fa);
+  border-radius: 0 9999px 9999px 0;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Scrollable Step Content ─────────────────────────────── */
+.onboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2.75rem 2.75rem 1.5rem;
+}
+
+/* Step slide transition */
+.onboard-step {
+  animation: step-slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes step-slide-in {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.onboard-step-back {
+  animation: step-slide-back 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes step-slide-back {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Step number tag */
+.onboard-step-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.9rem;
+  border-radius: 9999px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 1.25rem;
+}
+
+/* Step title */
+.onboard-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin-bottom: 0.65rem;
+}
+
+.onboard-title span {
+  color: var(--primary);
+}
+
+.onboard-desc {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-bottom: 2rem;
+  max-width: 520px;
+}
+
+/* ── Step 1: Feature Highlight Cards ─────────────────────── */
+.onboard-feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.onboard-feature-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.25rem;
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  animation: feature-card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.onboard-feature-card:nth-child(1) { animation-delay: 0.08s; }
+.onboard-feature-card:nth-child(2) { animation-delay: 0.14s; }
+.onboard-feature-card:nth-child(3) { animation-delay: 0.20s; }
+.onboard-feature-card:nth-child(4) { animation-delay: 0.26s; }
+.onboard-feature-card:nth-child(5) { animation-delay: 0.32s; }
+.onboard-feature-card:nth-child(6) { animation-delay: 0.38s; }
+
+@keyframes feature-card-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.onboard-feature-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.onboard-feature-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.onboard-feature-icon-wrap .material-symbols-outlined {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.onboard-feature-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.2rem;
+}
+
+.onboard-feature-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Step 2: Quick-start checklist ──────────────────────── */
+.onboard-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.onboard-check-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--bg-primary);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  animation: feature-card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.onboard-check-item:nth-child(1) { animation-delay: 0.05s; }
+.onboard-check-item:nth-child(2) { animation-delay: 0.1s; }
+.onboard-check-item:nth-child(3) { animation-delay: 0.15s; }
+
+.onboard-check-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.onboard-check-circle.done {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+.onboard-check-circle.done .material-symbols-outlined {
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.onboard-check-body {}
+
+.onboard-check-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.onboard-check-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+
+/* ── Step 3: CTA Buttons Row ────────────────────────────── */
+.onboard-cta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.onboard-cta-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 1.5rem;
+  border-radius: 18px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: feature-card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.onboard-cta-btn:nth-child(1) { animation-delay: 0.06s; }
+.onboard-cta-btn:nth-child(2) { animation-delay: 0.12s; }
+
+.onboard-cta-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
+}
+
+.onboard-cta-icon {
+  font-size: 1.5rem !important;
+  color: var(--primary);
+}
+
+.onboard-cta-label {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.onboard-cta-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── Footer Bar: Navigation ──────────────────────────────── */
+.onboard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2.75rem 2rem;
+  border-top: 1px solid var(--border);
+  gap: 1rem;
+}
+
+/* Progress dots */
+.onboard-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.onboard-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.onboard-dot.active {
+  width: 24px;
+  border-radius: 9999px;
+  background: var(--primary);
+}
+
+.onboard-dot.done {
+  background: var(--primary);
+  opacity: 0.4;
+}
+
+.onboard-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.onboard-skip-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 9999px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.onboard-skip-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-secondary);
+}

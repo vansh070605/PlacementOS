@@ -1,158 +1,222 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-@theme {
-  /* ── Dark Base Palette ── */
-  --color-base-950: #050508;
-  --color-base-900: #0d0d12;
-  --color-base-850: #111118;
-  --color-base-800: #16161f;
-  --color-base-750: #1a1a26;
-  --color-base-700: #1e1e2e;
-  --color-base-600: #252535;
-  --color-base-500: #2e2e42;
+/* ── Custom Vanilla Design Tokens ── */
+:root {
+  --bg-primary: #f8fafc;        /* Airy, soft off-white/gray canvas */
+  --bg-secondary: #f1f5f9;      /* Sidebar & backdrop grey */
+  --surface: #ffffff;           /* Clean white card surfaces */
+  --text-main: #0f172a;         /* High-contrast dark text */
+  --text-muted: #64748b;        /* Muted slate text for descriptions */
+  
+  --primary: #2563eb;           /* Sophisticated deep blue primary */
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  
+  --success: #10b981;           /* Sophisticated emerald green */
+  --success-light: #ecfdf5;
+  
+  --warning: #f97316;           /* Warm orange warning */
+  --warning-light: #fff7ed;
 
-  /* ── Accent Colors ── */
-  --color-accent-primary: #818cf8;
-  --color-accent-primary-dim: #6366f1;
-  --color-accent-secondary: #c084fc;
-  --color-accent-secondary-dim: #a855f7;
-  --color-accent-cyan: #22d3ee;
-  --color-accent-emerald: #34d399;
-  --color-accent-amber: #fbbf24;
-  --color-accent-rose: #f87171;
-
-  /* ── Typography ── */
-  --font-sora: 'Sora', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --danger: #ef4444;            /* Soft red */
+  --danger-light: #fef2f2;
+  
+  --border: #f1f5f9;            /* Very soft border */
+  --border-strong: #cbd5e1;     /* Interactive elements outline */
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.02), 0 4px 6px -2px rgba(0, 0, 0, 0.01);
+  --shadow-premium: 0 25px 50px -12px rgba(15, 23, 42, 0.03);
+  
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
 }
 
-/* ── Base Reset ── */
-*, *::before, *::after {
+/* ── Base Reset & Defaults ── */
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 16px;
+  min-height: 100vh;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #050508;
-  color: #f1f5f9;
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button, input, textarea {
+  font-family: inherit;
+}
+
+/* ── Page Grid & Layout Helpers ── */
+.app-container {
+  display: flex;
   min-height: 100vh;
-  overflow-x: hidden;
+}
+
+.main-content {
+  flex: 1;
+  padding: 3rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* Bento Box Grid Setup */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.bento-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem;
+  box-shadow: var(--shadow-premium);
+  border: 1px solid var(--border);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.bento-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 35px 70px -15px rgba(15, 23, 42, 0.07);
+}
+
+.span-12 { grid-column: span 12; }
+.span-8 { grid-column: span 8; }
+.span-6 { grid-column: span 6; }
+.span-4 { grid-column: span 4; }
+.span-3 { grid-column: span 3; }
+
+@media (max-width: 1024px) {
+  .span-8, .span-6, .span-4, .span-3 {
+    grid-column: span 12;
+  }
+}
+
+/* Typography styles */
+.text-hero-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--text-main);
+  line-height: 1.15;
+}
+
+.text-hero-desc {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+  max-width: 600px;
   line-height: 1.6;
 }
 
-/* ── Dark Mesh Background ── */
-.mesh-gradient {
-  background-color: #050508;
-  background-image:
-    radial-gradient(ellipse at 0% 0%,   rgba(99,102,241,0.10) 0, transparent 55%),
-    radial-gradient(ellipse at 100% 0%,  rgba(168,85,247,0.06) 0, transparent 50%),
-    radial-gradient(ellipse at 100% 100%,rgba(34,211,238,0.05) 0, transparent 50%),
-    radial-gradient(ellipse at 0% 100%,  rgba(99,102,241,0.05) 0, transparent 50%);
-  background-attachment: fixed;
+.card-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
-/* ── Noise overlay ── */
-.noise-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  opacity: 0.022;
-  z-index: 9999;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ── Scanline grid on sidebar ── */
-.scanline-grid::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(129,140,248,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(129,140,248,0.025) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-
-/* ── Glows ── */
-.glow-primary  { box-shadow: 0 0 18px rgba(99,102,241,0.45); }
-.glow-cyan     { box-shadow: 0 0 18px rgba(34,211,238,0.45); }
-.glow-emerald  { box-shadow: 0 0 14px rgba(52,211,153,0.45); }
-
-/* ── Material Symbols ── */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' -25, 'opsz' 24;
-  line-height: 1;
-  vertical-align: middle;
+/* Pill buttons */
+.btn-pill {
+  border-radius: 9999px;
+  padding: 0.85rem 2rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
 }
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
+.btn-pill-primary {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+}
+
+.btn-pill-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.22);
+  transform: translateY(-1px);
+}
+
+.btn-pill-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+}
+
+.btn-pill-secondary:hover {
+  background: #f8fafc;
+  color: var(--text-main);
+  border-color: var(--text-main);
+}
+
+/* Simple Shimmering loading lines */
+.skeleton-bar {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+  border-radius: 6px;
+  height: 1.25rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(129,140,248,0.2);
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(129,140,248,0.45);
+  background: #94a3b8;
 }
 
-/* ── Status / Difficulty Badges ── */
-.badge-applied      { background: rgba(99,102,241,0.15); color: #818cf8; border-color: rgba(129,140,248,0.28); }
-.badge-interviewing { background: rgba(168,85,247,0.15);  color: #c084fc; border-color: rgba(192,132,252,0.28); }
-.badge-offered      { background: rgba(52,211,153,0.15);  color: #34d399; border-color: rgba(52,211,153,0.28); }
-.badge-rejected     { background: rgba(248,113,113,0.15); color: #f87171; border-color: rgba(248,113,113,0.28); }
-
-.badge-easy   { background: rgba(34,211,238,0.12); color: #22d3ee; border-color: rgba(34,211,238,0.25); }
-.badge-medium { background: rgba(251,191,36,0.12); color: #fbbf24; border-color: rgba(251,191,36,0.25); }
-.badge-hard   { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.25); }
-
-.tag-accent {
-  background: rgba(129,140,248,0.12);
-  color: #818cf8;
-  border-color: rgba(129,140,248,0.25);
+/* Hide styling overrides for icons */
+.material-symbols-outlined {
+  font-size: 22px;
 }
-
-/* ── Typography helpers ── */
-.font-sora { font-family: 'Sora', sans-serif; }
-.font-mono  { font-family: 'JetBrains Mono', monospace; }
-
-/* ── Animations ── */
-@keyframes wave {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-7px); }
-}
-.wave-dot                  { animation: wave 1.4s infinite ease-in-out; }
-.wave-dot:nth-child(2)     { animation-delay: 0.18s; }
-.wave-dot:nth-child(3)     { animation-delay: 0.36s; }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-5px); }
-}
-.animate-float { animation: float 3s ease-in-out infinite; }
-
-@keyframes pulse-border {
-  0%, 100% { border-color: rgba(129,140,248,0.18); }
-  50%       { border-color: rgba(129,140,248,0.50); box-shadow: 0 0 12px rgba(99,102,241,0.2); }
-}
-.animate-pulse-border { animation: pulse-border 2.5s ease-in-out infinite; }
-
-@keyframes slide-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-slide-in { animation: slide-in 0.35s ease-out both; }

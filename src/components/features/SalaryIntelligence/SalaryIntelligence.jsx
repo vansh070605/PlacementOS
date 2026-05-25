@@ -1,0 +1,333 @@
+/**
+ * SalaryIntelligence.jsx
+ * ----------------------
+ * Salary Intelligence Agent (Agent 7) — Frontend Component
+ *
+ * Flow:
+ *   1. User fills: role title, location, experience level (pill toggle), years slider.
+ *   2. Component POSTs to POST /api/salary/analyze.
+ *   3. Renders: animated compensation band bars (P25/median/P75), negotiation
+ *      floor/ceiling boxes, equity + signing bonus chips, verbatim negotiation
+ *      script card, and market insights list.
+ */
+
+import React, { useState } from 'react';
+import './SalaryIntelligence.css';
+
+const BACKEND_URL = 'http://localhost:8000';
+
+const LEVELS = ['entry', 'mid', 'senior', 'staff', 'principal'];
+
+const formatUSD = (n) =>
+  n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n}`;
+
+// Animated horizontal salary band bar component
+function BandBar({ band, color, label, icon }) {
+  const range = band.p75 - band.p25 || 1;
+  const medianPct = ((band.median - band.p25) / range) * 100;
+
+  return (
+    <div className="si-band-card">
+      <div className="si-band-title">
+        <span className="material-symbols-outlined">{icon}</span>
+        {label}
+      </div>
+
+      {/* Visual bar: full width = P25→P75 range */}
+      <div className="si-band-bar-wrapper">
+        <div
+          className="si-band-bar-fill"
+          style={{ width: '100%', background: `linear-gradient(90deg, ${color}33, ${color})` }}
+        />
+        {/* Median marker line */}
+        <div
+          style={{
+            position: 'absolute',
+            left: `${medianPct}%`,
+            top: '-5px',
+            bottom: '-5px',
+            width: '3px',
+            borderRadius: '9999px',
+            background: color,
+            boxShadow: `0 0 8px ${color}66`,
+          }}
+        />
+      </div>
+
+      <div className="si-band-markers">
+        <div className="si-band-marker">
+          <span className="si-band-marker-label">P25</span>
+          <span className="si-band-marker-value">{formatUSD(band.p25)}</span>
+        </div>
+        <div className="si-band-marker">
+          <span className="si-band-marker-label">Median</span>
+          <span className={`si-band-marker-value median`} style={{ color }}>
+            {formatUSD(band.median)}
+          </span>
+        </div>
+        <div className="si-band-marker">
+          <span className="si-band-marker-label">P75</span>
+          <span className="si-band-marker-value">{formatUSD(band.p75)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function SalaryIntelligence() {
+  const [roleTitle, setRoleTitle]       = useState('');
+  const [location, setLocation]         = useState('');
+  const [level, setLevel]               = useState('mid');
+  const [years, setYears]               = useState(3);
+  const [isLoading, setIsLoading]       = useState(false);
+  const [result, setResult]             = useState(null);
+  const [error, setError]               = useState(null);
+  const [scriptCopied, setScriptCopied] = useState(false);
+
+  const handleAnalyze = async () => {
+    if (!roleTitle.trim() || !location.trim()) return;
+    setIsLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/salary/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          role_title: roleTitle,
+          location,
+          experience_level: level,
+          experience_years: years,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Server error (${res.status})`);
+      }
+      setResult(await res.json());
+    } catch (err) {
+      setError(err.message || 'Failed to fetch salary data. Is the backend running?');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCopyScript = () => {
+    if (!result) return;
+    navigator.clipboard.writeText(result.negotiation_script).then(() => {
+      setScriptCopied(true);
+      setTimeout(() => setScriptCopied(false), 2200);
+    });
+  };
+
+  const handleReset = () => {
+    setResult(null);
+    setError(null);
+  };
+
+  // Skeleton loading
+  const renderSkeleton = () => (
+    <div className="si-results-grid">
+      {[1, 2].map((i) => (
+        <div key={i} className="si-band-card">
+          <div className="skeleton-bar" style={{ width: '55%', marginBottom: '1.25rem' }} />
+          <div className="skeleton-bar" style={{ width: '100%', height: '8px', borderRadius: '9999px', marginBottom: '0.75rem' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            {[1, 2, 3].map((j) => (
+              <div key={j} className="skeleton-bar" style={{ width: '28%', height: '2.5rem', borderRadius: '10px' }} />
+            ))}
+          </div>
+        </div>
+      ))}
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="si-band-card" style={{ gridColumn: 'span 2' }}>
+          <div className="skeleton-bar" style={{ width: '40%', marginBottom: '1rem' }} />
+          <div className="skeleton-bar" style={{ width: '100%', height: '5rem', borderRadius: '14px' }} />
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="si-wrapper">
+      <div className="si-header">
+        <h2 className="text-hero-title">Salary Intelligence</h2>
+        <p className="text-hero-desc">
+          Get AI-powered compensation benchmarks, negotiation range, and a verbatim script
+          tailored to your role, location, and seniority.
+        </p>
+      </div>
+
+      {error && (
+        <div className="jda-error-banner" style={{ marginBottom: '1.5rem' }}>
+          <span className="material-symbols-outlined">error</span>
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* ── Input Form (always visible) ── */}
+      {!result && (
+        <div className="bento-card span-12" style={{ marginBottom: '0' }}>
+          <div className="card-title">
+            <span className="material-symbols-outlined">manage_search</span>
+            <span>Research Compensation</span>
+          </div>
+
+          <div className="si-form-grid">
+            <div className="si-field">
+              <label className="si-label">Job Title</label>
+              <input
+                className="si-input"
+                value={roleTitle}
+                onChange={(e) => setRoleTitle(e.target.value)}
+                placeholder="e.g. Senior ML Engineer"
+              />
+            </div>
+            <div className="si-field">
+              <label className="si-label">Location / Market</label>
+              <input
+                className="si-input"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="e.g. San Francisco, CA"
+              />
+            </div>
+          </div>
+
+          <div className="si-field" style={{ marginBottom: '1.5rem' }}>
+            <label className="si-label">Seniority Level</label>
+            <div className="si-level-group">
+              {LEVELS.map((l) => (
+                <button
+                  key={l}
+                  className={`si-level-btn ${level === l ? 'active' : ''}`}
+                  onClick={() => setLevel(l)}
+                >
+                  {l.charAt(0).toUpperCase() + l.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="si-field">
+            <label className="si-label">Years of Experience</label>
+            <div className="si-slider-row">
+              <input
+                type="range"
+                className="si-slider"
+                min={0}
+                max={20}
+                value={years}
+                onChange={(e) => setYears(Number(e.target.value))}
+              />
+              <span className="si-slider-value">{years} yr{years !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+            <button
+              className="btn-pill btn-pill-primary"
+              onClick={handleAnalyze}
+              disabled={!roleTitle.trim() || !location.trim() || isLoading}
+            >
+              <span className="material-symbols-outlined">payments</span>
+              {isLoading ? 'Analyzing…' : 'Get Salary Insights'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Loading ── */}
+      {isLoading && renderSkeleton()}
+
+      {/* ── Results ── */}
+      {result && !isLoading && (
+        <>
+          <div className="si-results-grid">
+            {/* Compensation Bands */}
+            <BandBar band={result.base_salary_band} color="#2563eb" label="Base Salary Only" icon="account_balance_wallet" />
+            <BandBar band={result.total_comp_band}  color="#10b981" label="Total Compensation" icon="trending_up" />
+
+            {/* Negotiation Range */}
+            <div className="si-negot-card">
+              <div className="card-title" style={{ marginBottom: '0' }}>
+                <span className="material-symbols-outlined">gavel</span>
+                <span>Negotiation Range</span>
+              </div>
+              <div className="si-negot-range">
+                <div className="si-negot-box floor">
+                  <div className="si-negot-box-label">Walk-Away Floor</div>
+                  <div className="si-negot-box-value">{formatUSD(result.negotiation_floor)}</div>
+                </div>
+                <span className="si-negot-arrow">→</span>
+                <div className="si-negot-box ceiling">
+                  <div className="si-negot-box-label">Aspirational Ceiling</div>
+                  <div className="si-negot-box-value">{formatUSD(result.negotiation_ceiling)}</div>
+                </div>
+              </div>
+              <div className="si-extra-row">
+                <div className="si-extra-chip">
+                  <span className="material-symbols-outlined">corporate_fare</span>
+                  <div>
+                    <div className="si-extra-chip-label">Equity (RSUs)</div>
+                    <div className="si-extra-chip-value">{result.equity_range}</div>
+                  </div>
+                </div>
+                <div className="si-extra-chip">
+                  <span className="material-symbols-outlined">redeem</span>
+                  <div>
+                    <div className="si-extra-chip-label">Signing Bonus</div>
+                    <div className="si-extra-chip-value">{result.signing_bonus_range}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Negotiation Script */}
+            <div className="si-script-card">
+              <div className="card-title" style={{ marginBottom: '0' }}>
+                <span className="material-symbols-outlined">record_voice_over</span>
+                <span>Verbatim Negotiation Script</span>
+              </div>
+              <div className="si-script-bubble">{result.negotiation_script}</div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                <button
+                  className={`copy-btn ${scriptCopied ? 'copied' : ''}`}
+                  onClick={handleCopyScript}
+                >
+                  <span className="material-symbols-outlined">
+                    {scriptCopied ? 'check' : 'content_copy'}
+                  </span>
+                  {scriptCopied ? 'Copied!' : 'Copy Script'}
+                </button>
+              </div>
+            </div>
+
+            {/* Market Insights */}
+            <div className="si-insights-card">
+              <div className="card-title" style={{ marginBottom: '1.25rem' }}>
+                <span className="material-symbols-outlined">insights</span>
+                <span>Market Insights</span>
+              </div>
+              {result.market_insights.map((insight, i) => (
+                <div key={i} className="si-insight-item">
+                  <span className="si-insight-num">{i + 1}</span>
+                  <span className="si-insight-text">{insight}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Reset */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+            <button className="btn-pill btn-pill-secondary" onClick={handleReset}>
+              <span className="material-symbols-outlined">refresh</span>
+              New Search
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,378 @@
+import os
+import io
+import json
+import asyncio
+import logging
+import pdfplumber
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, UploadFile, File, status
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.config import settings
+from app.schemas import (
+    JDAnalysisRequest,
+    JDAnalysisResponse,
+    ProjectIngest,
+    OutreachRequest,
+    OutreachResponse,
+    CareerCompassResponse,
+    SalaryRequest,
+    SalaryIntelligenceResponse,
+    CoverLetterRequest,
+    CoverLetterResponse,
+)
+from app.vector_store import vector_store
+from app.agents import orchestrator
+
+# Initialize root logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("placementos.main")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager that handles FastAPI startup and shutdown routines.
+    Reads and seeds portfolio.json into the ChromaDB vector store.
+    """
+    logger.info("Initializing PlacementOS Backend...")
+    
+    # 1. Look for initial portfolio.json and seed the vector database
+    portfolio_path = settings.portfolio_json_path
+    if os.path.exists(portfolio_path):
+        logger.info(f"Found portfolio file at {portfolio_path}. Starting automatic ingestion...")
+        try:
+            with open(portfolio_path, "r", encoding="utf-8") as f:
+                projects = json.load(f)
+                
+            for p_data in projects:
+                # Validate input matching ProjectIngest schema
+                project = ProjectIngest(**p_data)
+                
+                # Ingest to vector database (asynchronous, runs DB calls in thread pool)
+                p_id = await vector_store.add_project(project)
+                logger.info(f"Seeded project: '{project.title}' with vector ID: {p_id}")
+            logger.info("Portfolio database seeding completed successfully.")
+            
+        except ValueError as ve:
+            logger.warning(
+                f"Startup Seeding Skipped: {ve}. "
+                "The server will continue to run. Please configure GEMINI_API_KEY in backend/.env "
+                "and restart the backend, or use the /api/portfolio/ingest endpoint once configured."
+            )
+        except Exception as e:
+            logger.error(f"Failed to seed initial portfolio data: {e}", exc_info=True)
+    else:
+        logger.warning(f"Portfolio file '{portfolio_path}' not found. Vector store will start empty.")
+        
+    yield
+    
+    logger.info("Shutting down PlacementOS Backend...")
+
+# Create FastAPI application instance
+app = FastAPI(
+    title="PlacementOS API",
+    description="Multi-agent asynchronous RAG backend for parsing JDs and analyzing portfolio alignment.",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Explicit CORS configuration for Vite Frontend local dev
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow GET, POST, OPTIONS etc.
+    allow_headers=["*"],  # Allow all default headers
+)
+
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def health_check():
+    """
+    Simple health verification endpoint checking configuration states.
+    """
+    has_api_key = settings.gemini_api_key is not None and len(settings.gemini_api_key) > 0
+    return {
+        "status": "healthy",
+        "gemini_api_key_configured": has_api_key,
+        "active_models": {
+            "llm": settings.gemini_model,
+            "embeddings": settings.embedding_model
+        }
+    }
+
+@app.post(
+    "/api/analyze",
+    response_model=JDAnalysisResponse,
+    status_code=status.HTTP_200_OK
+)
+async def analyze_job_description(request: JDAnalysisRequest):
+    """
+    Trigger the multi-agent asynchronous pipeline to evaluate compatibility
+    between a job description and the candidate's vector-indexed portfolio.
+    """
+    if not request.job_description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job description text cannot be empty."
+        )
+        
+    try:
+        # Run the full async multi-agent execution pipeline
+        analysis_result = await orchestrator.analyze_jd(request.job_description)
+        return analysis_result
+        
+    except ValueError as ve:
+        # Specific exception if GEMINI_API_KEY environment config is missing
+        logger.error(f"API key error: {ve}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"Error during job description analysis: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred during job description parsing or retrieval synthesis."
+        )
+
+@app.post(
+    "/api/outreach",
+    response_model=OutreachResponse,
+    status_code=status.HTTP_200_OK
+)
+async def generate_outreach(request: OutreachRequest):
+    """
+    Triggers Agent 4 (The Networker) to generate personalized LinkedIn connection
+    requests and follow-up messages based on the JD analysis output.
+    Accepts alignment_score, tailored_bullets, tone, and the original job description.
+    """
+    if not request.job_description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job description cannot be empty."
+        )
+    if not request.tailored_bullets:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="tailored_bullets cannot be empty. Run /api/analyze first."
+        )
+    try:
+        outreach_result = await orchestrator.run_networker_agent(request)
+        return outreach_result
+    except ValueError as ve:
+        logger.error(f"API key error in outreach: {ve}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"Error during outreach generation: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while generating outreach messages."
+        )
+
+@app.post("/api/portfolio/ingest", status_code=status.HTTP_201_CREATED)
+async def ingest_project(project: ProjectIngest):
+    """
+    Dynamically ingest a new project into the portfolio vector store.
+    Useful for on-the-fly portfolio additions from UI dashboard.
+    """
+    try:
+        project_id = await vector_store.add_project(project)
+        return {
+            "status": "success",
+            "message": f"Project '{project.title}' successfully ingested.",
+            "project_id": project_id
+        }
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"Ingestion error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to ingest project: {str(e)}"
+        )
+
+@app.get("/api/portfolio/list")
+async def list_portfolio_items():
+    """
+    Helper endpoint returning metadata for all portfolio items currently indexed in ChromaDB.
+    """
+    try:
+        def _get_items():
+            return vector_store.collection.get(include=["metadatas"])
+            
+        data = await asyncio.to_thread(_get_items)
+        items = []
+        if data and data["ids"]:
+            for i, meta in zip(data["ids"], data["metadatas"]):
+                technologies = []
+                try:
+                    if meta.get("technologies"):
+                        technologies = json.loads(meta["technologies"])
+                except Exception:
+                    pass
+                items.append({
+                    "id": i,
+                    "title": meta.get("title", ""),
+                    "technologies": technologies,
+                    "metrics": meta.get("metrics") or None
+                })
+        return {"count": len(items), "projects": items}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to query portfolio list: {str(e)}"
+        )
+
+
+@app.post(
+    "/api/compass/upload",
+    response_model=CareerCompassResponse,
+    status_code=status.HTTP_200_OK
+)
+async def upload_resume_for_compass(file: UploadFile = File(...)):
+    """
+    Career Compass: Accepts a PDF resume upload, extracts its text using pdfplumber,
+    and feeds it to Agent 5 (The Career Compass Strategist) which returns exactly
+    3 AI-ranked career role pathways with alignment scores, core strengths, and
+    ordered skill-gap roadmaps.
+    """
+    # ── 1. File Type Validation ───────────────────────────────────────────────
+    if file.content_type not in ("application/pdf", "application/x-pdf"):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Only PDF files are accepted. Please upload a valid .pdf resume."
+        )
+
+    # ── 2. Read file bytes into memory (safe for typical resume sizes) ────────
+    try:
+        file_bytes = await file.read()
+    except Exception as e:
+        logger.error(f"Failed to read uploaded file: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not read the uploaded file. Please try again."
+        )
+
+    # ── 3. Extract PDF text via pdfplumber (offloaded to thread pool) ─────────
+    def _extract_text(pdf_bytes: bytes) -> str:
+        """Synchronous PDF extraction, safe to run in asyncio.to_thread."""
+        text_parts = []
+        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text_parts.append(page_text.strip())
+        return "\n\n".join(text_parts)
+
+    try:
+        resume_text = await asyncio.to_thread(_extract_text, file_bytes)
+    except Exception as e:
+        logger.error(f"PDF text extraction failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Failed to extract text from the PDF. Ensure the file is not scanned or password-protected."
+        )
+
+    # ── 4. Validate minimum content ───────────────────────────────────────────
+    if len(resume_text.strip()) < 150:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "The extracted resume text is too short (less than 150 characters). "
+                "The PDF may be a scanned image. Please upload a text-based PDF."
+            )
+        )
+
+    logger.info(
+        f"Resume uploaded: '{file.filename}' | "
+        f"Size: {len(file_bytes):,} bytes | "
+        f"Extracted: {len(resume_text):,} characters across {resume_text.count(chr(12)) + 1} pages."
+    )
+
+    # ── 5. Run Agent 5 ────────────────────────────────────────────────────────
+    try:
+        compass_result = await orchestrator.run_strategist_agent(resume_text)
+        return compass_result
+    except ValueError as ve:
+        logger.error(f"API key error in career compass: {ve}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"Career Compass analysis failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while analyzing the resume. Please try again."
+        )
+
+
+@app.post(
+    "/api/salary/analyze",
+    response_model=SalaryIntelligenceResponse,
+    status_code=status.HTTP_200_OK
+)
+async def analyze_salary(request: SalaryRequest):
+    """
+    Salary Intelligence Agent (Agent 7):
+    Returns structured compensation bands, equity norms, signing bonus range,
+    negotiation floor/ceiling, a verbatim negotiation script, and market insights
+    for the specified role, location, and seniority level.
+    """
+    if not request.role_title.strip() or not request.location.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="role_title and location are required fields."
+        )
+    try:
+        result = await orchestrator.run_salary_agent(request)
+        return result
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Salary analysis failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Salary analysis failed. Please try again."
+        )
+
+
+@app.post(
+    "/api/cover-letter/generate",
+    response_model=CoverLetterResponse,
+    status_code=status.HTTP_200_OK
+)
+async def generate_cover_letter(request: CoverLetterRequest):
+    """
+    Cover Letter Forge (Agent 8):
+    Generates a tailored, non-generic cover letter cross-referencing the job description
+    with the candidate's AI-analysed resume bullets. Returns full letter text, word count,
+    and key hooks for quick review. Supports three writing styles.
+    """
+    if not request.job_description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="job_description cannot be empty."
+        )
+    if not request.tailored_bullets:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="tailored_bullets cannot be empty. Run /api/analyze first to get resume bullets."
+        )
+    try:
+        result = await orchestrator.run_cover_letter_agent(request)
+        return result
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Cover letter generation failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Cover letter generation failed. Please try again."
+        )
