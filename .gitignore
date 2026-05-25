@@ -25,4 +25,4 @@ dist-ssr
 
 # Vite cache
 .vite
-
+backend/.env
