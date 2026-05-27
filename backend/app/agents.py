@@ -17,6 +17,7 @@ from app.schemas import (
     CompensationBand,
     CoverLetterRequest,
     CoverLetterResponse,
+    ProjectAuditResponse,
 )
 from app.vector_store import vector_store
 
@@ -457,6 +458,55 @@ class JDAnalysisOrchestrator:
         actual_words = len(result.cover_letter.split())
         result.word_count = actual_words
         logger.info(f"Agent 8 cover letter generated. Words: {actual_words} | Hooks: {len(result.key_hooks)}")
+        return result
+
+    async def run_auditor_agent(self, code_content: str) -> ProjectAuditResponse:
+        """
+        Agent 6: Project Auditor & Explainer
+        Analyzes raw project files/snippets, generating optimization plans,
+        Mermaid architecture flowcharts, tailored Google X-Y-Z resume bullets,
+        and hard project-defense interview questions.
+        """
+        logger.info("Running Agent 6: Project Auditor...")
+
+        prompt = f"""
+        You are an elite principal engineer and expert interviewer. Your task is to audit and analyze the following project codebase / snippets.
+        
+        CODE CONTENT FOR ANALYSIS:
+        \"\"\"
+        {code_content[:15000]}
+        \"\"\"
+
+        INSTRUCTIONS:
+        1. Analyze the overall purpose of the codebase and generate:
+           - A clean, optimized professional 'project_title'.
+           - A high-impact 2-3 sentence 'project_description' explaining what the system does.
+           - A comprehensive list of 'technologies' detected (languages, databases, frameworks, libraries, modules).
+           - An estimation of any engineering accomplishments or performance metrics that are implied by this implementation (e.g. O(1) searches, async concurrency, connection pooling) to populate 'metrics'.
+        2. In 'architecture_overview', explain the design patterns, code flow, and structural layout of the code.
+        3. In 'mermaid_diagram', write a VALID, clean Mermaid.js flowchart string (using graph TD or LR) illustrating the system design and component interactions. 
+           - Make sure nodes have clear labels. E.g., Use double quotes for labels: A["FastAPI Server"] --> B[("ChromaDB Client")]
+           - Never include markdown fences (like ```mermaid) or html tags inside the string. Just output the raw Mermaid syntax text.
+        4. In 'interview_prep_questions', generate 3 to 5 realistic, challenging technical interview questions (collateral project defense) that a candidate would be asked based on their decisions in this codebase. For each question, provide a detailed, professional, and convincing answer referencing the code's decisions.
+        5. In 'resume_bullets', draft 3 tailored Google X-Y-Z formula bullets: "Accomplished [X] as measured by [Y] by doing [Z]" referencing code details (e.g., "Reduced DB lookup time by introducing semantic indexing with ChromaDB", "Built async event handlers using FastAPI lifespan to handle concurrent requests").
+        6. Under the suggestions lists:
+           - 'code_quality_suggestions': 2-3 actionable items on structure, type hinting, documentation, or design patterns.
+           - 'performance_suggestions': 2-3 items on speed, database indexing, caching, resource/memory safety, or scalability.
+           - 'security_suggestions': 2-3 items on handling sensitive env variables, sanitizing inputs, encryption, or auth.
+        """
+
+        response = await self.genai_client.aio.models.generate_content(
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=ProjectAuditResponse,
+                temperature=0.2,  # Analytical precision
+            )
+        )
+
+        result = ProjectAuditResponse.model_validate_json(response.text)
+        logger.info(f"Agent 6 completed project audit for: '{result.project_title}'")
         return result
 
 

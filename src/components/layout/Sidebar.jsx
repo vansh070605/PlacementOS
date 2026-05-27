@@ -6,6 +6,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     { id: 'dashboard',    label: 'Dashboard',      icon: 'grid_view'       },
     { id: 'applications', label: 'Job Tracker',     icon: 'business_center' },
     { id: 'prep',         label: 'DSA Prep',        icon: 'code'            },
+    { id: 'auditor',      label: 'Project Auditor', icon: 'terminal'        },
     { id: 'analyzer',     label: 'JD Analyzer',     icon: 'manage_search'   },
     { id: 'compass',      label: 'Career Compass',  icon: 'explore'         },
     { id: 'salary',       label: 'Salary Intel',    icon: 'payments'        },

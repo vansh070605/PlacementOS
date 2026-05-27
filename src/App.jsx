@@ -7,6 +7,7 @@ import JDAnalyzer from './components/features/JDAnalyzer/JDAnalyzer';
 import CareerCompass from './components/features/CareerCompass/CareerCompass';
 import SalaryIntelligence from './components/features/SalaryIntelligence/SalaryIntelligence';
 import CoverLetterForge from './components/features/CoverLetterForge/CoverLetterForge';
+import ProjectAuditor from './components/features/ProjectAuditor/ProjectAuditor';
 import OnboardingModal from './components/shared/OnboardingModal';
 
 // Helper to safely load data from localStorage
@@ -154,6 +155,8 @@ export default function App() {
             setDsaProgress={setDsaProgress}
           />
         );
+      case 'auditor':
+        return <ProjectAuditor />;
       case 'analyzer':
         return <JDAnalyzer />;
       case 'compass':

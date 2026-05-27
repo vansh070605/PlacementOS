@@ -1,8 +1,13 @@
 import os
 import io
+import re
 import json
+import uuid
+import zipfile
+import shutil
 import asyncio
 import logging
+import httpx
 import pdfplumber
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, UploadFile, File, status
@@ -20,6 +25,8 @@ from app.schemas import (
     SalaryIntelligenceResponse,
     CoverLetterRequest,
     CoverLetterResponse,
+    ProjectAuditRequest,
+    ProjectAuditResponse,
 )
 from app.vector_store import vector_store
 from app.agents import orchestrator
@@ -376,3 +383,227 @@ async def generate_cover_letter(request: CoverLetterRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Cover letter generation failed. Please try again."
         )
+
+
+def scan_directory_for_code(dir_path: str, max_chars: int = 35000) -> str:
+    """
+    Recursively scans the local directory, reads code files, and returns a consolidated string.
+    """
+    if not os.path.isdir(dir_path):
+        raise ValueError(f"Path '{dir_path}' is not a valid directory or is not accessible.")
+
+    exclude_dirs = {
+        ".git", "node_modules", ".venv", "venv", "__pycache__", "dist", "build", 
+        ".vite", "package-lock.json", ".next", ".idea", ".vscode"
+    }
+    allowed_extensions = {
+        ".py", ".js", ".jsx", ".ts", ".tsx", ".go", ".java", ".cpp", ".c", ".h", 
+        ".html", ".css", ".rs", ".json", ".sql", ".sh"
+    }
+    
+    consolidated = []
+    total_len = 0
+    
+    for root, dirs, files in os.walk(dir_path):
+        # Exclude directories in-place to optimize walk
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        
+        for file in files:
+            ext = os.path.splitext(file)[1].lower()
+            if ext not in allowed_extensions:
+                continue
+                
+            file_path = os.path.join(root, file)
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read(12000)  # Read up to 12KB per file
+                    
+                rel_path = os.path.relpath(file_path, dir_path)
+                header = f"\n=== File: {rel_path} ===\n"
+                
+                if total_len + len(header) + len(content) > max_chars:
+                    remaining_space = max_chars - total_len - len(header)
+                    if remaining_space > 100:
+                        consolidated.append(header + content[:remaining_space] + "\n... [TRUNCATED DUE TO SIZE LIMIT] ...\n")
+                    break
+                    
+                consolidated.append(header + content)
+                total_len += len(header) + len(content)
+            except Exception as e:
+                logger.warning(f"Skipped file {file_path} during scan: {e}")
+                
+        if total_len >= max_chars:
+            break
+            
+    return "".join(consolidated)
+
+
+def parse_github_url(url: str) -> tuple[str, str]:
+    """
+    Extracts owner and repo name from a GitHub URL.
+    Supports formats:
+    - https://github.com/owner/repo
+    - git@github.com:owner/repo.git
+    - http://github.com/owner/repo.git
+    """
+    cleaned_url = url.strip()
+    # Check for HTTPS/HTTP format
+    match = re.search(r"github\.com/([^/]+)/([^/.]+)", cleaned_url)
+    if match:
+        return match.group(1), match.group(2)
+        
+    # Check for SSH format: git@github.com:owner/repo.git
+    match_ssh = re.search(r"github\.com:([^/]+)/([^/.]+)", cleaned_url)
+    if match_ssh:
+        return match_ssh.group(1), match_ssh.group(2)
+        
+    raise ValueError(
+        "Invalid GitHub repository URL. "
+        "Must be in the format 'https://github.com/owner/repo'."
+    )
+
+
+async def fetch_github_zipball(owner: str, repo: str, target_dir: str):
+    """
+    Downloads the zipball of the default branch for a public repository,
+    and extracts it to the target directory.
+    """
+    url = f"https://api.github.com/repos/{owner}/{repo}/zipball"
+    headers = {
+        "User-Agent": "PlacementOS-App",
+        "Accept": "application/vnd.github+json"
+    }
+    
+    logger.info(f"Downloading ZIP archive for {owner}/{repo} from GitHub API...")
+    async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+        response = await client.get(url, headers=headers)
+        if response.status_code == 404:
+            raise ValueError(
+                f"Repository '{owner}/{repo}' not found on GitHub. "
+                "Ensure the repository is public and the spelling is correct."
+            )
+        elif response.status_code != 200:
+            raise ValueError(
+                f"GitHub API returned status code {response.status_code} "
+                f"({response.text[:200]})."
+            )
+            
+        zip_bytes = io.BytesIO(response.content)
+        
+        # Run synchronous zip extraction in executor
+        def _extract():
+            with zipfile.ZipFile(zip_bytes) as zip_ref:
+                zip_ref.extractall(target_dir)
+                
+        await asyncio.to_thread(_extract)
+
+
+@app.post(
+    "/api/project/audit",
+    response_model=ProjectAuditResponse,
+    status_code=status.HTTP_200_OK
+)
+async def audit_project(request: ProjectAuditRequest):
+    """
+    Agent 6: Project Auditor & Explainer.
+    Receives either a local directory path to scan, a public GitHub URL, or direct pasted code snippets,
+    and returns a structured analysis containing architecture, Mermaid diagrams,
+    interview preparation Q&As, and Google X-Y-Z resume bullets.
+    """
+    consolidated_code = ""
+    temp_dir = None
+    
+    try:
+        if request.github_repo_url:
+            url = request.github_repo_url.strip()
+            logger.info(f"Auditing project from public GitHub repository: {url}")
+            try:
+                owner, repo = parse_github_url(url)
+            except ValueError as ve:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=str(ve)
+                )
+                
+            # Create a unique temporary directory inside the backend workspace folder
+            data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+            os.makedirs(data_dir, exist_ok=True)
+            temp_dir = os.path.join(data_dir, f"temp_github_{uuid.uuid4()}")
+            os.makedirs(temp_dir, exist_ok=True)
+            
+            try:
+                # Download and unzip the repository
+                await fetch_github_zipball(owner, repo, temp_dir)
+                # Scan the extracted repository
+                consolidated_code = await asyncio.to_thread(scan_directory_for_code, temp_dir)
+            except ValueError as ve:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=str(ve)
+                )
+            except Exception as e:
+                logger.error(f"Failed to fetch or process GitHub zipball: {e}", exc_info=True)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Error downloading or extracting GitHub repository: {str(e)}"
+                )
+                
+        elif request.local_directory_path:
+            path = request.local_directory_path.strip()
+            logger.info(f"Auditing project from local directory path: {path}")
+            try:
+                # Run blocking filesystem walk in thread pool executor
+                consolidated_code = await asyncio.to_thread(scan_directory_for_code, path)
+            except ValueError as ve:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=str(ve)
+                )
+            except Exception as e:
+                logger.error(f"Failed to scan directory: {e}", exc_info=True)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Error scanning local directory: {str(e)}"
+                )
+                
+        elif request.code_snippets:
+            logger.info(f"Auditing project from {len(request.code_snippets)} code snippet(s)")
+            snippet_list = []
+            for snippet in request.code_snippets:
+                snippet_list.append(f"\n=== File: {snippet.filename} ===\n{snippet.content}")
+            consolidated_code = "\n".join(snippet_list)
+            
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Please provide either 'github_repo_url', 'local_directory_path', or 'code_snippets'."
+            )
+            
+        if not consolidated_code.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No readable source code was found to analyze in this repository or directory."
+            )
+            
+        try:
+            result = await orchestrator.run_auditor_agent(consolidated_code)
+            return result
+        except ValueError as ve:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(ve))
+        except Exception as e:
+            logger.error(f"Project audit failed: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="An error occurred during project codebase analysis."
+            )
+            
+    finally:
+        # Cleanup temporary files
+        if temp_dir and os.path.exists(temp_dir):
+            try:
+                # Run blocking cleanup in executor
+                await asyncio.to_thread(shutil.rmtree, temp_dir, ignore_errors=True)
+                logger.info(f"Successfully cleaned up temporary directory: {temp_dir}")
+            except Exception as cleanup_err:
+                logger.warning(f"Failed to delete temp dir {temp_dir}: {cleanup_err}")
+

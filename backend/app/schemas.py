@@ -209,3 +209,49 @@ class CoverLetterResponse(BaseModel):
     cover_letter: str = Field(..., description="The complete, ready-to-send cover letter text (400-500 words).")
     word_count: int = Field(..., description="Approximate word count of the generated letter.")
     key_hooks: List[str] = Field(..., description="2-4 power phrases or strongest points used in the letter — surfaced for quick review.")
+
+
+# ── Agent 6 Schemas (Project Auditor & Explainer Agent) ───────────────────────
+
+class CodeSnippet(BaseModel):
+    """
+    Represents a single file name and its contents passed in direct paste mode.
+    """
+    filename: str = Field(..., description="Name of the file (e.g., 'main.py').")
+    content: str = Field(..., description="Full text content of the file.")
+
+class ProjectAuditRequest(BaseModel):
+    """
+    API request schema for auditing a project codebase.
+    Can accept a local directory path, direct code snippets, or a public GitHub repository URL.
+    """
+    local_directory_path: Optional[str] = Field(None, description="Absolute local folder path to scan for code files.")
+    code_snippets: Optional[List[CodeSnippet]] = Field(None, description="Pasted code snippets with filenames.")
+    github_repo_url: Optional[str] = Field(None, description="A public GitHub repository URL to download and scan.")
+
+class AuditQuestion(BaseModel):
+    """
+    An interview question and its detailed ideal answer for the audited project.
+    """
+    question: str = Field(..., description="The interview question (e.g. 'Why did you use React 19?').")
+    answer: str = Field(..., description="The structured, professional ideal answer explaining technical details.")
+
+class ProjectAuditResponse(BaseModel):
+    """
+    API response schema for Agent 6 (Project Auditor).
+    Includes architectural summaries, Mermaid diagrams, interview defense Q&A, and resume bullets.
+    Generated via Gemini structured outputs.
+    """
+    project_title: str = Field(..., description="An optimized, professional title for the project.")
+    project_description: str = Field(..., description="A concise, high-impact description summarizing what the project does.")
+    technologies: List[str] = Field(..., description="List of detected programming languages, libraries, databases, and frameworks.")
+    metrics: Optional[str] = Field(None, description="A summary of potential or detected achievements/metrics based on the code's complexity.")
+    architecture_overview: str = Field(..., description="A summary explaining the system design, core modules, and data flow of this codebase.")
+    mermaid_diagram: str = Field(..., description="A clean, valid Mermaid.js flowchart string (using graph TD or LR) illustrating the module relationships and data flow. Never include markdown wrappers around the string itself.")
+    interview_prep_questions: List[AuditQuestion] = Field(..., description="3-5 company interview defense questions tailored to this project's code decisions.")
+    resume_bullets: List[str] = Field(..., description="3 tailored Google X-Y-Z formula resume bullets highlighting engineering achievements from this project.")
+    code_quality_suggestions: List[str] = Field(..., description="2-3 specific suggestions for code readability, structure, or clean code best practices based on the code.")
+    performance_suggestions: List[str] = Field(..., description="2-3 suggestions to improve execution speed, resource leaks, caching, or scaling.")
+    security_suggestions: List[str] = Field(..., description="2-3 security best practice recommendations (e.g., credentials management, input validation).")
+
+
