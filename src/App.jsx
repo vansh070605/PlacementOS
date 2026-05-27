@@ -9,6 +9,9 @@ import SalaryIntelligence from './components/features/SalaryIntelligence/SalaryI
 import CoverLetterForge from './components/features/CoverLetterForge/CoverLetterForge';
 import ProjectAuditor from './components/features/ProjectAuditor/ProjectAuditor';
 import OnboardingModal from './components/shared/OnboardingModal';
+import AuthOverlay from './components/shared/AuthOverlay';
+import ProfileScreen from './components/features/Profile/ProfileScreen';
+import { authService } from './services/firebase';
 
 // Helper to safely load data from localStorage
 const loadLocalStorageData = (key, defaultValue) => {
@@ -84,6 +87,16 @@ export default function App() {
   // Navigation & Screen Tabs State
   const [activeTab, setActiveTab] = useState(() => loadLocalStorageData('pos_active_tab', 'dashboard'));
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Check auth state
+  useEffect(() => {
+    const unsubscribe = authService.onAuthStateChange((currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe && unsubscribe();
+  }, []);
 
   // Check if onboarding was already shown
   useEffect(() => {
@@ -165,6 +178,8 @@ export default function App() {
         return <SalaryIntelligence />;
       case 'cover-letter':
         return <CoverLetterForge />;
+      case 'profile':
+        return <ProfileScreen user={user} />;
       default:
         return (
           <Dashboard
@@ -184,7 +199,17 @@ export default function App() {
         isOpen={showOnboarding} 
         onClose={() => setShowOnboarding(false)} 
       />
-      <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+      <AuthOverlay 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onLoginSuccess={(u) => setUser(u)} 
+      />
+      <DashboardLayout 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        user={user}
+        setShowAuthModal={setShowAuthModal}
+      >
         {renderActiveScreen()}
       </DashboardLayout>
     </div>

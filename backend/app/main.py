@@ -13,8 +13,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, UploadFile, File, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import settings
-from app.schemas import (
+from .config import settings
+from .schemas import (
     JDAnalysisRequest,
     JDAnalysisResponse,
     ProjectIngest,
@@ -28,8 +28,8 @@ from app.schemas import (
     ProjectAuditRequest,
     ProjectAuditResponse,
 )
-from app.vector_store import vector_store
-from app.agents import orchestrator
+from .vector_store import vector_store
+from .agents import orchestrator
 
 # Initialize root logger
 logging.basicConfig(level=logging.INFO)
@@ -86,7 +86,7 @@ app = FastAPI(
 # Explicit CORS configuration for Vite Frontend local dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],  # Allow GET, POST, OPTIONS etc.
     allow_headers=["*"],  # Allow all default headers

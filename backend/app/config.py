@@ -1,5 +1,8 @@
 import os
+import logging
+logger = logging.getLogger("placementos.config")
 from typing import Optional
+from pydantic import validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -11,7 +14,7 @@ class Settings(BaseSettings):
     gemini_api_key: Optional[str] = None
     
     # Gemini model selection
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-1.5-flash"
     embedding_model: str = "gemini-embedding-2"
     
     # FastAPI Server parameters
@@ -28,6 +31,22 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore"
     )
+
+@validator("gemini_model")
+    def validate_gemini_model(cls, v):
+        allowed = {"gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-flash", "gemini-1.0-pro"}
+        if v not in allowed:
+            logger.warning(f"Gemini model '{v}' not recognized. Falling back to default 'gemini-1.5-flash'.")
+            return "gemini-1.5-flash"
+        return v
+
+    @validator("embedding_model")
+    def validate_embedding_model(cls, v):
+        allowed = {"gemini-embedding-2"}
+        if v not in allowed:
+            logger.warning(f"Embedding model '{v}' not recognized. Falling back to default 'gemini-embedding-2'.")
+            return "gemini-embedding-2"
+        return v
 
 # Instantiate settings singleton
 settings = Settings()

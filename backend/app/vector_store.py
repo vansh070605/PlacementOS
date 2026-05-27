@@ -5,8 +5,8 @@ import asyncio
 from typing import List, Optional
 import chromadb
 from google import genai
-from app.config import settings
-from app.schemas import ProjectIngest, MatchedProject
+from .config import settings
+from .schemas import ProjectIngest, MatchedProject
 
 class VectorStoreManager:
     """

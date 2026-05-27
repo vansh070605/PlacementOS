@@ -20,7 +20,8 @@ export default function OnboardingModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
-  if (!isOpen && !isClosing) return null;
+  // If modal is not open, don't render anything.
+  if (!isOpen) return null;
 
   const handleClose = () => {
     setIsClosing(true);

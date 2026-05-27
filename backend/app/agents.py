@@ -3,8 +3,8 @@ import logging
 from typing import List
 from google import genai
 from google.genai import types
-from app.config import settings
-from app.schemas import (
+from .config import settings
+from .schemas import (
     JDAnalysisResponse,
     JDExtractedData,
     MatchedProject,
@@ -19,7 +19,7 @@ from app.schemas import (
     CoverLetterResponse,
     ProjectAuditResponse,
 )
-from app.vector_store import vector_store
+from .vector_store import vector_store
 
 # Set up logging for agent orchestration traceability
 logger = logging.getLogger("placementos.agents")
