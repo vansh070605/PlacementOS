@@ -1,0 +1,1402 @@
+[
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 458522
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 3,
+    "salary": 1478550
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 7,
+    "salary": 1313336
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 0,
+    "salary": 426567
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 6,
+    "salary": 2398497
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Lead",
+    "years_experience": 4,
+    "salary": 2459303
+  },
+  {
+    "role": "Product Manager",
+    "location": "Hyderabad",
+    "seniority": "Lead",
+    "years_experience": 1,
+    "salary": 495327
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Senior",
+    "years_experience": 0,
+    "salary": 2041294
+  },
+  {
+    "role": "Product Manager",
+    "location": "Hyderabad",
+    "seniority": "Mid",
+    "years_experience": 9,
+    "salary": 377209
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Senior",
+    "years_experience": 6,
+    "salary": 326654
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 5,
+    "salary": 688243
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 10,
+    "salary": 1829967
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Senior",
+    "years_experience": 7,
+    "salary": 1841370
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 2,
+    "salary": 2320932
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 6,
+    "salary": 2442594
+  },
+  {
+    "role": "Product Manager",
+    "location": "Hyderabad",
+    "seniority": "Senior",
+    "years_experience": 4,
+    "salary": 2164280
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Mumbai",
+    "seniority": "Mid",
+    "years_experience": 7,
+    "salary": 2848110
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 8,
+    "salary": 418074
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 2223627
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 4,
+    "salary": 565846
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 3,
+    "salary": 1565043
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 9,
+    "salary": 2274375
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 7,
+    "salary": 1988220
+  },
+  {
+    "role": "Product Manager",
+    "location": "Mumbai",
+    "seniority": "Senior",
+    "years_experience": 2,
+    "salary": 2108817
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 319284
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 7,
+    "salary": 1805312
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 6,
+    "salary": 2330351
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Senior",
+    "years_experience": 9,
+    "salary": 2052960
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 2,
+    "salary": 1321117
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 0,
+    "salary": 385373
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 4,
+    "salary": 664940
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 0,
+    "salary": 700408
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Hyderabad",
+    "seniority": "Lead",
+    "years_experience": 4,
+    "salary": 793070
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 5,
+    "salary": 1044293
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 1,
+    "salary": 300294
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 10,
+    "salary": 1833113
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Junior",
+    "years_experience": 5,
+    "salary": 546526
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 5,
+    "salary": 1489344
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 5,
+    "salary": 2776748
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 5,
+    "salary": 675724
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 0,
+    "salary": 728250
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 9,
+    "salary": 890877
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 0,
+    "salary": 2495829
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Lead",
+    "years_experience": 1,
+    "salary": 1840756
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 875361
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 4,
+    "salary": 702944
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 9,
+    "salary": 2611797
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 1,
+    "salary": 2420624
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Senior",
+    "years_experience": 10,
+    "salary": 2370283
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Junior",
+    "years_experience": 0,
+    "salary": 629860
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 8,
+    "salary": 2590856
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Mid",
+    "years_experience": 3,
+    "salary": 2040111
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 10,
+    "salary": 2794179
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 1,
+    "salary": 1695555
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 10,
+    "salary": 1715620
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 3,
+    "salary": 2773476
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 6,
+    "salary": 2325805
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Senior",
+    "years_experience": 2,
+    "salary": 2056355
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 0,
+    "salary": 1637007
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 8,
+    "salary": 977911
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Junior",
+    "years_experience": 8,
+    "salary": 1408765
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 7,
+    "salary": 450979
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 6,
+    "salary": 2328683
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Mid",
+    "years_experience": 4,
+    "salary": 406037
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 9,
+    "salary": 2486082
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Senior",
+    "years_experience": 6,
+    "salary": 1648972
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 2,
+    "salary": 2911489
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 2,
+    "salary": 1441736
+  },
+  {
+    "role": "Product Manager",
+    "location": "Hyderabad",
+    "seniority": "Senior",
+    "years_experience": 1,
+    "salary": 1592452
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 10,
+    "salary": 2187533
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Mid",
+    "years_experience": 4,
+    "salary": 964699
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 1,
+    "salary": 1434236
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 10,
+    "salary": 984756
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 10,
+    "salary": 424928
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 2,
+    "salary": 2570050
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 1,
+    "salary": 1319359
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 1,
+    "salary": 2084517
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 6,
+    "salary": 838436
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 0,
+    "salary": 900358
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 5,
+    "salary": 2787909
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 2,
+    "salary": 2318566
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 8,
+    "salary": 2045686
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 0,
+    "salary": 1185451
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 527473
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 7,
+    "salary": 572339
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Senior",
+    "years_experience": 6,
+    "salary": 1261391
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 3,
+    "salary": 541667
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 7,
+    "salary": 2047814
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 2,
+    "salary": 778568
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 0,
+    "salary": 1385584
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 3,
+    "salary": 1202035
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Delhi",
+    "seniority": "Senior",
+    "years_experience": 4,
+    "salary": 2154584
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Mumbai",
+    "seniority": "Junior",
+    "years_experience": 4,
+    "salary": 680692
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 1,
+    "salary": 696056
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 8,
+    "salary": 2601381
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 4,
+    "salary": 618070
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 9,
+    "salary": 2159821
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 651571
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Lead",
+    "years_experience": 7,
+    "salary": 873070
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 10,
+    "salary": 333044
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 8,
+    "salary": 2281586
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 1,
+    "salary": 606123
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 1759338
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 8,
+    "salary": 1098004
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Senior",
+    "years_experience": 5,
+    "salary": 1334221
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 5,
+    "salary": 522925
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 6,
+    "salary": 2977834
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 0,
+    "salary": 1633329
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Hyderabad",
+    "seniority": "Senior",
+    "years_experience": 1,
+    "salary": 2325364
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Junior",
+    "years_experience": 10,
+    "salary": 2783810
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Lead",
+    "years_experience": 9,
+    "salary": 2554202
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 8,
+    "salary": 942417
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Junior",
+    "years_experience": 3,
+    "salary": 816403
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 5,
+    "salary": 2681138
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 10,
+    "salary": 2299157
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 3,
+    "salary": 363725
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 7,
+    "salary": 2912132
+  },
+  {
+    "role": "Product Manager",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 5,
+    "salary": 2916504
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 8,
+    "salary": 642155
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 4,
+    "salary": 1620546
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 2003691
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Mumbai",
+    "seniority": "Junior",
+    "years_experience": 3,
+    "salary": 1741068
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 10,
+    "salary": 1379343
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Hyderabad",
+    "seniority": "Mid",
+    "years_experience": 9,
+    "salary": 725523
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 0,
+    "salary": 1257037
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 7,
+    "salary": 2974513
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Mid",
+    "years_experience": 5,
+    "salary": 892235
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 2,
+    "salary": 667499
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Mid",
+    "years_experience": 3,
+    "salary": 1568636
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 6,
+    "salary": 1301431
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 9,
+    "salary": 548337
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 7,
+    "salary": 1402130
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 9,
+    "salary": 1380950
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 10,
+    "salary": 2802700
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Lead",
+    "years_experience": 9,
+    "salary": 823362
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Lead",
+    "years_experience": 2,
+    "salary": 1726484
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Lead",
+    "years_experience": 2,
+    "salary": 1666597
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Senior",
+    "years_experience": 7,
+    "salary": 1072162
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 0,
+    "salary": 2255715
+  },
+  {
+    "role": "Product Manager",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 8,
+    "salary": 523747
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 0,
+    "salary": 1153280
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 0,
+    "salary": 2857626
+  },
+  {
+    "role": "Product Manager",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 6,
+    "salary": 2816009
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 1,
+    "salary": 1670590
+  },
+  {
+    "role": "Product Manager",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 9,
+    "salary": 2172471
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 1,
+    "salary": 2311454
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 4,
+    "salary": 2775944
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 4,
+    "salary": 2941758
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Senior",
+    "years_experience": 9,
+    "salary": 2310625
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 5,
+    "salary": 794436
+  },
+  {
+    "role": "Product Manager",
+    "location": "Hyderabad",
+    "seniority": "Mid",
+    "years_experience": 10,
+    "salary": 1860037
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 10,
+    "salary": 1448258
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 8,
+    "salary": 894251
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 8,
+    "salary": 2559102
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 2,
+    "salary": 1769591
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Junior",
+    "years_experience": 0,
+    "salary": 491696
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 1,
+    "salary": 2561437
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 9,
+    "salary": 445718
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Lead",
+    "years_experience": 0,
+    "salary": 1961367
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 9,
+    "salary": 2025138
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 6,
+    "salary": 2945261
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 1,
+    "salary": 2126580
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 1,
+    "salary": 2606196
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 2,
+    "salary": 780123
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Senior",
+    "years_experience": 6,
+    "salary": 2471385
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 9,
+    "salary": 2530265
+  },
+  {
+    "role": "Product Manager",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 4,
+    "salary": 1435916
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 10,
+    "salary": 315537
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Mid",
+    "years_experience": 0,
+    "salary": 2605431
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 2,
+    "salary": 1703430
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 7,
+    "salary": 2483025
+  },
+  {
+    "role": "Product Manager",
+    "location": "Mumbai",
+    "seniority": "Senior",
+    "years_experience": 6,
+    "salary": 2461097
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 5,
+    "salary": 1679396
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 0,
+    "salary": 2700465
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Senior",
+    "years_experience": 3,
+    "salary": 1242387
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Lead",
+    "years_experience": 0,
+    "salary": 1238809
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 1,
+    "salary": 471555
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 9,
+    "salary": 1035931
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 1889724
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Bangalore",
+    "seniority": "Lead",
+    "years_experience": 0,
+    "salary": 520424
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Delhi",
+    "seniority": "Junior",
+    "years_experience": 6,
+    "salary": 2424960
+  },
+  {
+    "role": "Product Manager",
+    "location": "Mumbai",
+    "seniority": "Mid",
+    "years_experience": 0,
+    "salary": 1536637
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 2,
+    "salary": 574222
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Hyderabad",
+    "seniority": "Mid",
+    "years_experience": 4,
+    "salary": 1090071
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Mid",
+    "years_experience": 10,
+    "salary": 1837224
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Junior",
+    "years_experience": 0,
+    "salary": 529585
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Hyderabad",
+    "seniority": "Mid",
+    "years_experience": 6,
+    "salary": 360051
+  },
+  {
+    "role": "Product Manager",
+    "location": "Delhi",
+    "seniority": "Lead",
+    "years_experience": 5,
+    "salary": 2830454
+  },
+  {
+    "role": "DevOps Engineer",
+    "location": "Hyderabad",
+    "seniority": "Lead",
+    "years_experience": 9,
+    "salary": 1550369
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Mumbai",
+    "seniority": "Mid",
+    "years_experience": 3,
+    "salary": 2539906
+  },
+  {
+    "role": "Product Manager",
+    "location": "Mumbai",
+    "seniority": "Senior",
+    "years_experience": 10,
+    "salary": 1552270
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Senior",
+    "years_experience": 7,
+    "salary": 1937226
+  },
+  {
+    "role": "Product Manager",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 6,
+    "salary": 1207943
+  },
+  {
+    "role": "Product Manager",
+    "location": "Mumbai",
+    "seniority": "Lead",
+    "years_experience": 8,
+    "salary": 533935
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Hyderabad",
+    "seniority": "Lead",
+    "years_experience": 0,
+    "salary": 1833479
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 8,
+    "salary": 2047890
+  },
+  {
+    "role": "Software Engineer",
+    "location": "Chennai",
+    "seniority": "Mid",
+    "years_experience": 1,
+    "salary": 1063713
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Chennai",
+    "seniority": "Senior",
+    "years_experience": 5,
+    "salary": 846192
+  },
+  {
+    "role": "Data Scientist",
+    "location": "Bangalore",
+    "seniority": "Junior",
+    "years_experience": 0,
+    "salary": 1729521
+  },
+  {
+    "role": "Product Manager",
+    "location": "Chennai",
+    "seniority": "Junior",
+    "years_experience": 4,
+    "salary": 1113285
+  }
+]

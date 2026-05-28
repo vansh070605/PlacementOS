@@ -30,6 +30,7 @@ from .schemas import (
 )
 from .vector_store import vector_store
 from .agents import orchestrator
+from .dl_salary import predict as dl_predict
 
 # Initialize root logger
 logging.basicConfig(level=logging.INFO)
@@ -338,7 +339,7 @@ async def analyze_salary(request: SalaryRequest):
             detail="role_title and location are required fields."
         )
     try:
-        result = await orchestrator.run_salary_agent(request)
+        result = dl_predict(request)
         return result
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(ve))

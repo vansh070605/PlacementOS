@@ -7,3 +7,5 @@ google-genai>=0.1.1
 python-dotenv>=1.0.1
 python-multipart>=0.0.9
 pdfplumber>=0.11.0
+tensorflow>=2.15.0
+pandas>=2.2.2
