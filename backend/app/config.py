@@ -18,7 +18,12 @@ class Settings(BaseSettings):
 
     # Gemini model selection
     gemini_model: str = "gemini-1.5-flash"
-    embedding_model: str = "gemini-embedding-2"
+
+    # Local SentenceTransformer model for ChromaDB embeddings.
+    # Replaces gemini-embedding-2 to eliminate embedding API calls and
+    # free the entire 15-RPM Gemini budget for LLM agent calls only.
+    # The model (~80 MB) is auto-downloaded on first run via HuggingFace Hub.
+    local_embedding_model: str = "all-MiniLM-L6-v2"
 
     # FastAPI Server parameters
     host: str = "0.0.0.0"
@@ -43,12 +48,16 @@ class Settings(BaseSettings):
             return "gemini-1.5-flash"
         return v
 
-    @field_validator("embedding_model")
-    def validate_embedding_model(cls, v: str) -> str:
-        allowed = {"gemini-embedding-2"}
+    @field_validator("local_embedding_model")
+    def validate_local_embedding_model(cls, v: str) -> str:
+        """Validate the local SentenceTransformer model name."""
+        allowed = {"all-MiniLM-L6-v2", "all-mpnet-base-v2", "paraphrase-MiniLM-L6-v2"}
         if v not in allowed:
-            logger.warning(f"Embedding model '{v}' not recognized. Falling back to default 'gemini-embedding-2'.")
-            return "gemini-embedding-2"
+            logger.warning(
+                f"Local embedding model '{v}' not in known list {allowed}. "
+                f"Falling back to 'all-MiniLM-L6-v2'."
+            )
+            return "all-MiniLM-L6-v2"
         return v
 
 # Instantiate settings singleton

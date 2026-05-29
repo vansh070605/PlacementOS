@@ -27,3 +27,17 @@ dist-ssr
 .vite
 .env
 backend/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+env/
+
+# Local databases and data stores
+backend/data/
+*.sqlite3

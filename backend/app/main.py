@@ -29,8 +29,15 @@ from .schemas import (
     ProjectAuditResponse,
 )
 from .vector_store import vector_store
-from .agents import orchestrator
+from .agents import orchestrator, RateLimitExceeded
 from .dl_salary import predict as dl_predict
+
+# ── Standardised 503 payload for rate-limit exhaustion ────────────────────────
+# Returned by every endpoint when tenacity gives up after 5 retry attempts.
+# The Vite/React frontend checks for this shape to show a toast notification.
+_RATE_LIMIT_RESPONSE = {
+    "error": "AI capacity temporarily reached. Please try again in 60 seconds."
+}
 
 # Initialize root logger
 logging.basicConfig(level=logging.INFO)
@@ -104,7 +111,7 @@ async def health_check():
         "gemini_api_key_configured": has_api_key,
         "active_models": {
             "llm": settings.gemini_model,
-            "embeddings": settings.embedding_model
+            "embeddings": f"{settings.local_embedding_model} (local SentenceTransformer)"
         }
     }
 
@@ -128,7 +135,14 @@ async def analyze_job_description(request: JDAnalysisRequest):
         # Run the full async multi-agent execution pipeline
         analysis_result = await orchestrator.analyze_jd(request.job_description)
         return analysis_result
-        
+
+    except RateLimitExceeded:
+        # Gemini 429 survived all 5 retry attempts → tell frontend to back off
+        logger.warning("Rate limit exceeded on /api/analyze after all retries.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_RATE_LIMIT_RESPONSE["error"],
+        )
     except ValueError as ve:
         # Specific exception if GEMINI_API_KEY environment config is missing
         logger.error(f"API key error: {ve}")
@@ -167,6 +181,12 @@ async def generate_outreach(request: OutreachRequest):
     try:
         outreach_result = await orchestrator.run_networker_agent(request)
         return outreach_result
+    except RateLimitExceeded:
+        logger.warning("Rate limit exceeded on /api/outreach after all retries.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_RATE_LIMIT_RESPONSE["error"],
+        )
     except ValueError as ve:
         logger.error(f"API key error in outreach: {ve}")
         raise HTTPException(
@@ -307,6 +327,12 @@ async def upload_resume_for_compass(file: UploadFile = File(...)):
     try:
         compass_result = await orchestrator.run_strategist_agent(resume_text)
         return compass_result
+    except RateLimitExceeded:
+        logger.warning("Rate limit exceeded on /api/compass/upload after all retries.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_RATE_LIMIT_RESPONSE["error"],
+        )
     except ValueError as ve:
         logger.error(f"API key error in career compass: {ve}")
         raise HTTPException(
@@ -376,6 +402,12 @@ async def generate_cover_letter(request: CoverLetterRequest):
     try:
         result = await orchestrator.run_cover_letter_agent(request)
         return result
+    except RateLimitExceeded:
+        logger.warning("Rate limit exceeded on /api/cover-letter/generate after all retries.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_RATE_LIMIT_RESPONSE["error"],
+        )
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(ve))
     except Exception as e:
@@ -589,6 +621,12 @@ async def audit_project(request: ProjectAuditRequest):
         try:
             result = await orchestrator.run_auditor_agent(consolidated_code)
             return result
+        except RateLimitExceeded:
+            logger.warning("Rate limit exceeded on /api/project/audit after all retries.")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=_RATE_LIMIT_RESPONSE["error"],
+            )
         except ValueError as ve:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(ve))
         except Exception as e:
