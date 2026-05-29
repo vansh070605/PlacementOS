@@ -10,6 +10,7 @@
   <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/Gemini-2.5--flash-violet?logo=google&logoColor=white" alt="Gemini">
   <img src="https://img.shields.io/badge/ChromaDB-VectorDB-orange" alt="ChromaDB">
+  <img src="https://img.shields.io/badge/SentenceTransformers-Local%20Embed-green" alt="SentenceTransformers">
   <img src="https://img.shields.io/badge/TensorFlow-Neural%20Net-red?logo=tensorflow&logoColor=white" alt="TensorFlow">
   <img src="https://img.shields.io/badge/Firebase-Auth-yellow?logo=firebase&logoColor=white" alt="Firebase">
 </p>
@@ -32,7 +33,7 @@ PlacementOS is powered by a suite of **8 specialized autonomous agents** running
 
 ### 🔄 The RAG Analysis Loop (Agents 1-3)
 1. **Agent 1: JD Extractor**: Asynchronously parses raw Job Description text. Leverages Gemini's structured outputs to extract required hard skills, soft skills, and latent engineering requirements (e.g., system scaling, query optimization, handling legacy migrations).
-2. **Agent 2: RAG Matcher**: Converts extracted terms into embeddings, then queries the local **ChromaDB** database to retrieve the top 5 most relevant personal projects.
+2. **Agent 2: RAG Matcher**: Converts extracted terms into embeddings locally via **SentenceTransformers (all-MiniLM-L6-v2)** (zero external API calls/quota usage), then queries the local **ChromaDB** database to retrieve the top 5 most relevant personal projects.
 3. **Agent 3: Synthesis Strategist**: Cross-references requirements with retrieved project metadata. It calculates a strict compatibility score (0-100), outputs a detailed alignment checklist, writes tailored, ATS-friendly resume bullets using the **Google X-Y-Z formula** (*Accomplished [X], as measured by [Y], by doing [Z]*), and builds a target interview prep study plan.
 
 ### ✉️ Target Generative Aids (Agents 4 & 8)
@@ -88,7 +89,8 @@ graph TD
 
 ### Backend (Local-First AI & ML)
 *   **FastAPI**: Asynchronous, high-performance web framework.
-*   **Google GenAI SDK**: Utilizing `gemini-1.5-flash` or `gemini-2.5-flash` for agent reasoning, and `gemini-embedding-2` for generating dense semantic vector representations.
+*   **Google GenAI SDK**: Utilizing `gemini-2.5-flash` for agent reasoning.
+*   **SentenceTransformers (`all-MiniLM-L6-v2`)**: Local embedding model running on-device for vector search, keeping Gemini API calls reserved solely for LLM logic.
 *   **ChromaDB**: SQLite-backed local vector database for indexing and searching your career portfolio.
 *   **TensorFlow & Keras**: Local model inference engine supporting neural networks trained on market compensation datasets.
 *   **pdfplumber**: Python package for local PDF text extraction.
@@ -174,11 +176,11 @@ cd PlacementOS
    pip install -r requirements.txt
    ```
 4. Set up environment variables:
-   Create a `backend/.env` file with your details (a template is available in backend):
+   Create a `backend/.env` file with your details (a template is available in `backend/.env.example`):
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
    GEMINI_MODEL=gemini-2.5-flash
-   EMBEDDING_MODEL=gemini-embedding-2
+   LOCAL_EMBEDDING_MODEL=all-MiniLM-L6-v2
    HOST=0.0.0.0
    PORT=8000
    CHROMA_DB_DIR=data/chroma
@@ -188,7 +190,7 @@ cd PlacementOS
    ```bash
    uvicorn app.main:app --reload --port 8000
    ```
-   > **Note:** On startup, the backend automatically reads `portfolio.json`, generates embeddings using `gemini-embedding-2`, and indexes them in ChromaDB.
+   > **Note:** On startup, the backend automatically reads `portfolio.json`, generates local embeddings using `all-MiniLM-L6-v2` (on-device), and indexes them in ChromaDB (no API quota consumed).
 
 ### 3. Frontend Setup
 1. In a new terminal, navigate to the project root:
@@ -222,21 +224,18 @@ Open `http://localhost:5173` in your browser. The app runs completely locally, s
 ## 🛠️ Under the Hood
 
 ### Asynchronous Multi-Agent Chaining
-Each agent in the pipeline relies on the official `google-genai` SDK using `gemini-2.5-flash`'s structured JSON output mode. By providing Pydantic response models, PlacementOS guarantees output structure validation:
-```python
-response = await self.genai_client.aio.models.generate_content(
-    model=settings.gemini_model,
-    contents=prompt,
-    config=types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=JDExtractedData,
-        temperature=0.1
-    )
-)
-```
+Each agent in the pipeline relies on the official `google-genai` SDK using `gemini-2.5-flash`'s structured JSON output mode. By providing Pydantic response models, PlacementOS guarantees output structure validation. All Gemini calls are throttled and protected from rate-limiting at a central entry point.
+
+### 🛡️ Backend Hardening & Rate-Limit Protections
+PlacementOS implements robust API defensive patterns to maximize the efficiency of Google's AI Studio Free Tier (15 RPM):
+*   **Local Embeddings**: Offloading all embedding tasks to `all-MiniLM-L6-v2` (SentenceTransformers) frees the entire 15-RPM quota for LLM reasoning.
+*   **Concurrency Throttling**: An `asyncio.Semaphore(3)` cap prevents more than 3 agents from calling Gemini concurrently, flattening burst traffic.
+*   **Exponential Backoff**: Wrapped with `tenacity` retries (up to 5 attempts, doubling wait times from 5s to 60s) specifically targeted at `429 Resource Exhausted` exceptions.
+*   **Graceful Degradation**: Invalid/leaked API keys or persistent rate-limits are caught and returned as clean HTTP 503 responses, preventing application crashes.
+*   **Secrets Safety**: Core environment files are git-ignored and configured via `.env.example` templates to prevent developer credentials from leaking.
 
 ### Local Neural Network Compensation Analysis
 The Salary Intelligence page references a local Deep Learning regression model compiled with Keras. Feature columns like `role`, `location`, and `seniority` are preprocessed via one-hot encoding, matching the training schema configured in `backend/scripts/train_salary_dl_model.py`. This predictions system runs entirely offline on your local machine, protecting user privacy.
 
 
-*Built as a personal command center to conquer the modern job market.*
+*Built as a personal career command center to conquer the modern job market.*
