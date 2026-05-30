@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Sidebar.css';
-import { authService } from '../../services/firebase';
+import { authService, dbService } from '../../services/firebase';
 
 export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModal }) {
   const [showPopover, setShowPopover] = useState(false);
+  const [displayName, setDisplayName] = useState('');
   const popoverRef = useRef(null);
 
   // Close popover when clicking outside
@@ -15,6 +16,36 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fetch up-to-date user profile name
+  useEffect(() => {
+    if (user?.uid) {
+      dbService.getUserProfile(user.uid)
+        .then((profile) => {
+          if (profile?.fullName) {
+            setDisplayName(profile.fullName);
+          } else {
+            setDisplayName(user.displayName || 'Candidate');
+          }
+        })
+        .catch(() => {
+          setDisplayName(user.displayName || 'Candidate');
+        });
+    } else {
+      setDisplayName('');
+    }
+  }, [user]);
+
+  // Listen to profile updates from the Profile screen
+  useEffect(() => {
+    const handleProfileUpdate = (e) => {
+      if (e.detail?.fullName) {
+        setDisplayName(e.detail.fullName);
+      }
+    };
+    document.addEventListener('pos:profile-updated', handleProfileUpdate);
+    return () => document.removeEventListener('pos:profile-updated', handleProfileUpdate);
   }, []);
 
   const handleLogout = async () => {
@@ -71,9 +102,9 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
                 onClick={() => setShowPopover(!showPopover)}
                 aria-expanded={showPopover}
               >
-                <div className="user-avatar">{user.displayName ? user.displayName.substring(0, 2).toUpperCase() : 'U'}</div>
+                <div className="user-avatar">{displayName ? displayName.substring(0, 2).toUpperCase() : 'U'}</div>
                 <div className="user-info">
-                  <span className="user-name">{user.displayName || 'Candidate'}</span>
+                  <span className="user-name">{displayName || 'Candidate'}</span>
                   <span className="user-role">View Profile</span>
                 </div>
               </button>

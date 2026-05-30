@@ -34,6 +34,7 @@ export default function ProfileScreen({ user }) {
   const handleSave = async () => {
     setSaving(true);
     await dbService.updateUserProfile(user.uid, profile);
+    document.dispatchEvent(new CustomEvent('pos:profile-updated', { detail: profile }));
     setSaving(false);
     setIsEditing(false);
     setShowToast(true);
