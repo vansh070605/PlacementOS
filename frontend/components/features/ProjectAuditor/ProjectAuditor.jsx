@@ -19,7 +19,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ProjectAuditor.css';
 
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = `http://${window.location.hostname}:8000`;
 
 export default function ProjectAuditor() {
   // Input Modes: 'paste' or 'path'
@@ -29,6 +29,12 @@ export default function ProjectAuditor() {
   const [localPath, setLocalPath] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
   const [snippets, setSnippets] = useState([{ filename: 'main.py', content: '' }]);
+  const [manualProject, setManualProject] = useState({
+    title: '',
+    description: '',
+    technologies: '',
+    metrics: ''
+  });
 
   // UI States
   const [isLoading, setIsLoading] = useState(false);
@@ -141,6 +147,48 @@ export default function ProjectAuditor() {
       setError(err.message || 'Failed to complete project audit. Is the FastAPI server running on port 8000?');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Submit manual entry directly to Portfolio
+  const handleManualSave = async () => {
+    if (!manualProject.title.trim() || !manualProject.description.trim()) {
+      setError('Project Title and Description are required.');
+      return;
+    }
+    
+    setIsSaving(true);
+    setError(null);
+    setSaveSuccess(false);
+
+    try {
+      const payload = {
+        title: manualProject.title.trim(),
+        description: manualProject.description.trim(),
+        technologies: manualProject.technologies.split(',').map(s => s.trim()).filter(Boolean),
+        metrics: manualProject.metrics.trim() || undefined
+      };
+
+      const response = await fetch(`${BACKEND_URL}/api/portfolio/ingest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.detail || 'Failed to save to database.');
+      }
+
+      setSaveSuccess(true);
+      document.dispatchEvent(new CustomEvent('pos:portfolio-updated'));
+      setManualProject({ title: '', description: '', technologies: '', metrics: '' });
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      console.error('[ProjectAuditor] manual save error:', err);
+      setError(err.message || 'Failed to ingest project into portfolio vector store.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -259,8 +307,8 @@ export default function ProjectAuditor() {
       <div className="pa-header">
         <h2 className="text-hero-title">Project Auditor</h2>
         <p className="text-hero-desc">
-          Upload your local project codebase or paste file snippets. Agent 6 performs a deep static audit 
-          to generate architectural flows, custom "Project Defense" interview prep questions, and tailored resume bullet points.
+          Upload your local project codebase or paste file snippets for Agent 6 to perform a deep static audit. 
+          You can also manually enter project details to add them directly to your portfolio.
         </p>
       </div>
 
@@ -297,6 +345,13 @@ export default function ProjectAuditor() {
               <span className="material-symbols-outlined">link</span>
               Scan GitHub Repo
             </button>
+            <button
+              className={`pa-mode-btn ${inputMode === 'manual' ? 'active' : ''}`}
+              onClick={() => setInputMode('manual')}
+            >
+              <span className="material-symbols-outlined">edit_square</span>
+              Manual Entry
+            </button>
           </div>
 
           <div className="pa-input-body">
@@ -332,6 +387,49 @@ export default function ProjectAuditor() {
                 </div>
                 <div className="pa-input-hint">
                   The backend server will recursively scan source files, skipping build bundles and dependency folders like <code>node_modules</code>.
+                </div>
+              </div>
+            ) : inputMode === 'manual' ? (
+              <div className="pa-manual-section" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="pa-path-section">
+                  <label className="pa-input-label">Project Title *</label>
+                  <input
+                    type="text"
+                    value={manualProject.title}
+                    onChange={(e) => setManualProject({ ...manualProject, title: e.target.value })}
+                    placeholder="e.g. E-Commerce Backend API"
+                    className="pa-path-input"
+                  />
+                </div>
+                <div className="pa-path-section">
+                  <label className="pa-input-label">Project Description *</label>
+                  <textarea
+                    value={manualProject.description}
+                    onChange={(e) => setManualProject({ ...manualProject, description: e.target.value })}
+                    placeholder="Describe what the project does, its purpose, and key features..."
+                    className="pa-textarea"
+                    rows={4}
+                  />
+                </div>
+                <div className="pa-path-section">
+                  <label className="pa-input-label">Technologies Used (comma separated)</label>
+                  <input
+                    type="text"
+                    value={manualProject.technologies}
+                    onChange={(e) => setManualProject({ ...manualProject, technologies: e.target.value })}
+                    placeholder="e.g. Node.js, Express, MongoDB, Docker"
+                    className="pa-path-input"
+                  />
+                </div>
+                <div className="pa-path-section">
+                  <label className="pa-input-label">Key Metrics / Impact (optional)</label>
+                  <input
+                    type="text"
+                    value={manualProject.metrics}
+                    onChange={(e) => setManualProject({ ...manualProject, metrics: e.target.value })}
+                    placeholder="e.g. Reduced API latency by 40%"
+                    className="pa-path-input"
+                  />
                 </div>
               </div>
             ) : (
@@ -377,11 +475,28 @@ export default function ProjectAuditor() {
               <span className="material-symbols-outlined">verified_user</span>
               Local processing. No code is shared or sent outside your system.
             </span>
-            <button className="btn-pill btn-pill-primary" onClick={handleAudit}>
-              <span className="material-symbols-outlined">insights</span>
-              Audit Codebase
-            </button>
+            {inputMode === 'manual' ? (
+              <button 
+                className="btn-pill btn-pill-primary" 
+                onClick={handleManualSave}
+                disabled={isSaving}
+              >
+                <span className="material-symbols-outlined">save_as</span>
+                {isSaving ? 'Saving...' : 'Add to Portfolio'}
+              </button>
+            ) : (
+              <button className="btn-pill btn-pill-primary" onClick={handleAudit}>
+                <span className="material-symbols-outlined">insights</span>
+                Audit Codebase
+              </button>
+            )}
           </div>
+          {saveSuccess && inputMode === 'manual' && (
+            <div className="pa-saved-badge animate-pop" style={{ marginTop: '1rem', alignSelf: 'flex-end' }}>
+              <span className="material-symbols-outlined">check_circle</span>
+              Saved to Portfolio
+            </div>
+          )}
         </div>
       )}
 

@@ -26,6 +26,10 @@ No changes to Pydantic schemas, API contracts, or agent interfaces.
 """
 
 import os
+
+# Prevent PyTorch/Tokenizer deadlocks when using threads
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 import json
 import uuid
 import asyncio
@@ -135,6 +139,15 @@ class VectorStoreManager:
 
         await asyncio.to_thread(_sync_upsert)
         return project_id
+
+    async def delete_project(self, project_id: str):
+        """
+        Deletes a project from the ChromaDB collection.
+        """
+        def _sync_delete():
+            self.collection.delete(ids=[project_id])
+
+        await asyncio.to_thread(_sync_delete)
 
     async def query_similar_projects(
         self, query_text: str, limit: int = 3

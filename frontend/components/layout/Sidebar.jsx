@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import MobileViewButton from '../shared/MobileViewButton';
 import './Sidebar.css';
 import { authService, dbService } from '../../services/firebase';
 
-export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModal }) {
+export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModal, isMobileMenuOpen, setIsMobileMenuOpen }) {
   const [showPopover, setShowPopover] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const popoverRef = useRef(null);
@@ -65,16 +66,35 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
     { id: 'compass',      label: 'Career Compass',  icon: 'explore'         },
     { id: 'salary',       label: 'Salary Intel',    icon: 'payments'        },
     { id: 'cover-letter', label: 'Cover Letter',    icon: 'draw'            },
+    { id: 'ats-scorer',   label: 'ATS Scorer',      icon: 'radar'           },
+    { id: 'settings',     label: 'Settings',        icon: 'settings'        },
   ];
 
   return (
-    <aside className="sidebar">
-      <div className="logo-container">
-        <div className="logo-icon">P</div>
-        <span className="logo-text">PlacementOS</span>
-      </div>
+    <>
+      {/* Overlay to dim background when mobile menu is open */}
+      <div 
+        className={`mobile-sidebar-overlay ${isMobileMenuOpen ? 'open' : ''}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      ></div>
 
-      <nav>
+      <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <div className="logo-icon">P</div>
+            <span className="logo-text">PlacementOS</span>
+          </div>
+          
+          <button 
+            className="mobile-close-btn"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close Menu"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <nav>
         <ul className="nav-links">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
@@ -94,6 +114,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
       </nav>
 
       <div className="sidebar-footer">
+        <MobileViewButton />
         <div className="sidebar-footer-actions">
           {user ? (
             <div className="user-profile-container" ref={popoverRef}>
@@ -128,7 +149,10 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
           )}
 
           <button 
-            onClick={() => document.dispatchEvent(new CustomEvent('pos:navigate', { detail: 'show-onboarding' }))}
+            onClick={() => {
+              document.dispatchEvent(new CustomEvent('pos:navigate', { detail: 'show-onboarding' }));
+              if (setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+            }}
             className="help-btn"
             title="Help / Tour"
           >
@@ -137,5 +161,6 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
         </div>
       </div>
     </aside>
+    </>
   );
 }

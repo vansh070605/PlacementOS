@@ -12,11 +12,14 @@
 
 import React, { useState, useEffect } from 'react';
 import './CoverLetterForge.css';
+import { useProfile } from '../../../contexts/ProfileContext';
+import { formatProfileToText } from '../../../utils/profileFormatter';
 
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = `http://${window.location.hostname}:8000`;
 const STYLES = ['professional', 'story_driven', 'data_first'];
 
 export default function CoverLetterForge() {
+  const { profile } = useProfile();
   const [jobDescription, setJobDescription] = useState('');
   const [targetCompany, setTargetCompany]   = useState('');
   const [style, setStyle]                   = useState('professional');
@@ -68,9 +71,9 @@ export default function CoverLetterForge() {
           job_description: jobDescription,
           target_company: targetCompany || "the company",
           style: style,
+          candidate_profile: formatProfileToText(profile),
           tailored_bullets: importedData.bullets,
           alignment_score: importedData.score,
-          candidate_name: "Vansh Agrawal" // Could be dynamic from a profile settings page
         }),
       });
       
@@ -131,73 +134,81 @@ export default function CoverLetterForge() {
         </div>
       )}
 
-      {/* ── Form Card (always visible until result) ── */}
+      {/* Form Card (always visible until result) */}
       {!result && (
-        <div className="clf-form-card">
-          <div className="card-title">
-            <span className="material-symbols-outlined">draw</span>
-            <span>Draft Settings</span>
-          </div>
-
-          {!importedData && (
-             <div className="jda-error-banner" style={{ marginBottom: '1.5rem', backgroundColor: 'var(--warning-light)', color: 'var(--warning)', borderColor: 'var(--warning)' }}>
-               <span className="material-symbols-outlined">warning</span>
-               <span>No resume bullets found in local storage. Please run the JD Analyzer first to extract your strongest bullets.</span>
-             </div>
-          )}
-
-          <div className="clf-input-row">
-             <div className="clf-field">
-               <label className="clf-label">Target Company</label>
-               <input
-                 className="clf-input"
-                 value={targetCompany}
-                 onChange={(e) => setTargetCompany(e.target.value)}
-                 placeholder="e.g. Anthropic"
-               />
-             </div>
-          </div>
-
-          <div className="clf-field">
-            <label className="clf-label">Job Description</label>
-            <textarea
-              className="clf-textarea"
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Paste the full job description here..."
-            />
-          </div>
-
-          <div className="clf-field">
-            <label className="clf-label">Writing Style</label>
-            <div className="clf-style-group">
-              {STYLES.map((s) => (
-                <button
-                  key={s}
-                  className={`clf-style-btn ${style === s ? 'active' : ''}`}
-                  onClick={() => setStyle(s)}
-                >
-                  {style === s && <span className="material-symbols-outlined">check</span>}
-                  {formatStyleLabel(s)}
-                </button>
-              ))}
+        <div className="bento-grid">
+          <div className="clf-form-card span-5" style={{ margin: 0 }}>
+            <div className="card-title">
+              <span className="material-symbols-outlined">draw</span>
+              <span>Draft Settings</span>
             </div>
-            <p className="text-hero-desc" style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
-              {style === 'professional' && "Formal, polished, and concise. Focuses on technical alignment."}
-              {style === 'story_driven' && "Narrative and humanized. Focuses on your journey and growth."}
-              {style === 'data_first' && "Metrics-led and high-impact. Focuses on quantifiable achievements."}
-            </p>
+
+            {!importedData && (
+               <div className="jda-error-banner" style={{ marginBottom: '1.5rem', backgroundColor: 'var(--warning-light)', color: 'var(--warning)', borderColor: 'var(--warning)' }}>
+                 <span className="material-symbols-outlined">warning</span>
+                 <span>No resume bullets found in local storage. Please run the JD Analyzer first to extract your strongest bullets.</span>
+               </div>
+            )}
+
+            <div className="clf-input-row">
+               <div className="clf-field">
+                 <label className="clf-label">Target Company</label>
+                 <input
+                   className="clf-input"
+                   value={targetCompany}
+                   onChange={(e) => setTargetCompany(e.target.value)}
+                   placeholder="e.g. Anthropic"
+                 />
+               </div>
+            </div>
+
+            <div className="clf-field">
+              <label className="clf-label">Job Description</label>
+              <textarea
+                className="clf-textarea"
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste the full job description here..."
+              />
+            </div>
+
+            <div className="clf-field">
+              <label className="clf-label">Writing Style</label>
+              <div className="clf-style-group">
+                {STYLES.map((s) => (
+                  <button
+                    key={s}
+                    className={`clf-style-btn ${style === s ? 'active' : ''}`}
+                    onClick={() => setStyle(s)}
+                  >
+                    {style === s && <span className="material-symbols-outlined">check</span>}
+                    {formatStyleLabel(s)}
+                  </button>
+                ))}
+              </div>
+              <p className="text-hero-desc" style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                {style === 'professional' && "Formal, polished, and concise. Focuses on technical alignment."}
+                {style === 'story_driven' && "Narrative and humanized. Focuses on your journey and growth."}
+                {style === 'data_first' && "Metrics-led and high-impact. Focuses on quantifiable achievements."}
+              </p>
+            </div>
+
+            <div className="clf-action-bar">
+              <button
+                className="btn-pill btn-pill-primary"
+                onClick={handleGenerate}
+                disabled={!jobDescription.trim() || isLoading || !importedData}
+              >
+                <span className="material-symbols-outlined">magic_button</span>
+                {isLoading ? 'Forging Letter...' : 'Generate Cover Letter'}
+              </button>
+            </div>
           </div>
 
-          <div className="clf-action-bar">
-            <button
-              className="btn-pill btn-pill-primary"
-              onClick={handleGenerate}
-              disabled={!jobDescription.trim() || isLoading || !importedData}
-            >
-              <span className="material-symbols-outlined">magic_button</span>
-              {isLoading ? 'Forging Letter...' : 'Generate Cover Letter'}
-            </button>
+          <div className="bento-card span-7" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-muted)', borderStyle: 'dashed', backgroundColor: 'transparent' }}>
+             <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', marginBottom: '1rem', opacity: 0.4 }}>document_scanner</span>
+             <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-main)', fontSize: '1.25rem' }}>Ready to Forge</h3>
+             <p style={{ maxWidth: '400px', fontSize: '0.95rem' }}>Fill out the draft settings and generate your highly-tailored, ATS-friendly cover letter to land your next interview.</p>
           </div>
         </div>
       )}

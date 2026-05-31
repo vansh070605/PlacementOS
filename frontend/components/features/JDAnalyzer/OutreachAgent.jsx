@@ -15,7 +15,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './OutreachAgent.css';
 
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = `http://${window.location.hostname}:8000`;
 
 const TONE_OPTIONS = [
   { id: 'professional', label: 'Professional', icon: 'work' },

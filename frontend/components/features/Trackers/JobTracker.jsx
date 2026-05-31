@@ -74,7 +74,7 @@ export default function JobTracker({ applications, setApplications }) {
           <h2 className="text-hero-title">Job Pipeline</h2>
           <p className="text-hero-desc">Track and move your applications throughout their stages with responsive, airy boards.</p>
         </div>
-        <button className="btn-pill btn-pill-primary" onClick={() => setModalOpen(true)}>
+        <button className="btn-pill btn-pill-primary mobile-padded-btn" onClick={() => setModalOpen(true)}>
           <span className="material-symbols-outlined">add</span>
           Add Application
         </button>

@@ -90,7 +90,7 @@ export default function DSATracker({ dsaProgress, setDsaProgress }) {
           <h2 className="text-hero-title">DSA Mastery Roadmap</h2>
           <p className="text-hero-desc">Track syllabus completion and log daily problem-solving achievements.</p>
         </div>
-        <button className="btn-pill btn-pill-primary" onClick={() => setShowAddForm(!showAddForm)}>
+        <button className="btn-pill btn-pill-primary mobile-padded-btn" onClick={() => setShowAddForm(!showAddForm)}>
           <span className="material-symbols-outlined">{showAddForm ? 'close' : 'add'}</span>
           {showAddForm ? 'Cancel Form' : 'Log Solved Problem'}
         </button>

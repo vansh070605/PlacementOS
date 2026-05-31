@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import './SalaryIntelligence.css';
 
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = `http://${window.location.hostname}:8000`;
 
 const LEVELS = ['entry', 'mid', 'senior', 'staff', 'principal'];
 
@@ -168,72 +168,80 @@ export default function SalaryIntelligence() {
 
       {/* ── Input Form (always visible) ── */}
       {!result && (
-        <div className="bento-card span-12" style={{ marginBottom: '0' }}>
-          <div className="card-title">
-            <span className="material-symbols-outlined">manage_search</span>
-            <span>Research Compensation</span>
-          </div>
+        <div className="bento-grid">
+          <div className="bento-card span-5" style={{ marginBottom: '0' }}>
+            <div className="card-title">
+              <span className="material-symbols-outlined">manage_search</span>
+              <span>Research Compensation</span>
+            </div>
 
-          <div className="si-form-grid">
+            <div className="si-form-grid">
+              <div className="si-field">
+                <label className="si-label">Job Title</label>
+                <input
+                  className="si-input"
+                  value={roleTitle}
+                  onChange={(e) => setRoleTitle(e.target.value)}
+                  placeholder="e.g. Senior ML Engineer"
+                />
+              </div>
+              <div className="si-field">
+                <label className="si-label">Location / Market</label>
+                <input
+                  className="si-input"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="e.g. San Francisco, CA"
+                />
+              </div>
+            </div>
+
+            <div className="si-field" style={{ marginBottom: '1.5rem' }}>
+              <label className="si-label">Seniority Level</label>
+              <div className="si-level-group">
+                {LEVELS.map((l) => (
+                  <button
+                    key={l}
+                    className={`si-level-btn ${level === l ? 'active' : ''}`}
+                    onClick={() => setLevel(l)}
+                  >
+                    {l.charAt(0).toUpperCase() + l.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="si-field">
-              <label className="si-label">Job Title</label>
-              <input
-                className="si-input"
-                value={roleTitle}
-                onChange={(e) => setRoleTitle(e.target.value)}
-                placeholder="e.g. Senior ML Engineer"
-              />
+              <label className="si-label">Years of Experience</label>
+              <div className="si-slider-row">
+                <input
+                  type="range"
+                  className="si-slider"
+                  min={0}
+                  max={20}
+                  value={years}
+                  onChange={(e) => setYears(Number(e.target.value))}
+                />
+                <span className="si-slider-value">{years} yr{years !== 1 ? 's' : ''}</span>
+              </div>
             </div>
-            <div className="si-field">
-              <label className="si-label">Location / Market</label>
-              <input
-                className="si-input"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. San Francisco, CA"
-              />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+              <button
+                className="btn-pill btn-pill-primary"
+                onClick={handleAnalyze}
+                disabled={!roleTitle.trim() || !location.trim() || isLoading}
+              >
+                <span className="material-symbols-outlined">payments</span>
+                {isLoading ? 'Analyzing…' : 'Get Salary Insights'}
+              </button>
             </div>
           </div>
 
-          <div className="si-field" style={{ marginBottom: '1.5rem' }}>
-            <label className="si-label">Seniority Level</label>
-            <div className="si-level-group">
-              {LEVELS.map((l) => (
-                <button
-                  key={l}
-                  className={`si-level-btn ${level === l ? 'active' : ''}`}
-                  onClick={() => setLevel(l)}
-                >
-                  {l.charAt(0).toUpperCase() + l.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="si-field">
-            <label className="si-label">Years of Experience</label>
-            <div className="si-slider-row">
-              <input
-                type="range"
-                className="si-slider"
-                min={0}
-                max={20}
-                value={years}
-                onChange={(e) => setYears(Number(e.target.value))}
-              />
-              <span className="si-slider-value">{years} yr{years !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.75rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-            <button
-              className="btn-pill btn-pill-primary"
-              onClick={handleAnalyze}
-              disabled={!roleTitle.trim() || !location.trim() || isLoading}
-            >
-              <span className="material-symbols-outlined">payments</span>
-              {isLoading ? 'Analyzing…' : 'Get Salary Insights'}
-            </button>
+          <div className="bento-card span-7" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-muted)', borderStyle: 'dashed', backgroundColor: 'transparent' }}>
+             <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', marginBottom: '1rem', opacity: 0.4 }}>payments</span>
+             <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-main)', fontSize: '1.25rem' }}>Salary Insights</h3>
+             <p style={{ maxWidth: '400px', fontSize: '0.95rem' }}>Enter your role and details to discover compensation benchmarks and get a personalized negotiation script.</p>
           </div>
         </div>
       )}

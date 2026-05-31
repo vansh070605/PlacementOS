@@ -5,10 +5,9 @@
    ============================================================ */
 
 .clf-wrapper {
-  padding: 2.5rem;
 }
 
-.clf-header { margin-bottom: 2.5rem; }
+.clf-header { margin-bottom: 0; }
 
 /* ── Form Card ───────────────────────────────────────────── */
 .clf-form-card {

@@ -1,0 +1,152 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const ThemeContext = createContext();
+
+export const useTheme = () => useContext(ThemeContext);
+
+const THEMES = {
+  blue: {
+    primary: '#2563eb',
+    primaryHover: '#1d4ed8',
+    primaryLight: '#eff6ff',
+  },
+  emerald: {
+    primary: '#10b981',
+    primaryHover: '#059669',
+    primaryLight: '#ecfdf5',
+  },
+  purple: {
+    primary: '#7c3aed',
+    primaryHover: '#6d28d9',
+    primaryLight: '#f5f3ff',
+  },
+  orange: {
+    primary: '#f97316',
+    primaryHover: '#ea580c',
+    primaryLight: '#fff7ed',
+  }
+};
+
+const MODES = {
+  light: {
+    bgPrimary: '#f8fafc',
+    bgSecondary: '#f1f5f9',
+    surface: '#ffffff',
+    textMain: '#0f172a',
+    textMuted: '#64748b',
+    border: '#f1f5f9',
+    borderStrong: '#cbd5e1',
+    cardBg: '#ffffff',
+  },
+  dark: {
+    bgPrimary: '#0f172a',
+    bgSecondary: '#1e293b',
+    surface: '#1e293b',
+    textMain: '#f8fafc',
+    textMuted: '#94a3b8',
+    border: '#334155',
+    borderStrong: '#475569',
+    cardBg: '#1e293b',
+  }
+};
+
+const RADII = {
+  sharp: { lg: '0px', md: '0px', sm: '0px', pill: '0px' },
+  rounded: { lg: '24px', md: '16px', sm: '10px', pill: '9999px' },
+  pill: { lg: '32px', md: '24px', sm: '16px', pill: '9999px' },
+};
+
+const FONTS = {
+  inter: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+  sora: "'Sora', sans-serif",
+  jetbrains: "'JetBrains Mono', monospace",
+};
+
+const ANIMATIONS = {
+  reduced: { fast: '0s', normal: '0s', slow: '0s', bounce: 'ease' },
+  smooth: { fast: '0.15s', normal: '0.2s', slow: '0.3s', bounce: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+  playful: { fast: '0.2s', normal: '0.4s', slow: '0.6s', bounce: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+};
+
+export const ThemeProvider = ({ children }) => {
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('placementos_settings');
+    return saved ? JSON.parse(saved) : {
+      color: 'blue',
+      mode: 'light',
+      radius: 'rounded',
+      font: 'inter',
+      animation: 'smooth'
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('placementos_settings', JSON.stringify(settings));
+    
+    const root = document.documentElement;
+    
+    // Apply Color
+    const color = THEMES[settings.color];
+    if (color) {
+      root.style.setProperty('--primary', color.primary);
+      root.style.setProperty('--primary-hover', color.primaryHover);
+      root.style.setProperty('--primary-light', color.primaryLight);
+    }
+    
+    // Apply Mode
+    const mode = MODES[settings.mode];
+    if (mode) {
+      root.style.setProperty('--bg-primary', mode.bgPrimary);
+      root.style.setProperty('--bg-secondary', mode.bgSecondary);
+      root.style.setProperty('--surface', mode.surface);
+      root.style.setProperty('--text-main', mode.textMain);
+      root.style.setProperty('--text-muted', mode.textMuted);
+      root.style.setProperty('--border', mode.border);
+      root.style.setProperty('--border-strong', mode.borderStrong);
+      root.style.setProperty('--card-bg', mode.cardBg);
+      
+      // Toggle a class on body for specific dark-mode overrides if needed
+      if (settings.mode === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    }
+    
+    // Apply Radius
+    const radius = RADII[settings.radius];
+    if (radius) {
+      root.style.setProperty('--radius-lg', radius.lg);
+      root.style.setProperty('--radius-md', radius.md);
+      root.style.setProperty('--radius-sm', radius.sm);
+      root.style.setProperty('--radius-pill', radius.pill);
+    }
+    
+    // Apply Font
+    const font = FONTS[settings.font];
+    if (font) {
+      root.style.setProperty('--font-main', font);
+      document.body.style.fontFamily = font;
+    }
+    
+    // Apply Animations
+    const anim = ANIMATIONS[settings.animation];
+    if (anim) {
+      root.style.setProperty('--transition-fast', anim.fast);
+      root.style.setProperty('--transition-normal', anim.normal);
+      root.style.setProperty('--transition-slow', anim.slow);
+      root.style.setProperty('--bounce-easing', anim.bounce);
+    }
+    
+  }, [settings]);
+
+  const updateSettings = (updates) => {
+    setSettings(prev => ({ ...prev, ...updates }));
+  };
+
+  return (
+    <ThemeContext.Provider value={{ settings, updateSettings, THEMES, MODES, RADII, FONTS, ANIMATIONS }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};

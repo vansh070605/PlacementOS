@@ -45,6 +45,42 @@ export default function OnboardingModal({ isOpen, onClose }) {
             
             <div className="onboard-feature-grid">
               <div className="onboard-feature-card">
+                <div className="onboard-feature-icon-wrap" style={{ background: '#3b82f6' }}>
+                  <span className="material-symbols-outlined">dashboard</span>
+                </div>
+                <div>
+                  <div className="onboard-feature-name">Dashboard</div>
+                  <div className="onboard-feature-desc">Command center overview</div>
+                </div>
+              </div>
+              <div className="onboard-feature-card">
+                <div className="onboard-feature-icon-wrap" style={{ background: '#10b981' }}>
+                  <span className="material-symbols-outlined">work</span>
+                </div>
+                <div>
+                  <div className="onboard-feature-name">Job Tracker</div>
+                  <div className="onboard-feature-desc">Manage applications</div>
+                </div>
+              </div>
+              <div className="onboard-feature-card">
+                <div className="onboard-feature-icon-wrap" style={{ background: '#f59e0b' }}>
+                  <span className="material-symbols-outlined">code</span>
+                </div>
+                <div>
+                  <div className="onboard-feature-name">DSA Prep</div>
+                  <div className="onboard-feature-desc">Track algorithm progress</div>
+                </div>
+              </div>
+              <div className="onboard-feature-card">
+                <div className="onboard-feature-icon-wrap" style={{ background: '#8b5cf6' }}>
+                  <span className="material-symbols-outlined">terminal</span>
+                </div>
+                <div>
+                  <div className="onboard-feature-name">Project Auditor</div>
+                  <div className="onboard-feature-desc">Audit your codebase</div>
+                </div>
+              </div>
+              <div className="onboard-feature-card">
                 <div className="onboard-feature-icon-wrap" style={{ background: '#2563eb' }}>
                   <span className="material-symbols-outlined">manage_search</span>
                 </div>
@@ -54,7 +90,7 @@ export default function OnboardingModal({ isOpen, onClose }) {
                 </div>
               </div>
               <div className="onboard-feature-card">
-                <div className="onboard-feature-icon-wrap" style={{ background: '#10b981' }}>
+                <div className="onboard-feature-icon-wrap" style={{ background: '#06b6d4' }}>
                   <span className="material-symbols-outlined">explore</span>
                 </div>
                 <div>
@@ -63,7 +99,7 @@ export default function OnboardingModal({ isOpen, onClose }) {
                 </div>
               </div>
               <div className="onboard-feature-card">
-                <div className="onboard-feature-icon-wrap" style={{ background: '#f59e0b' }}>
+                <div className="onboard-feature-icon-wrap" style={{ background: '#f97316' }}>
                   <span className="material-symbols-outlined">payments</span>
                 </div>
                 <div>
@@ -72,7 +108,7 @@ export default function OnboardingModal({ isOpen, onClose }) {
                 </div>
               </div>
               <div className="onboard-feature-card">
-                <div className="onboard-feature-icon-wrap" style={{ background: '#8b5cf6' }}>
+                <div className="onboard-feature-icon-wrap" style={{ background: '#14b8a6' }}>
                   <span className="material-symbols-outlined">draw</span>
                 </div>
                 <div>

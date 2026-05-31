@@ -53,6 +53,7 @@ from .schemas import (
     CoverLetterRequest,
     CoverLetterResponse,
     ProjectAuditResponse,
+    ATSScoreResponse,
 )
 from .vector_store import vector_store
 
@@ -136,6 +137,35 @@ async def _call_gemini(client: genai.Client, **kwargs):
     """
     @_gemini_retry()
     async def _inner():
+        # Enforce strict safety settings on every call
+        safety_settings = [
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+            ),
+        ]
+        
+        # Merge or inject into config
+        config = kwargs.get('config')
+        if not config:
+            config = types.GenerateContentConfig(safety_settings=safety_settings)
+            kwargs['config'] = config
+        elif isinstance(config, types.GenerateContentConfig):
+            if not config.safety_settings:
+                config.safety_settings = safety_settings
+        
         return await client.aio.models.generate_content(**kwargs)
 
     async with _GEMINI_SEMAPHORE:
@@ -556,20 +586,17 @@ class JDAnalysisOrchestrator:
         You are an elite career writer who has helped candidates land offers at Google, Stripe,
         Anthropic, and top Series B startups. Write a cover letter for the following candidate.
 
-        CANDIDATE: {request.candidate_name}
+        CANDIDATE PROFILE SUMMARY:
+        {request.candidate_profile or "Not provided"}
+
         TARGET COMPANY: {request.target_company}
         ALIGNMENT SCORE WITH ROLE: {request.alignment_score}/100
 
         TARGET JOB DESCRIPTION:
         {request.job_description[:1200]}
 
-        CANDIDATE'S STRONGEST RESUME BULLETS (from AI portfolio analysis — these are real, use them):
+        CANDIDATE'S STRONGEST RESUME BULLETS (from AI portfolio analysis):
         {bullets_text}
-
-        PORTFOLIO PROJECTS (reference these by name when relevant):
-        - LitterVision (YOLOv8, DCGAN, PyTorch — computer vision & generative AI)
-        - QuakeIntel (React 19, Three.js, GIS — real-time geospatial visualization)
-        - VinoMetrix (FastAPI, XGBoost — production ML API)
 
         WRITING STYLE DIRECTIVE: Write in a {style_guide}
 
@@ -653,6 +680,44 @@ class JDAnalysisOrchestrator:
 
         result = ProjectAuditResponse.model_validate_json(response.text)
         logger.info(f"Agent 6 completed project audit for: '{result.project_title}'")
+        return result
+
+    async def run_ats_scorer_agent(self, resume_text: str, job_description: str) -> ATSScoreResponse:
+        """
+        Agent 9 (ATS Scorer): Evaluates a candidate's resume against a job description.
+        Simulates an ATS filter to identify matched keywords, missing keywords, and formatting issues.
+        """
+        prompt = f"""
+You are an ultra-strict Applicant Tracking System (ATS) and Technical Recruiter.
+Analyze the provided candidate's Resume against the provided Job Description.
+
+JOB DESCRIPTION:
+{job_description}
+
+CANDIDATE RESUME:
+{resume_text}
+
+Perform a rigorous evaluation and return a structured JSON object matching the requested schema.
+- match_score: A strict integer from 0 to 100 representing how well the resume matches the JD.
+- matched_keywords: List of important hard and soft skills found in both.
+- missing_keywords: List of critical skills explicitly required in the JD but missing in the resume.
+- formatting_feedback: List of any potential parsing issues (e.g. lack of experience section, odd formatting) or general improvements.
+- overall_verdict: A short paragraph summarizing the candidate's fit and next steps.
+"""
+        logger.info("Triggering Agent 9: ATS Scorer")
+        response = await _call_gemini(
+            self.genai_client,
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=ATSScoreResponse,
+                temperature=0.2,
+            )
+        )
+
+        result = ATSScoreResponse.model_validate_json(response.text)
+        logger.info(f"Agent 9 completed ATS scoring with match score: {result.match_score}")
         return result
 
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './ProfileScreen.css';
 import { dbService } from '../../../services/firebase';
+import { useProfile } from '../../../contexts/ProfileContext';
 
 export default function ProfileScreen({ user }) {
+  const { profile: globalProfile, refreshProfile } = useProfile();
   const [profile, setProfile] = useState({
     fullName: '', title: '', email: '', phone: '', location: '',
     github: '', linkedin: '', website: '', bio: '', skills: []
@@ -12,19 +14,44 @@ export default function ProfileScreen({ user }) {
   const [saving, setSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [newSkill, setNewSkill] = useState('');
+  const [portfolioProjects, setPortfolioProjects] = useState([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [editingProjectId, setEditingProjectId] = useState(null);
+  const [editProjectData, setEditProjectData] = useState({ title: '', description: '', technologies: '', metrics: '' });
+  const [savingProject, setSavingProject] = useState(false);
 
   useEffect(() => {
-    if (user?.uid) {
-      loadProfile();
+    if (globalProfile) {
+      setProfile(globalProfile);
+      setLoading(false);
+    } else {
+      setLoading(true);
     }
-  }, [user]);
+  }, [globalProfile]);
 
-  const loadProfile = async () => {
-    setLoading(true);
-    const data = await dbService.getUserProfile(user.uid);
-    setProfile(data);
-    setLoading(false);
+  const loadPortfolioProjects = async () => {
+    setLoadingProjects(true);
+    try {
+      const response = await fetch(`http://${window.location.hostname}:8000/api/portfolio/list`);
+      if (response.ok) {
+        const data = await response.json();
+        setPortfolioProjects(data.projects || []);
+      }
+    } catch (err) {
+      console.error('Failed to load portfolio projects:', err);
+    } finally {
+      setLoadingProjects(false);
+    }
   };
+
+  useEffect(() => {
+    loadPortfolioProjects();
+    
+    // Listen for portfolio updates (from Project Auditor)
+    const handlePortfolioUpdate = () => loadPortfolioProjects();
+    document.addEventListener('pos:portfolio-updated', handlePortfolioUpdate);
+    return () => document.removeEventListener('pos:portfolio-updated', handlePortfolioUpdate);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,6 +61,7 @@ export default function ProfileScreen({ user }) {
   const handleSave = async () => {
     setSaving(true);
     await dbService.updateUserProfile(user.uid, profile);
+    await refreshProfile();
     document.dispatchEvent(new CustomEvent('pos:profile-updated', { detail: profile }));
     setSaving(false);
     setIsEditing(false);
@@ -56,6 +84,77 @@ export default function ProfileScreen({ user }) {
       ...prev,
       skills: prev.skills.filter(s => s !== skillToRemove)
     }));
+  };
+
+  const handleEditProjectClick = (project) => {
+    setEditingProjectId(project.id);
+    setEditProjectData({
+      title: project.title,
+      description: project.description || '',
+      technologies: project.technologies ? project.technologies.join(', ') : '',
+      metrics: project.metrics || ''
+    });
+  };
+
+  const handleCancelEditProject = () => {
+    setEditingProjectId(null);
+    setEditProjectData({ title: '', description: '', technologies: '', metrics: '' });
+  };
+
+  const handleSaveProject = async (projectId) => {
+    if (!editProjectData.title.trim() || !editProjectData.description.trim()) {
+      alert("Title and description are required.");
+      return;
+    }
+    
+    setSavingProject(true);
+    try {
+      const payload = {
+        id: projectId,
+        title: editProjectData.title.trim(),
+        description: editProjectData.description.trim(),
+        technologies: editProjectData.technologies.split(',').map(s => s.trim()).filter(Boolean),
+        metrics: editProjectData.metrics.trim() || undefined
+      };
+
+      const response = await fetch(`http://${window.location.hostname}:8000/api/portfolio/ingest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setEditingProjectId(null);
+        loadPortfolioProjects();
+        document.dispatchEvent(new CustomEvent('pos:portfolio-updated'));
+      } else {
+        alert("Failed to save project.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving project.");
+    } finally {
+      setSavingProject(false);
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    if (!confirm("Are you sure you want to delete this project?")) return;
+    
+    try {
+      const response = await fetch(`http://${window.location.hostname}:8000/api/portfolio/${projectId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        loadPortfolioProjects();
+        document.dispatchEvent(new CustomEvent('pos:portfolio-updated'));
+      } else {
+        alert("Failed to delete project.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting project.");
+    }
   };
 
   if (loading) return <div style={{ padding: '2rem' }}>Loading profile...</div>;
@@ -193,6 +292,101 @@ export default function ProfileScreen({ user }) {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="bento-card profile-section-card full-width">
+        <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 className="section-title"><span className="material-symbols-outlined">folder_special</span> Indexed Portfolio Projects</h3>
+          <span className="pa-project-tag" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+            Used for JD Analysis
+          </span>
+        </div>
+        <div className="projects-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+          {loadingProjects ? (
+            <div style={{ color: 'var(--text-muted)' }}>Loading indexed projects...</div>
+          ) : portfolioProjects.length > 0 ? (
+            portfolioProjects.map(project => (
+              <div key={project.id} style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: '12px', background: 'var(--bg-primary)', position: 'relative' }}>
+                {editingProjectId === project.id ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Title *</label>
+                      <input 
+                        type="text" 
+                        value={editProjectData.title} 
+                        onChange={(e) => setEditProjectData({...editProjectData, title: e.target.value})}
+                        style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Description *</label>
+                      <textarea 
+                        value={editProjectData.description} 
+                        onChange={(e) => setEditProjectData({...editProjectData, description: e.target.value})}
+                        rows={3}
+                        style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', resize: 'vertical' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Technologies (comma separated)</label>
+                      <input 
+                        type="text" 
+                        value={editProjectData.technologies} 
+                        onChange={(e) => setEditProjectData({...editProjectData, technologies: e.target.value})}
+                        style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>Metrics (optional)</label>
+                      <input 
+                        type="text" 
+                        value={editProjectData.metrics} 
+                        onChange={(e) => setEditProjectData({...editProjectData, metrics: e.target.value})}
+                        style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                      <button className="btn-pill btn-pill-secondary" onClick={handleCancelEditProject} disabled={savingProject}>Cancel</button>
+                      <button className="btn-pill btn-pill-primary" onClick={() => handleSaveProject(project.id)} disabled={savingProject}>{savingProject ? 'Saving...' : 'Save Changes'}</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem' }}>
+                      <button onClick={() => handleEditProjectClick(project)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>edit</span>
+                      </button>
+                      <button onClick={() => handleDeleteProject(project.id)} style={{ background: 'none', border: 'none', color: 'var(--error-color, #ef4444)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>delete</span>
+                      </button>
+                    </div>
+                    <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)', paddingRight: '4rem' }}>{project.title}</h4>
+                    {project.description && (
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: '1.4' }}>{project.description}</p>
+                    )}
+                    {project.technologies && project.technologies.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.75rem' }}>
+                        {project.technologies.map((tech, idx) => (
+                          <span key={idx} style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', color: 'var(--text-secondary)', padding: '0.2rem 0.5rem', borderRadius: '6px' }}>{tech}</span>
+                        ))}
+                      </div>
+                    )}
+                    {project.metrics && (
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>bar_chart</span>
+                        {project.metrics}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="profile-field-value empty">
+              No projects indexed yet. Use the <strong>Project Auditor</strong> to add projects.
+            </div>
+          )}
+        </div>
       </div>
 
       {showToast && (

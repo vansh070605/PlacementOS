@@ -8,7 +8,10 @@ import CareerCompass from './components/features/CareerCompass/CareerCompass';
 import SalaryIntelligence from './components/features/SalaryIntelligence/SalaryIntelligence';
 import CoverLetterForge from './components/features/CoverLetterForge/CoverLetterForge';
 import ProjectAuditor from './components/features/ProjectAuditor/ProjectAuditor';
+import Settings from './components/features/Settings/Settings';
+import ATSScorer from './components/features/ATSScorer/ATSScorer';
 import OnboardingModal from './components/shared/OnboardingModal';
+import { ProfileProvider } from './contexts/ProfileContext';
 import AuthOverlay from './components/shared/AuthOverlay';
 import ProfileScreen from './components/features/Profile/ProfileScreen';
 import { authService } from './services/firebase';
@@ -180,6 +183,10 @@ export default function App() {
         return <CoverLetterForge />;
       case 'profile':
         return <ProfileScreen user={user} />;
+      case 'settings':
+        return <Settings />;
+      case 'ats-scorer':
+        return <ATSScorer />;
       default:
         return (
           <Dashboard
@@ -194,24 +201,26 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      <OnboardingModal 
-        isOpen={showOnboarding} 
-        onClose={() => setShowOnboarding(false)} 
-      />
-      <AuthOverlay 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
-        onLoginSuccess={(u) => setUser(u)} 
-      />
-      <DashboardLayout 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
-        user={user}
-        setShowAuthModal={setShowAuthModal}
-      >
-        {renderActiveScreen()}
-      </DashboardLayout>
-    </div>
+    <ProfileProvider user={user}>
+      <div className="app-container">
+        <OnboardingModal 
+          isOpen={showOnboarding} 
+          onClose={() => setShowOnboarding(false)} 
+        />
+        <AuthOverlay 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)} 
+          onLoginSuccess={(u) => setUser(u)} 
+        />
+        <DashboardLayout 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab}
+          user={user}
+          setShowAuthModal={setShowAuthModal}
+        >
+          {renderActiveScreen()}
+        </DashboardLayout>
+      </div>
+    </ProfileProvider>
   );
 }

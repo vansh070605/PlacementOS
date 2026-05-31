@@ -5,11 +5,10 @@
    ============================================================ */
 
 .si-wrapper {
-  padding: 2.5rem;
 }
 
 .si-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
 }
 
 /* ── Input Form Card ─────────────────────────────────────── */

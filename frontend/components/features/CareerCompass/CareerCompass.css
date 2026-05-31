@@ -9,12 +9,11 @@
 
 /* ── Page Header ──────────────────────────────────────────── */
 .cc-wrapper {
-  padding: 2.5rem;
   max-width: 100%;
 }
 
 .cc-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
 }
 
 /* ── Upload Zone Bento Card ───────────────────────────────── */

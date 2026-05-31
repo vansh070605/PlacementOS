@@ -10,8 +10,10 @@ import logging
 import httpx
 import pdfplumber
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, UploadFile, File, status
+from typing import Optional
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, status
 from fastapi.middleware.cors import CORSMiddleware
+import socket
 
 from .config import settings
 from .schemas import (
@@ -27,6 +29,7 @@ from .schemas import (
     CoverLetterResponse,
     ProjectAuditRequest,
     ProjectAuditResponse,
+    ATSScoreResponse,
 )
 from .vector_store import vector_store
 from .agents import orchestrator, RateLimitExceeded
@@ -114,6 +117,24 @@ async def health_check():
             "embeddings": f"{settings.local_embedding_model} (local SentenceTransformer)"
         }
     }
+
+@app.get("/api/network-ip", status_code=status.HTTP_200_OK)
+async def get_network_ip():
+    """
+    Returns the local network IP address of the machine running the backend.
+    Useful for generating QR codes for mobile device access on the same network.
+    """
+    try:
+        # Create a dummy socket to determine the local IP used for internet access
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # Doesn't have to be reachable, just forces the OS to choose a route
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return {"ip": ip}
+    except Exception as e:
+        logger.error(f"Failed to determine local IP: {e}")
+        return {"ip": "127.0.0.1"}
 
 @app.post(
     "/api/analyze",
@@ -247,6 +268,7 @@ async def list_portfolio_items():
                 items.append({
                     "id": i,
                     "title": meta.get("title", ""),
+                    "description": meta.get("description", ""),
                     "technologies": technologies,
                     "metrics": meta.get("metrics") or None
                 })
@@ -257,58 +279,47 @@ async def list_portfolio_items():
             detail=f"Failed to query portfolio list: {str(e)}"
         )
 
+@app.delete("/api/portfolio/{project_id}", status_code=status.HTTP_200_OK)
+async def delete_portfolio_item(project_id: str):
+    """
+    Remove a project from the vector store by its ID.
+    """
+    try:
+        await vector_store.delete_project(project_id)
+        return {"detail": f"Project {project_id} deleted successfully."}
+    except Exception as e:
+        logger.error(f"Failed to delete project {project_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete the project."
+        )
+
+def _extract_text(pdf_bytes: bytes) -> str:
+    """Synchronous PDF extraction, safe to run in asyncio.to_thread."""
+    text_parts = []
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        for page in pdf.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text_parts.append(page_text.strip())
+    return "\n\n".join(text_parts)
+
 
 @app.post(
     "/api/compass/upload",
     response_model=CareerCompassResponse,
     status_code=status.HTTP_200_OK
 )
-async def upload_resume_for_compass(file: UploadFile = File(...)):
+async def upload_resume_for_compass(
+    file: Optional[UploadFile] = File(None),
+    resume_text: Optional[str] = Form(None)
+):
     """
-    Career Compass: Accepts a PDF resume upload, extracts its text using pdfplumber,
+    Career Compass: Accepts a PDF resume upload or raw resume text,
     and feeds it to Agent 5 (The Career Compass Strategist) which returns exactly
     3 AI-ranked career role pathways with alignment scores, core strengths, and
     ordered skill-gap roadmaps.
     """
-    # ── 1. File Type Validation ───────────────────────────────────────────────
-    if file.content_type not in ("application/pdf", "application/x-pdf"):
-        raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Only PDF files are accepted. Please upload a valid .pdf resume."
-        )
-
-    # ── 2. Read file bytes into memory (safe for typical resume sizes) ────────
-    try:
-        file_bytes = await file.read()
-    except Exception as e:
-        logger.error(f"Failed to read uploaded file: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Could not read the uploaded file. Please try again."
-        )
-
-    # ── 3. Extract PDF text via pdfplumber (offloaded to thread pool) ─────────
-    def _extract_text(pdf_bytes: bytes) -> str:
-        """Synchronous PDF extraction, safe to run in asyncio.to_thread."""
-        text_parts = []
-        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-            for page in pdf.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text_parts.append(page_text.strip())
-        return "\n\n".join(text_parts)
-
-    try:
-        resume_text = await asyncio.to_thread(_extract_text, file_bytes)
-    except Exception as e:
-        logger.error(f"PDF text extraction failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Failed to extract text from the PDF. Ensure the file is not scanned or password-protected."
-        )
-
-    # ── 4. Validate minimum content ───────────────────────────────────────────
-    if len(resume_text.strip()) < 150:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=(
@@ -646,3 +657,83 @@ async def audit_project(request: ProjectAuditRequest):
             except Exception as cleanup_err:
                 logger.warning(f"Failed to delete temp dir {temp_dir}: {cleanup_err}")
 
+
+@app.post(
+    "/api/ats/score",
+    response_model=ATSScoreResponse,
+    status_code=status.HTTP_200_OK
+)
+async def score_resume_ats(
+    job_description: str = Form(...),
+    file: Optional[UploadFile] = File(None),
+    resume_text: Optional[str] = Form(None)
+):
+    """
+    ATS Scorer (Agent 9):
+    Accepts a PDF resume OR raw resume text, and a Job Description. 
+    Parses the PDF if provided, then runs Agent 9 to generate an ATS score.
+    """
+    if not job_description or not job_description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job description is required."
+        )
+
+    if not file and not resume_text:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You must provide either a PDF file or raw resume text."
+        )
+
+    if file:
+        if file.content_type not in ("application/pdf", "application/x-pdf"):
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail="Only PDF files are accepted. Please upload a valid .pdf resume."
+            )
+        try:
+            file_bytes = await file.read()
+        except Exception as e:
+            logger.error(f"Failed to read uploaded file: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not read the uploaded file. Please try again."
+            )
+        try:
+            extracted_text = await asyncio.to_thread(_extract_text, file_bytes)
+        except Exception as e:
+            logger.error(f"PDF text extraction failed: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Failed to extract text from the PDF. Ensure the file is not scanned or password-protected."
+            )
+    else:
+        extracted_text = resume_text
+
+    if len(extracted_text.strip()) < 150:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="The extracted resume text is too short. Please provide a more detailed profile."
+        )
+
+    try:
+        result = await orchestrator.run_ats_scorer_agent(extracted_text, job_description)
+        return result
+    except RateLimitExceeded:
+        logger.warning("Rate limit exceeded on /api/ats/score after all retries.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_RATE_LIMIT_RESPONSE["error"],
+        )
+    except ValueError as ve:
+        logger.error(f"API key error in ATS Scorer: {ve}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"ATS Scorer failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while scoring the resume. Please try again."
+        )

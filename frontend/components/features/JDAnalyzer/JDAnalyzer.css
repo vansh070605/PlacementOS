@@ -21,7 +21,7 @@
 /* Input Area Form */
 .jda-textarea {
   width: 100%;
-  height: 280px;
+  height: 450px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 1.25rem;

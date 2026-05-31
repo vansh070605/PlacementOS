@@ -17,8 +17,10 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import './CareerCompass.css';
+import { useProfile } from '../../../contexts/ProfileContext';
+import { formatProfileToText } from '../../../utils/profileFormatter';
 
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = `http://${window.location.hostname}:8000`;
 
 // ── Score ring colour thresholds ──────────────────────────────────────────────
 const scoreColor = (score) => {
@@ -169,6 +171,7 @@ function PathwayCard({ pathway, rank }) {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function CareerCompass() {
+  const { profile } = useProfile();
   const [isDragOver, setIsDragOver]     = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading]       = useState(false);
@@ -209,14 +212,21 @@ export default function CareerCompass() {
 
   // ── Submit to backend ──────────────────────────────────────────────────────
   const handleAnalyze = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile && !profile) {
+      setError('Please upload a resume or complete your Candidate Profile first.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
     setResult(null);
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    if (selectedFile) {
+      formData.append('file', selectedFile);
+    } else if (profile) {
+      formData.append('resume_text', formatProfileToText(profile));
+    }
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/compass/upload`, {
@@ -268,21 +278,22 @@ export default function CareerCompass() {
         </div>
       )}
 
-      {/* ── Upload card (always visible when no result or loading) ── */}
+      {/* Upload card (always visible when no result or loading) */}
       {!result && !isLoading && (
-        <div className="cc-upload-card">
-          {/* Drop zone */}
-          <div
-            className={`cc-drop-zone ${isDragOver ? 'drag-over' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            role="button"
-            tabIndex={0}
-            aria-label="Upload PDF resume"
-            onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
-          >
+        <div className="bento-grid">
+          <div className="cc-upload-card span-5" style={{ margin: 0 }}>
+            {/* Drop zone */}
+            <div
+              className={`cc-drop-zone ${isDragOver ? 'drag-over' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              role="button"
+              tabIndex={0}
+              aria-label="Upload PDF resume"
+              onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
+            >
             <input
               ref={fileInputRef}
               type="file"
@@ -305,6 +316,15 @@ export default function CareerCompass() {
                 </div>
                 <div className="cc-upload-sub">
                   {(selectedFile.size / 1024).toFixed(0)} KB · Click to change file
+                </div>
+              </>
+            ) : profile ? (
+              <>
+                <div className="cc-upload-title">
+                  Using Candidate Profile
+                </div>
+                <div className="cc-upload-sub">
+                  Your profile data will be used. You can also drag & drop a PDF resume to override.
                 </div>
               </>
             ) : (
@@ -335,7 +355,7 @@ export default function CareerCompass() {
               <button
                 className="btn-pill btn-pill-primary"
                 onClick={handleAnalyze}
-                disabled={!selectedFile}
+                disabled={!selectedFile && !profile}
               >
                 <span className="material-symbols-outlined">explore</span>
                 Analyze Resume
@@ -343,6 +363,13 @@ export default function CareerCompass() {
             </div>
           </div>
         </div>
+
+        <div className="bento-card span-7" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-muted)', borderStyle: 'dashed', backgroundColor: 'transparent' }}>
+             <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', marginBottom: '1rem', opacity: 0.4 }}>explore</span>
+             <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-main)', fontSize: '1.25rem' }}>Discover Your Path</h3>
+             <p style={{ maxWidth: '400px', fontSize: '0.95rem' }}>Upload your resume to receive AI-driven career trajectories, skill gaps, and transition strategies.</p>
+        </div>
+      </div>
       )}
 
       {/* ── Loading state ── */}
