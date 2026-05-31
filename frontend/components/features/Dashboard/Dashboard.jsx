@@ -53,7 +53,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
   };
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="dashboard-wrapper animate-fade-in">
       {/* Title block */}
       <div className="text-hero-title">Command Center</div>
       <p className="text-hero-desc">
@@ -62,7 +62,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
 
       {/* Bento Row 1: Metrics */}
       <div className="dashboard-metrics" style={{ marginTop: '2.5rem' }}>
-        <div className="metric-card">
+        <div className="metric-card animate-slide-up delay-100">
           <div className="metric-icon-wrapper blue">
             <span className="material-symbols-outlined">folder_open</span>
           </div>
@@ -72,7 +72,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card animate-slide-up delay-200">
           <div className="metric-icon-wrapper purple">
             <span className="material-symbols-outlined">forum</span>
           </div>
@@ -82,7 +82,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card animate-slide-up delay-300">
           <div className="metric-icon-wrapper emerald">
             <span className="material-symbols-outlined">emoji_events</span>
           </div>
@@ -92,7 +92,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card animate-slide-up delay-400">
           <div className="metric-icon-wrapper orange">
             <span className="material-symbols-outlined">task_alt</span>
           </div>
@@ -106,7 +106,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
       {/* Bento Grid */}
       <div className="bento-grid">
         {/* Card 1: Target Gauges */}
-        <div className="bento-card span-6">
+        <div className="bento-card span-6 animate-slide-up delay-100">
           <div className="dashboard-section-title">
             <span className="material-symbols-outlined">ads_click</span>
             <span>Weekly Progress & Targets</span>
@@ -160,7 +160,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
 
         {/* Card 2: Configure Targets Panel (Conditional inline) */}
         {configOpen ? (
-          <div className="bento-card span-6">
+          <div className="bento-card span-6 animate-slide-up">
             <div className="dashboard-section-title">
               <span className="material-symbols-outlined">tune</span>
               <span>Edit Weekly Goals</span>
@@ -209,7 +209,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
           </div>
         ) : (
           /* Card 3: Recent Activity / Live Pipeline */
-          <div className="bento-card span-6">
+          <div className="bento-card span-6 animate-slide-up delay-200">
             <div className="dashboard-section-title">
               <span className="material-symbols-outlined">update</span>
               <span>Recent Applications</span>

@@ -68,8 +68,8 @@ export default function JobTracker({ applications, setApplications }) {
   };
 
   return (
-    <div className="jobtracker-wrapper">
-      <div style={{ display: 'flex', justify: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+    <div className="jobtracker-wrapper animate-fade-in">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 className="text-hero-title">Job Pipeline</h2>
           <p className="text-hero-desc">Track and move your applications throughout their stages with responsive, airy boards.</p>
@@ -83,7 +83,7 @@ export default function JobTracker({ applications, setApplications }) {
       {/* Kanban Board Container */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="pipeline-container">
-          {columns.map((colName) => {
+          {columns.map((colName, index) => {
             const colApps = applications.filter((app) => app.status === colName);
             return (
               <Droppable droppableId={colName} key={colName}>
@@ -91,7 +91,7 @@ export default function JobTracker({ applications, setApplications }) {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="pipeline-column"
+                    className={`pipeline-column animate-slide-up delay-${(index % 4 + 1) * 100}`}
                   >
                     <div className="column-header">
                       <span className="column-title">{colName}</span>

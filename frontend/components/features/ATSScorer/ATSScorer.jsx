@@ -80,7 +80,7 @@ export default function ATSScorer() {
       </div>
 
       <div className="ats-input-section bento-grid">
-        <div className="ats-card bento-card span-6">
+        <div className="ats-card bento-card span-6 animate-slide-up delay-100">
           <div className="ats-card-header">
             <span className="material-symbols-outlined">upload_file</span>
             <h3>1. Upload Resume</h3>
@@ -104,7 +104,7 @@ export default function ATSScorer() {
           </div>
         </div>
 
-        <div className="ats-card bento-card span-6">
+        <div className="ats-card bento-card span-6 animate-slide-up delay-200">
           <div className="ats-card-header">
             <span className="material-symbols-outlined">description</span>
             <h3>2. Target Job Description</h3>
@@ -147,7 +147,7 @@ export default function ATSScorer() {
       {result && (
         <div className="ats-results-section bento-grid animate-fade-in" style={{ marginTop: '2rem' }}>
           
-          <div className="ats-card bento-card span-4" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="ats-card bento-card span-4 animate-slide-up delay-300" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <h3 style={{ marginBottom: '1rem' }}>Match Score</h3>
             <div className="score-circle" style={{ borderColor: getScoreColor(result.match_score), color: getScoreColor(result.match_score) }}>
               {result.match_score}%
@@ -157,7 +157,7 @@ export default function ATSScorer() {
             </p>
           </div>
 
-          <div className="ats-card bento-card span-8">
+          <div className="ats-card bento-card span-8 animate-slide-up delay-400">
             <div className="ats-card-header">
               <span className="material-symbols-outlined">gavel</span>
               <h3>Overall Verdict</h3>
@@ -175,7 +175,7 @@ export default function ATSScorer() {
             </ul>
           </div>
 
-          <div className="ats-card bento-card span-6">
+          <div className="ats-card bento-card span-6 animate-slide-up delay-500">
             <div className="ats-card-header">
               <span className="material-symbols-outlined" style={{ color: 'var(--success)' }}>check_circle</span>
               <h3>Matched Keywords</h3>
@@ -188,7 +188,7 @@ export default function ATSScorer() {
             </div>
           </div>
 
-          <div className="ats-card bento-card span-6">
+          <div className="ats-card bento-card span-6 animate-slide-up delay-100">
             <div className="ats-card-header">
               <span className="material-symbols-outlined" style={{ color: 'var(--danger)' }}>cancel</span>
               <h3>Missing Keywords (Add These)</h3>

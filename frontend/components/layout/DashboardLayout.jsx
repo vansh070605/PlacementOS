@@ -31,7 +31,9 @@ export default function DashboardLayout({ children, activeTab, setActiveTab, use
           </button>
         </header>
 
-        {children}
+        <div key={activeTab} className="animate-fade-in" style={{ height: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {children}
+        </div>
       </div>
 
     </div>

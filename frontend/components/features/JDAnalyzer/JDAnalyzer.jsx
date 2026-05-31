@@ -130,7 +130,7 @@ export default function JDAnalyzer() {
   // Renders the elegant skeleton loading cards matching the bento layout
   const renderLoadingState = () => (
     <div className="bento-grid">
-      <div className="bento-card span-4">
+      <div className="bento-card span-4 animate-slide-up delay-100">
         <div className="jda-score-container">
           <div className="jda-skeleton-circle"></div>
           <div className="skeleton-bar" style={{ width: '60%', marginTop: '1.5rem' }}></div>
@@ -138,7 +138,7 @@ export default function JDAnalyzer() {
         </div>
       </div>
       
-      <div className="bento-card span-12">
+      <div className="bento-card span-12 animate-slide-up delay-200">
         <div className="skeleton-bar" style={{ width: '30%', marginBottom: '1.5rem', height: '1.5rem' }}></div>
         <div className="gap-y-4">
           <div className="skeleton-bar" style={{ width: '90%' }}></div>
@@ -148,7 +148,7 @@ export default function JDAnalyzer() {
         </div>
       </div>
 
-      <div className="bento-card span-12">
+      <div className="bento-card span-12 animate-slide-up delay-300">
         <div className="skeleton-bar" style={{ width: '40%', marginBottom: '1.5rem', height: '1.5rem' }}></div>
         <div className="gap-y-4">
           <div className="skeleton-bar" style={{ width: '95%', height: '3rem' }}></div>
@@ -157,7 +157,7 @@ export default function JDAnalyzer() {
         </div>
       </div>
 
-      <div className="bento-card span-4">
+      <div className="bento-card span-4 animate-slide-up delay-400">
         <div className="skeleton-bar" style={{ width: '50%', marginBottom: '1.5rem', height: '1.5rem' }}></div>
         <div className="gap-y-4">
           <div className="skeleton-bar" style={{ width: '80%', height: '2.5rem' }}></div>
@@ -169,7 +169,7 @@ export default function JDAnalyzer() {
   );
 
   return (
-    <div className="jda-wrapper">
+    <div className="jda-wrapper animate-fade-in">
       <div className="jda-header">
         <h2 className="text-hero-title">JD Analyzer</h2>
         <p className="text-hero-desc">
@@ -189,7 +189,7 @@ export default function JDAnalyzer() {
       ) : !analysisResult ? (
         // Input Form State
         <div className="bento-grid">
-          <div className="bento-card span-12">
+          <div className="bento-card span-12 animate-slide-up delay-500">
             <div className="card-title">
               <span className="material-symbols-outlined">edit_note</span>
               <span>Paste Job Description</span>
@@ -253,7 +253,7 @@ export default function JDAnalyzer() {
           </div>
 
           {/* Card 1: Score Display */}
-          <div className="bento-card span-4">
+          <div className="bento-card span-4 animate-slide-up delay-100">
             <div className="jda-score-container">
               <div className="jda-score-number">{analysisResult.alignment_score}%</div>
               <div className="jda-score-label">Compatibility Score</div>
@@ -277,7 +277,7 @@ export default function JDAnalyzer() {
           </div>
 
           {/* Card 2: Skills Alignment Matrix */}
-          <div className="bento-card span-12">
+          <div className="bento-card span-12 animate-slide-up delay-200">
             <div className="card-title">
               <span className="material-symbols-outlined">checklist</span>
               <span>Skills Alignment Matrix</span>
@@ -304,7 +304,7 @@ export default function JDAnalyzer() {
           </div>
 
           {/* Card 3: Tailored Resume Bullets */}
-          <div className="bento-card span-12">
+          <div className="bento-card span-12 animate-slide-up delay-300">
             <div className="card-title">
               <span className="material-symbols-outlined">history_edu</span>
               <span>Tailored Resume Bullets (Google X-Y-Z)</span>
@@ -331,7 +331,7 @@ export default function JDAnalyzer() {
           </div>
 
           {/* Card 4: Recommended Study Plan */}
-          <div className="bento-card span-4">
+          <div className="bento-card span-4 animate-slide-up delay-400">
             <div className="card-title">
               <span className="material-symbols-outlined">menu_book</span>
               <span>Interview Prep Checklist</span>

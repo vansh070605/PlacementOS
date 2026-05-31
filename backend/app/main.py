@@ -320,6 +320,18 @@ async def upload_resume_for_compass(
     3 AI-ranked career role pathways with alignment scores, core strengths, and
     ordered skill-gap roadmaps.
     """
+    if not resume_text and not file:
+        raise HTTPException(status_code=400, detail="Either file or resume_text must be provided.")
+        
+    if not resume_text and file:
+        try:
+            file_bytes = await file.read()
+            resume_text = await asyncio.to_thread(_extract_text, file_bytes)
+        except Exception as e:
+            logger.error(f"Failed to extract pdf: {e}")
+            raise HTTPException(status_code=400, detail="Could not extract text from PDF.")
+
+    if len(resume_text.strip()) < 150:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=(
@@ -328,11 +340,7 @@ async def upload_resume_for_compass(
             )
         )
 
-    logger.info(
-        f"Resume uploaded: '{file.filename}' | "
-        f"Size: {len(file_bytes):,} bytes | "
-        f"Extracted: {len(resume_text):,} characters across {resume_text.count(chr(12)) + 1} pages."
-    )
+    logger.info(f"Resume text extracted. Size: {len(resume_text)} chars.")
 
     # ── 5. Run Agent 5 ────────────────────────────────────────────────────────
     try:

@@ -100,7 +100,7 @@ export default function DSATracker({ dsaProgress, setDsaProgress }) {
       <div className="bento-grid">
         {/* Card 1: Add Solved Problem (Conditional) */}
         {showAddForm && (
-          <div className="bento-card span-12">
+          <div className="bento-card span-12 animate-slide-up delay-100">
             <div className="card-title">
               <span className="material-symbols-outlined">playlist_add</span>
               <span>Log Problem Achievement</span>
@@ -177,7 +177,7 @@ export default function DSATracker({ dsaProgress, setDsaProgress }) {
         )}
 
         {/* Card 2: Syllabus Topics Checklist */}
-        <div className="bento-card span-12">
+        <div className="bento-card span-12 animate-slide-up delay-200">
           <div className="card-title">
             <span className="material-symbols-outlined">menu_book</span>
             <span>Core Interview Syllabus Checklist</span>
@@ -206,7 +206,7 @@ export default function DSATracker({ dsaProgress, setDsaProgress }) {
         </div>
 
         {/* Card 3: Solved Log details */}
-        <div className="bento-card span-12">
+        <div className="bento-card span-12 animate-slide-up delay-300">
           <div style={{ display: 'flex', justify: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div className="card-title" style={{ marginBottom: 0 }}>
               <span className="material-symbols-outlined">receipt_long</span>

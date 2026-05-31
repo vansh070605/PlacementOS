@@ -167,7 +167,7 @@ export default function ProfileScreen({ user }) {
   };
 
   return (
-    <div className="profile-screen bento-grid">
+    <div className="profile-screen bento-grid animate-fade-in">
       <div className="span-12 profile-header">
         <div className="profile-header-left">
           <h1>Candidate Profile</h1>
@@ -294,7 +294,7 @@ export default function ProfileScreen({ user }) {
         )}
       </div>
 
-      <div className="bento-card profile-section-card full-width">
+      <div className="bento-card profile-section-card full-width animate-slide-up delay-400">
         <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 className="section-title"><span className="material-symbols-outlined">folder_special</span> Indexed Portfolio Projects</h3>
           <span className="pa-project-tag" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>

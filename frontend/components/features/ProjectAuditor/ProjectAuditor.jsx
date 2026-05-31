@@ -302,7 +302,7 @@ export default function ProjectAuditor() {
   };
 
   return (
-    <div className="pa-wrapper">
+    <div className="pa-wrapper animate-fade-in">
       {/* Header */}
       <div className="pa-header">
         <h2 className="text-hero-title">Project Auditor</h2>
@@ -523,11 +523,11 @@ export default function ProjectAuditor() {
 
       {/* Results View */}
       {result && !isLoading && (
-        <div className="pa-results-container">
+        <div className="pa-results-container animate-fade-in">
           {/* Bento Header */}
-          <div className="pa-results-header-card">
-            <div className="pa-title-layout">
-              <div className="pa-title-meta">
+          <div className="bento-grid" style={{ marginBottom: '2rem' }}>
+            <div className="bento-card span-12 animate-slide-up delay-100">
+              <div className="pa-card-header">
                 <span className="pa-project-tag">Audited Project</span>
                 <h3 className="pa-project-title">{result.project_title}</h3>
                 <p className="pa-project-desc">{result.project_description}</p>

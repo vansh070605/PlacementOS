@@ -116,8 +116,10 @@ function LoadingSkeleton() {
 
 // ── Pathway Card ───────────────────────────────────────────────────────────────
 function PathwayCard({ pathway, rank }) {
+  const staggerDelay = rank === 1 ? 'delay-100' : rank === 2 ? 'delay-200' : 'delay-300';
+
   return (
-    <div className={`cc-pathway-card ${rank === 1 ? 'top-card' : ''}`}>
+    <div className={`cc-pathway-card animate-slide-up ${staggerDelay} ${rank === 1 ? 'top-card' : ''}`}>
 
       {/* Header: title + rank */}
       <div className="cc-card-header">
@@ -259,7 +261,7 @@ export default function CareerCompass() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="cc-wrapper">
+    <div className="cc-wrapper animate-fade-in">
 
       {/* Page header */}
       <div className="cc-header">

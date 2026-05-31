@@ -108,8 +108,8 @@ button, input, textarea {
 }
 
 .bento-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 35px 70px -15px rgba(15, 23, 42, 0.07);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 35px 70px -15px rgba(15, 23, 42, 0.07), 0 15px 30px -10px rgba(15, 23, 42, 0.05);
 }
 
 .span-12 { grid-column: span 12; }
@@ -178,7 +178,11 @@ button, input, textarea {
 .btn-pill-primary:hover {
   background: var(--primary-hover);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.22);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-pill-primary:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .btn-pill-secondary {
@@ -191,6 +195,11 @@ button, input, textarea {
   background: #f8fafc;
   color: var(--text-main);
   border-color: var(--text-main);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-pill-secondary:active {
+  transform: translateY(0) scale(0.97);
 }
 
 /* Simple Shimmering loading lines */
@@ -214,17 +223,63 @@ button, input, textarea {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 9999px;
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* ✨ Global UI Animations ✨ */
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  0% { opacity: 0; transform: translateX(20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseSoft {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.animate-slide-up {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out both;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pulse-soft {
+  animation: pulseSoft 2s infinite ease-in-out;
+}
+
+/* Stagger Delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
 
 /* Hide styling overrides for icons */
 .material-symbols-outlined {

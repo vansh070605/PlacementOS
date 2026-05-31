@@ -17,7 +17,7 @@ export default function Settings() {
       <div className="settings-grid bento-grid">
         
         {/* App Mode (Light / Dark) */}
-        <div className="settings-card bento-card span-6">
+        <div className="settings-card bento-card span-6 animate-slide-up delay-100">
           <div className="settings-card-header">
             <span className="material-symbols-outlined">light_mode</span>
             <h3>Appearance Mode</h3>
@@ -39,7 +39,7 @@ export default function Settings() {
         </div>
 
         {/* Primary Color Theme */}
-        <div className="settings-card bento-card span-6">
+        <div className="settings-card bento-card span-6 animate-slide-up delay-200">
           <div className="settings-card-header">
             <span className="material-symbols-outlined">palette</span>
             <h3>Primary Theme Color</h3>
@@ -64,7 +64,7 @@ export default function Settings() {
         </div>
 
         {/* Aesthetics (Border Radius) */}
-        <div className="settings-card bento-card span-4">
+        <div className="settings-card bento-card span-4 animate-slide-up delay-300">
           <div className="settings-card-header">
             <span className="material-symbols-outlined">rounded_corner</span>
             <h3>Border Radius</h3>
@@ -85,7 +85,7 @@ export default function Settings() {
         </div>
 
         {/* Typography (Font Family) */}
-        <div className="settings-card bento-card span-4">
+        <div className="settings-card bento-card span-4 animate-slide-up delay-400">
           <div className="settings-card-header">
             <span className="material-symbols-outlined">match_case</span>
             <h3>Typography</h3>
@@ -106,7 +106,7 @@ export default function Settings() {
         </div>
 
         {/* Animations & Transitions */}
-        <div className="settings-card bento-card span-4">
+        <div className="settings-card bento-card span-4 animate-slide-up delay-500">
           <div className="settings-card-header">
             <span className="material-symbols-outlined">animation</span>
             <h3>Animations & Speed</h3>
