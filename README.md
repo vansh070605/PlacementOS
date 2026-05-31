@@ -27,22 +27,31 @@ PlacementOS is a local-first, AI-powered career command center. It replaces gene
 
 ---
 
+## 🚀 Key Features & The Unified Candidate Profile
+
+At the core of PlacementOS is the **Global Candidate Profile**. Powered by Firebase, you build your profile once—adding your bio, contact info, GitHub/LinkedIn links, and technical skills—and it syncs universally across the entire application in real-time. 
+
+Instead of constantly uploading a static PDF resume, our suite of AI agents directly consume this living profile as context, converting it dynamically into markdown to inject into prompts, saving you time and ensuring the AI is always operating on your most up-to-date accomplishments. (Of course, manual PDF uploads are still fully supported as an override!)
+
+---
+
 ## 🤖 The Multi-Agent Orchestration Engine
 
-PlacementOS is powered by a suite of **8 specialized autonomous agents** running on a local FastAPI backend, combining LLM reasoning, semantic search, and custom neural networks.
+PlacementOS is powered by a suite of **9 specialized autonomous agents** running on a local FastAPI backend, combining LLM reasoning, semantic search, and custom neural networks.
 
 ### 🔄 The RAG Analysis Loop (Agents 1-3)
-1. **Agent 1: JD Extractor**: Asynchronously parses raw Job Description text. Leverages Gemini's structured outputs to extract required hard skills, soft skills, and latent engineering requirements (e.g., system scaling, query optimization, handling legacy migrations).
+1. **Agent 1: JD Extractor**: Asynchronously parses raw Job Description text. Leverages Gemini's structured outputs to extract required hard skills, soft skills, and latent engineering requirements.
 2. **Agent 2: RAG Matcher**: Converts extracted terms into embeddings locally via **SentenceTransformers (all-MiniLM-L6-v2)** (zero external API calls/quota usage), then queries the local **ChromaDB** database to retrieve the top 5 most relevant personal projects.
-3. **Agent 3: Synthesis Strategist**: Cross-references requirements with retrieved project metadata. It calculates a strict compatibility score (0-100), outputs a detailed alignment checklist, writes tailored, ATS-friendly resume bullets using the **Google X-Y-Z formula** (*Accomplished [X], as measured by [Y], by doing [Z]*), and builds a target interview prep study plan.
+3. **Agent 3: Synthesis Strategist**: Cross-references requirements with retrieved project metadata. It calculates a strict compatibility score (0-100), outputs a detailed alignment checklist, writes tailored, ATS-friendly resume bullets using the **Google X-Y-Z formula**, and builds a target interview prep study plan.
 
 ### ✉️ Target Generative Aids (Agents 4 & 8)
-*   **Agent 4: The Networker**: Ingests analysis results and drafts highly personalized LinkedIn outreach sequences (strictly under 300 characters for connection invites) and cold follow-up messages tailored to a Casual, Professional, or Confident tone.
-*   **Agent 8: Cover Letter Forge**: Automatically imports tailored resume bullets to craft compelling, non-generic cover letters. Supports **Professional**, **Story-Driven**, or **Data-First** writing styles.
+*   **Agent 4: The Networker (Cold Email/LinkedIn Generator)**: Ingests analysis results and drafts highly personalized LinkedIn outreach sequences (strictly under 300 characters) and cold follow-up emails tailored to Casual, Professional, or Confident tones.
+*   **Agent 8: Cover Letter Forge**: Automatically consumes your **Candidate Profile** and tailored resume bullets to craft compelling, non-generic cover letters. Supports **Professional**, **Story-Driven**, or **Data-First** writing styles.
 
-### 🧭 Career & Code Auditors (Agents 5 & 6)
-*   **Agent 5: Career Compass**: Accepts PDF resume uploads, parses content using `pdfplumber`, maps competencies, and identifies the candidate's top 3 ideal career pathways—complete with an ordered learning roadmap to close skill gaps.
+### 🧭 Career, Code, & ATS Auditors (Agents 5, 6, & 9)
+*   **Agent 5: Career Compass**: Utilizes your unified Profile (or a PDF upload) to map your competencies and identify your top 3 ideal career pathways—complete with an ordered learning roadmap to close skill gaps.
 *   **Agent 6: Project Auditor & Explainer**: Scans local codebase directories, pasted snippets, or clones public GitHub repositories. Generates a structural architectural overview, writes a valid **Mermaid.js** flowchart, creates tough project-defense interview questions with mock answers, and formulates optimization recommendations.
+*   **Agent 9: ATS Scorer**: Simulates a strict Applicant Tracking System (ATS). Compares your profile/resume against a target JD to provide a Match Score (0-100), overall verdict, parsing issue feedback, and lists of matched/missing keywords.
 
 ### 📊 Local Machine Learning (Agent 7)
 *   **Agent 7: Salary Intelligence**: Feeds role title, location, and seniority parameters into a **locally trained TensorFlow/Keras neural network regression model**. Predicts base salary bands (P25 to P75), total compensations, equity norms, and outputs a verbatim negotiation script.
@@ -66,7 +75,8 @@ graph TD
   end
 
   subgraph Independent Trackers [Independent Trackers]
-    H[PDF Resume Upload] -->|Agent 5: Career Compass| I[3 Ranked Career Paths & roadmaps]
+    H[Global Profile / Resume] -->|Agent 5: Career Compass| I[3 Ranked Career Paths & roadmaps]
+    H -->|Agent 9: ATS Scorer| ATS[Match Score & Missing Keywords]
     J[Local Folder / Git URL] -->|Agent 6: Project Auditor| K[Code Audit, Mermaid Charts & Q/As]
     L[Role & Location] -->|Agent 7: Salary Intelligence| M[Local Neural Net Prediction & Negotiation Script]
   end
@@ -84,67 +94,16 @@ graph TD
 ### Frontend (Bento-Box Design System)
 *   **React 19 & Vite 8**: High-performance rendering and hot-module reloading.
 *   **Vanilla CSS 3**: Utility-free styling framework leveraging modern design details: HSL palettes, glassmorphism overlays, custom shadows, and dynamic micro-animations.
-*   **Firebase Client SDK**: Secure, client-side authentication and session management.
-*   **html2canvas & jsPDF**: Client-side conversion tools for generating clean PDF exports of JD analysis reports.
+*   **Firebase SDK**: Secure authentication and real-time syncing of the Candidate Profile.
+*   **React Context API**: Global state management (`ProfileContext`) for seamless agent data sharing.
 
 ### Backend (Local-First AI & ML)
 *   **FastAPI**: Asynchronous, high-performance web framework.
-*   **Google GenAI SDK**: Utilizing `gemini-2.5-flash` for agent reasoning.
+*   **Google GenAI SDK**: Utilizing `gemini-2.5-flash` with robust safety settings for agent reasoning.
 *   **SentenceTransformers (`all-MiniLM-L6-v2`)**: Local embedding model running on-device for vector search, keeping Gemini API calls reserved solely for LLM logic.
 *   **ChromaDB**: SQLite-backed local vector database for indexing and searching your career portfolio.
 *   **TensorFlow & Keras**: Local model inference engine supporting neural networks trained on market compensation datasets.
 *   **pdfplumber**: Python package for local PDF text extraction.
-
----
-
-## 📁 Repository Structure
-
-```
-PlacementOS/
-├── backend/                        # FastAPI Backend (Python)
-│   ├── app/
-│   │   ├── agents.py               # The 8 AI Agent Definitions
-│   │   ├── config.py               # Pydantic environment configurations
-│   │   ├── main.py                 # FastAPI endpoints & Lifespan seeding
-│   │   ├── schemas.py              # Pydantic schema validation structures
-│   │   ├── vector_store.py         # ChromaDB interface & embeddings
-│   │   └── dl_salary.py            # Local Keras model inference
-│   ├── data/
-│   │   ├── chroma/                 # Local vector database storage
-│   │   └── india_salary_raw.json   # Base dataset for salary model
-│   ├── models/
-│   │   └── salary_india_dl_model.h5 # Trained Keras neural network model
-│   ├── scripts/
-│   │   ├── fetch_india_salary_data.py # Scraping/generation script
-│   │   └── train_salary_dl_model.py # Keras training script
-│   ├── .env                        # Local Gemini backend environment config
-│   ├── portfolio.json              # Seed project data
-│   └── requirements.txt            # Python dependencies
-│
-├── frontend/                       # React 19 Frontend (Vite)
-│   ├── components/                 # React component library
-│   │   ├── features/               # Bento components (Dashboard, CareerCompass, JDAnalyzer...)
-│   │   ├── layout/                 # Sidebar and layout structures
-│   │   └── shared/                 # Modals and auth overlays
-│   ├── services/
-│   │   └── firebase.js             # Firebase auth integrations
-│   ├── App.jsx                     # Core UI controller & tab router
-│   ├── index.css                   # Premium CSS styles & bento layouts
-│   └── main.jsx                    # React entrypoint
-│
-├── public/                         # Public client-side assets
-│   ├── images/
-│   │   ├── placementos_banner.png  # UI header asset
-│   │   └── dashboard_mockup.png    # Dashboard preview mockup
-│   ├── favicon.svg                 # App icon
-│   └── icons.svg                   # UI iconography
-│
-├── .env                            # Client-side Firebase credentials
-├── index.html                      # HTML entrypoint
-├── package.json                    # Node dependencies
-├── vite.config.js                  # Vite builder settings
-└── eslint.config.js                # Linter configs
-```
 
 ---
 
@@ -176,7 +135,7 @@ cd PlacementOS
    pip install -r requirements.txt
    ```
 4. Set up environment variables:
-   Create a `backend/.env` file with your details (a template is available in `backend/.env.example`):
+   Create a `backend/.env` file with your details:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
    GEMINI_MODEL=gemini-2.5-flash
@@ -190,19 +149,19 @@ cd PlacementOS
    ```bash
    uvicorn app.main:app --reload --port 8000
    ```
-   > **Note:** On startup, the backend automatically reads `portfolio.json`, generates local embeddings using `all-MiniLM-L6-v2` (on-device), and indexes them in ChromaDB (no API quota consumed).
+   > **Note:** On startup, the backend automatically reads `portfolio.json`, generates local embeddings using `all-MiniLM-L6-v2` (on-device), and indexes them in ChromaDB. **A PyTorch/Tokenizer deadlock safeguard (`TOKENIZERS_PARALLELISM="false"`) is enabled by default to prevent threading freezes.**
 
 ### 3. Frontend Setup
 1. In a new terminal, navigate to the project root:
    ```bash
-   cd PlacementOS
+   cd PlacementOS/frontend
    ```
 2. Install npm packages:
    ```bash
    npm install
    ```
 3. Set up frontend environment variables:
-   Create a `.env` file in the root directory:
+   Create a `.env` file in the `frontend` directory:
    ```env
    VITE_FIREBASE_API_KEY=your_firebase_api_key
    VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
@@ -217,7 +176,7 @@ cd PlacementOS
    ```
 
 ### 4. Run the Application
-Open `http://localhost:5173` in your browser. The app runs completely locally, storing your trackers in `localStorage` and vector data inside `backend/data/chroma`.
+Open `http://localhost:5173` in your browser. The app runs completely locally, storing your trackers in Firebase and vector data inside `backend/data/chroma`.
 
 ---
 
@@ -226,16 +185,15 @@ Open `http://localhost:5173` in your browser. The app runs completely locally, s
 ### Asynchronous Multi-Agent Chaining
 Each agent in the pipeline relies on the official `google-genai` SDK using `gemini-2.5-flash`'s structured JSON output mode. By providing Pydantic response models, PlacementOS guarantees output structure validation. All Gemini calls are throttled and protected from rate-limiting at a central entry point.
 
-### 🛡️ Backend Hardening & Rate-Limit Protections
-PlacementOS implements robust API defensive patterns to maximize the efficiency of Google's AI Studio Free Tier (15 RPM):
+### 🛡️ Backend Hardening & Protections
+PlacementOS implements robust API defensive patterns:
 *   **Local Embeddings**: Offloading all embedding tasks to `all-MiniLM-L6-v2` (SentenceTransformers) frees the entire 15-RPM quota for LLM reasoning.
-*   **Concurrency Throttling**: An `asyncio.Semaphore(3)` cap prevents more than 3 agents from calling Gemini concurrently, flattening burst traffic.
-*   **Exponential Backoff**: Wrapped with `tenacity` retries (up to 5 attempts, doubling wait times from 5s to 60s) specifically targeted at `429 Resource Exhausted` exceptions.
-*   **Graceful Degradation**: Invalid/leaked API keys or persistent rate-limits are caught and returned as clean HTTP 503 responses, preventing application crashes.
-*   **Secrets Safety**: Core environment files are git-ignored and configured via `.env.example` templates to prevent developer credentials from leaking.
+*   **Deadlock Prevention**: `TOKENIZERS_PARALLELISM` is disabled to ensure thread-safe compatibility between ChromaDB and `asyncio.to_thread()`.
+*   **Concurrency Throttling**: An `asyncio.Semaphore(3)` cap prevents more than 3 agents from calling Gemini concurrently.
+*   **Exponential Backoff**: Wrapped with `tenacity` retries (up to 5 attempts, doubling wait times) specifically targeted at `429 Resource Exhausted` exceptions.
+*   **Strict Security Posture**: Implements strict Gemini `safety_settings` against block thresholds to prevent prompt injections or policy violations.
 
 ### Local Neural Network Compensation Analysis
 The Salary Intelligence page references a local Deep Learning regression model compiled with Keras. Feature columns like `role`, `location`, and `seniority` are preprocessed via one-hot encoding, matching the training schema configured in `backend/scripts/train_salary_dl_model.py`. This predictions system runs entirely offline on your local machine, protecting user privacy.
-
 
 *Built as a personal career command center to conquer the modern job market.*
