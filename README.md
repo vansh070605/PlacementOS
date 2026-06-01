@@ -1,7 +1,7 @@
 # PlacementOS
 
 <p align="center">
-  <img src="./public/images/placementos_banner.png" alt="PlacementOS Banner" width="100%">
+  <img src="./frontend/public/images/placementos_banner.png" alt="PlacementOS Banner" width="100%">
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@ PlacementOS is a local-first, AI-powered career command center. It replaces gene
 ## 🎨 Visual Tour
 
 <p align="center">
-  <img src="./public/images/dashboard_mockup.png" alt="PlacementOS Bento-Box Dashboard Mockup" width="100%">
+  <img src="./frontend/public/images/dashboard_mockup.png" alt="PlacementOS Bento-Box Dashboard Mockup" width="100%">
 </p>
 
 ---
