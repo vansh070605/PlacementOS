@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 /**
  * Sends a job description to the FastAPI backend for multi-agent RAG analysis.

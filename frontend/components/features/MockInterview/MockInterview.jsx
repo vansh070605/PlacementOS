@@ -5,6 +5,7 @@ import './MockInterview.css';
 
 export default function MockInterview() {
   const { profile } = useProfile();
+  const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   
   const [jobDescription, setJobDescription] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
@@ -31,7 +32,7 @@ export default function MockInterview() {
     setChatHistory([]); // Clear any previous history
 
     try {
-      const response = await fetch('http://localhost:8000/api/interview/mock', {
+      const response = await fetch(`${backendUrl}/api/interview/mock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -80,7 +81,7 @@ export default function MockInterview() {
     }));
 
     try {
-      const response = await fetch('http://localhost:8000/api/interview/mock', {
+      const response = await fetch(`${backendUrl}/api/interview/mock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

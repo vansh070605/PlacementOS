@@ -3,7 +3,7 @@ import './ATSScorer.css';
 import { useProfile } from '../../../contexts/ProfileContext';
 import { formatProfileToText } from '../../../utils/profileFormatter';
 
-const backendUrl = 'http://localhost:8000';
+const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function ATSScorer() {
   const { profile } = useProfile();
