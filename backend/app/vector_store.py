@@ -41,7 +41,7 @@ from chromadb.api.types import Documents, EmbeddingFunction, Embeddings
 from google import genai
 
 class CustomGeminiEmbeddingFunction(EmbeddingFunction):
-    def __init__(self, api_key: str, model_name: str = "text-embedding-004"):
+    def __init__(self, api_key: str, model_name: str = "gemini-embedding-2"):
         if not api_key:
             raise ValueError("GEMINI_API_KEY is missing!")
         self.client = genai.Client(api_key=api_key)
@@ -88,7 +88,7 @@ class VectorStoreManager:
             
         self._embedding_fn = CustomGeminiEmbeddingFunction(
             api_key=settings.gemini_api_key,
-            model_name="text-embedding-004"
+            model_name="gemini-embedding-2"
         )
         logger.info("Custom Gemini embedding model loaded successfully.")
 
