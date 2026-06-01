@@ -139,7 +139,6 @@ cd PlacementOS
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
    GEMINI_MODEL=gemini-2.5-flash
-   LOCAL_EMBEDDING_MODEL=all-MiniLM-L6-v2
    HOST=0.0.0.0
    PORT=8000
    CHROMA_DB_DIR=data/chroma
@@ -149,7 +148,7 @@ cd PlacementOS
    ```bash
    uvicorn app.main:app --reload --port 8000
    ```
-   > **Note:** On startup, the backend automatically reads `portfolio.json`, generates local embeddings using `all-MiniLM-L6-v2` (on-device), and indexes them in ChromaDB. **A PyTorch/Tokenizer deadlock safeguard (`TOKENIZERS_PARALLELISM="false"`) is enabled by default to prevent threading freezes.**
+   > **Note:** On startup, the backend automatically reads `portfolio.json`, generates embeddings using the Gemini Embeddings API (`gemini-embedding-2`), and indexes them in ChromaDB. Ensure your `GEMINI_API_KEY` is set!
 
 ### 3. Frontend Setup
 1. In a new terminal, navigate to the project root:
@@ -187,8 +186,7 @@ Each agent in the pipeline relies on the official `google-genai` SDK using `gemi
 
 ### 🛡️ Backend Hardening & Protections
 PlacementOS implements robust API defensive patterns:
-*   **Local Embeddings**: Offloading all embedding tasks to `all-MiniLM-L6-v2` (SentenceTransformers) frees the entire 15-RPM quota for LLM reasoning.
-*   **Deadlock Prevention**: `TOKENIZERS_PARALLELISM` is disabled to ensure thread-safe compatibility between ChromaDB and `asyncio.to_thread()`.
+*   **Zero-Footprint Embeddings**: Offloads embedding tasks to the Gemini API (`gemini-embedding-2`) to dramatically reduce server RAM usage, making it completely deployable on 512MB free-tier cloud platforms.
 *   **Concurrency Throttling**: An `asyncio.Semaphore(3)` cap prevents more than 3 agents from calling Gemini concurrently.
 *   **Exponential Backoff**: Wrapped with `tenacity` retries (up to 5 attempts, doubling wait times) specifically targeted at `429 Resource Exhausted` exceptions.
 *   **Strict Security Posture**: Implements strict Gemini `safety_settings` against block thresholds to prevent prompt injections or policy violations.
