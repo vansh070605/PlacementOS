@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      # These variables should ideally be read from a .env file, but we set defaults here.
+      - GEMINI_MODEL=gemini-2.5-flash
+      - LOCAL_EMBEDDING_MODEL=all-MiniLM-L6-v2
+      - HOST=0.0.0.0
+      - PORT=8000
+      - CHROMA_DB_DIR=data/chroma
+      - PORTFOLIO_JSON_PATH=portfolio.json
+      - TOKENIZERS_PARALLELISM=false
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - backend

@@ -1003,7 +1003,7 @@
   .pa-input-card,
   .pa-results-header-card,
   .pa-panel {
-    padding: 1.25rem;
+    padding: 1rem;
   }
 
   .pa-loading-wrapper {
@@ -1011,11 +1011,7 @@
   }
 
   .pa-mode-toggles {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    flex-wrap: wrap;
     padding-bottom: 0.5rem;
     gap: 0.5rem;
   }
@@ -1025,10 +1021,10 @@
   }
 
   .pa-mode-btn {
-    flex: 0 0 auto;
+    flex: 1 1 calc(50% - 0.5rem);
     justify-content: center;
     font-size: 0.85rem;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 0.5rem;
     white-space: nowrap;
   }
 

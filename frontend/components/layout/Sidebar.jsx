@@ -67,6 +67,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
     { id: 'salary',       label: 'Salary Intel',    icon: 'payments'        },
     { id: 'cover-letter', label: 'Cover Letter',    icon: 'draw'            },
     { id: 'ats-scorer',   label: 'ATS Scorer',      icon: 'radar'           },
+    { id: 'mock-interview', label: 'Mock Interview', icon: 'record_voice_over' },
     { id: 'settings',     label: 'Settings',        icon: 'settings'        },
   ];
 
@@ -81,7 +82,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
       <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="logo-container">
-            <div className="logo-icon">P</div>
+            <img src="/favicon.png" alt="PlacementOS" className="logo-icon" style={{ background: 'transparent', padding: 0, objectFit: 'contain' }} />
             <span className="logo-text">PlacementOS</span>
           </div>
           

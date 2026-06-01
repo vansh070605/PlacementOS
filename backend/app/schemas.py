@@ -266,3 +266,28 @@ class ATSScoreResponse(BaseModel):
     overall_verdict: str = Field(..., description="A brief paragraph summarizing the candidate's fit and major actionable advice.")
 
 
+# ── Agent 10 Schemas (Mock Interview Agent) ──────────────────────────────────
+
+class ConversationTurn(BaseModel):
+    """A single turn in the mock interview conversation."""
+    role: str = Field(..., description="'interviewer' or 'candidate'")
+    content: str = Field(..., description="The message content")
+
+class MockInterviewRequest(BaseModel):
+    """
+    API request schema for the mock interview agent.
+    """
+    job_description: str = Field(..., description="The target Job Description.")
+    candidate_profile: str = Field(..., description="The candidate's unified profile or resume text.")
+    conversation_history: List[ConversationTurn] = Field(default_factory=list, description="The chat history so far. If empty, the agent asks the first question.")
+    latest_answer: Optional[str] = Field(None, description="The candidate's latest answer to process.")
+
+class MockInterviewResponse(BaseModel):
+    """
+    API response schema for Agent 10.
+    """
+    feedback: Optional[str] = Field(None, description="Constructive feedback on the candidate's latest answer, using STAR method principles where applicable. Null if it's the first question.")
+    next_question: str = Field(..., description="The next interview question to ask the candidate.")
+    is_technical: bool = Field(..., description="Whether the next question is technical (true) or behavioral (false).")
+
+

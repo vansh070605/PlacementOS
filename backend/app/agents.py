@@ -54,6 +54,8 @@ from .schemas import (
     CoverLetterResponse,
     ProjectAuditResponse,
     ATSScoreResponse,
+    MockInterviewRequest,
+    MockInterviewResponse,
 )
 from .vector_store import vector_store
 
@@ -718,6 +720,60 @@ Perform a rigorous evaluation and return a structured JSON object matching the r
 
         result = ATSScoreResponse.model_validate_json(response.text)
         logger.info(f"Agent 9 completed ATS scoring with match score: {result.match_score}")
+        return result
+
+    async def run_mock_interview_agent(self, request: MockInterviewRequest) -> MockInterviewResponse:
+        """
+        Agent 10 (Mock Interview Agent): Acts as a technical/behavioral interviewer.
+        Evaluates the previous answer, provides feedback, and asks the next question based on the JD.
+        """
+        logger.info("Running Agent 10: Mock Interview Agent...")
+        
+        # Build conversation history
+        history_str = ""
+        for turn in request.conversation_history:
+            history_str += f"{turn.role.capitalize()}: {turn.content}\n\n"
+            
+        if not history_str:
+            history_str = "No conversation history yet. This is the first question."
+            
+        latest_ans_str = request.latest_answer if request.latest_answer else "None yet."
+        
+        prompt = f"""
+You are an expert technical and behavioral interviewer at a top-tier tech company.
+Your goal is to conduct a mock interview with a candidate for a specific job description, based on their profile.
+
+TARGET JOB DESCRIPTION:
+{request.job_description[:1500]}
+
+CANDIDATE PROFILE:
+{request.candidate_profile[:2000]}
+
+CONVERSATION HISTORY:
+{history_str}
+
+CANDIDATE'S LATEST ANSWER:
+{latest_ans_str}
+
+INSTRUCTIONS:
+1. If this is the first question (no conversation history or latest answer), introduce the interview briefly and ask the first question (can be behavioral or technical based on the JD). 'feedback' should be null.
+2. If there is a latest answer, evaluate it. Provide constructive 'feedback' using the STAR (Situation, Task, Action, Result) method where applicable. Be honest, professional, and point out what they did well and what could be improved.
+3. Determine the 'next_question'. It should logically follow the conversation or shift to a new relevant topic from the JD.
+4. Indicate if the next question 'is_technical' (true/false).
+"""
+        response = await _call_gemini(
+            self.genai_client,
+            model=settings.gemini_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=MockInterviewResponse,
+                temperature=0.7,
+            )
+        )
+        
+        result = MockInterviewResponse.model_validate_json(response.text)
+        logger.info(f"Agent 10 generated next question. Is technical: {result.is_technical}")
         return result
 
 

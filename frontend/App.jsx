@@ -10,6 +10,7 @@ import CoverLetterForge from './components/features/CoverLetterForge/CoverLetter
 import ProjectAuditor from './components/features/ProjectAuditor/ProjectAuditor';
 import Settings from './components/features/Settings/Settings';
 import ATSScorer from './components/features/ATSScorer/ATSScorer';
+import MockInterview from './components/features/MockInterview/MockInterview';
 import OnboardingModal from './components/shared/OnboardingModal';
 import { ProfileProvider } from './contexts/ProfileContext';
 import AuthOverlay from './components/shared/AuthOverlay';
@@ -187,6 +188,8 @@ export default function App() {
         return <Settings />;
       case 'ats-scorer':
         return <ATSScorer />;
+      case 'mock-interview':
+        return <MockInterview />;
       default:
         return (
           <Dashboard

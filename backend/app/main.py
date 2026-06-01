@@ -30,6 +30,8 @@ from .schemas import (
     ProjectAuditRequest,
     ProjectAuditResponse,
     ATSScoreResponse,
+    MockInterviewRequest,
+    MockInterviewResponse,
 )
 from .vector_store import vector_store
 from .agents import orchestrator, RateLimitExceeded
@@ -744,4 +746,49 @@ async def score_resume_ats(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while scoring the resume. Please try again."
+        )
+
+
+@app.post(
+    "/api/interview/mock",
+    response_model=MockInterviewResponse,
+    status_code=status.HTTP_200_OK
+)
+async def mock_interview_endpoint(request: MockInterviewRequest):
+    """
+    Mock Interview Agent (Agent 10):
+    Conducts a mock interview based on the JD and candidate profile.
+    """
+    if not request.job_description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job description is required."
+        )
+
+    if not request.candidate_profile.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Candidate profile is required."
+        )
+
+    try:
+        result = await orchestrator.run_mock_interview_agent(request)
+        return result
+    except RateLimitExceeded:
+        logger.warning("Rate limit exceeded on /api/interview/mock after all retries.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_RATE_LIMIT_RESPONSE["error"],
+        )
+    except ValueError as ve:
+        logger.error(f"API key error in Mock Interview: {ve}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"Mock Interview failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while processing the mock interview. Please try again."
         )
