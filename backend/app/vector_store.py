@@ -37,7 +37,7 @@ import logging
 from typing import List, Optional
 
 import chromadb
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+from chromadb.utils.embedding_functions import GoogleGenerativeAiEmbeddingFunction
 
 from .config import settings
 from .schemas import ProjectIngest, MatchedProject
@@ -66,14 +66,15 @@ class VectorStoreManager:
         #
         # all-MiniLM-L6-v2:  384-dim, ~80 MB, fast CPU inference, strong
         # semantic quality for short paragraphs (ideal for project descriptions).
-        logger.info(
-            f"Initializing local embedding model: '{settings.local_embedding_model}' "
-            f"(first run will download ~80 MB from HuggingFace)..."
+        logger.info("Initializing Google Gemini embedding model to save RAM...")
+        if not settings.gemini_api_key:
+            logger.warning("GEMINI_API_KEY is missing! Embeddings will fail.")
+            
+        self._embedding_fn = GoogleGenerativeAiEmbeddingFunction(
+            api_key=settings.gemini_api_key,
+            model_name="models/text-embedding-004"
         )
-        self._embedding_fn = SentenceTransformerEmbeddingFunction(
-            model_name=settings.local_embedding_model
-        )
-        logger.info("Local embedding model loaded successfully.")
+        logger.info("Gemini embedding model loaded successfully.")
 
         # ── 3. Initialize persistent ChromaDB client ─────────────────────
         self.chroma_client = chromadb.PersistentClient(path=settings.chroma_db_dir)
