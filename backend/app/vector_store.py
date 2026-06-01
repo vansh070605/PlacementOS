@@ -37,7 +37,23 @@ import logging
 from typing import List, Optional
 
 import chromadb
-from chromadb.utils.embedding_functions import GoogleGenerativeAiEmbeddingFunction
+from chromadb.api.types import Documents, EmbeddingFunction, Embeddings
+from google import genai
+
+class CustomGeminiEmbeddingFunction(EmbeddingFunction):
+    def __init__(self, api_key: str, model_name: str = "text-embedding-004"):
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY is missing!")
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = model_name
+
+    def __call__(self, input: Documents) -> Embeddings:
+        response = self.client.models.embed_content(
+            model=self.model_name,
+            contents=list(input)
+        )
+        return [e.values for e in response.embeddings]
+
 
 from .config import settings
 from .schemas import ProjectIngest, MatchedProject
@@ -66,15 +82,15 @@ class VectorStoreManager:
         #
         # all-MiniLM-L6-v2:  384-dim, ~80 MB, fast CPU inference, strong
         # semantic quality for short paragraphs (ideal for project descriptions).
-        logger.info("Initializing Google Gemini embedding model to save RAM...")
+        logger.info("Initializing Custom Google Gemini embedding model to save RAM...")
         if not settings.gemini_api_key:
             logger.warning("GEMINI_API_KEY is missing! Embeddings will fail.")
             
-        self._embedding_fn = GoogleGenerativeAiEmbeddingFunction(
+        self._embedding_fn = CustomGeminiEmbeddingFunction(
             api_key=settings.gemini_api_key,
-            model_name="models/text-embedding-004"
+            model_name="text-embedding-004"
         )
-        logger.info("Gemini embedding model loaded successfully.")
+        logger.info("Custom Gemini embedding model loaded successfully.")
 
         # ── 3. Initialize persistent ChromaDB client ─────────────────────
         self.chroma_client = chromadb.PersistentClient(path=settings.chroma_db_dir)
