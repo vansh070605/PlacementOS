@@ -9,21 +9,25 @@ const THEMES = {
     primary: '#2563eb',
     primaryHover: '#1d4ed8',
     primaryLight: '#eff6ff',
+    darkPrimaryLight: 'rgba(37, 99, 235, 0.15)',
   },
   emerald: {
     primary: '#10b981',
     primaryHover: '#059669',
     primaryLight: '#ecfdf5',
+    darkPrimaryLight: 'rgba(16, 185, 129, 0.15)',
   },
   purple: {
     primary: '#7c3aed',
     primaryHover: '#6d28d9',
     primaryLight: '#f5f3ff',
+    darkPrimaryLight: 'rgba(124, 58, 237, 0.15)',
   },
   orange: {
     primary: '#f97316',
     primaryHover: '#ea580c',
     primaryLight: '#fff7ed',
+    darkPrimaryLight: 'rgba(249, 115, 22, 0.15)',
   }
 };
 
@@ -37,6 +41,9 @@ const MODES = {
     border: '#f1f5f9',
     borderStrong: '#cbd5e1',
     cardBg: '#ffffff',
+    successLight: '#ecfdf5',
+    warningLight: '#fff7ed',
+    dangerLight: '#fef2f2',
   },
   dark: {
     bgPrimary: '#0f172a',
@@ -47,6 +54,9 @@ const MODES = {
     border: '#334155',
     borderStrong: '#475569',
     cardBg: '#1e293b',
+    successLight: 'rgba(16, 185, 129, 0.15)',
+    warningLight: 'rgba(249, 115, 22, 0.15)',
+    dangerLight: 'rgba(239, 68, 68, 0.15)',
   }
 };
 
@@ -90,7 +100,9 @@ export const ThemeProvider = ({ children }) => {
     if (color) {
       root.style.setProperty('--primary', color.primary);
       root.style.setProperty('--primary-hover', color.primaryHover);
-      root.style.setProperty('--primary-light', color.primaryLight);
+      
+      const primaryLight = settings.mode === 'dark' ? color.darkPrimaryLight : color.primaryLight;
+      root.style.setProperty('--primary-light', primaryLight);
     }
     
     // Apply Mode
@@ -104,6 +116,16 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty('--border', mode.border);
       root.style.setProperty('--border-strong', mode.borderStrong);
       root.style.setProperty('--card-bg', mode.cardBg);
+      
+      if (mode.successLight) {
+        root.style.setProperty('--success-light', mode.successLight);
+      }
+      if (mode.warningLight) {
+        root.style.setProperty('--warning-light', mode.warningLight);
+      }
+      if (mode.dangerLight) {
+        root.style.setProperty('--danger-light', mode.dangerLight);
+      }
       
       // Toggle a class on body for specific dark-mode overrides if needed
       if (settings.mode === 'dark') {

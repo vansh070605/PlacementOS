@@ -26,7 +26,7 @@
 
 /* ── Modal Container ────────────────────────────────────── */
 .onboard-modal {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 28px;
   box-shadow: 0 40px 80px -20px rgba(15, 23, 42, 0.25),
               0 0 0 1px rgba(15, 23, 42, 0.05);

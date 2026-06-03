@@ -47,7 +47,7 @@
 }
 
 .column-count {
-  background: #ffffff;
+  background: var(--surface);
   color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 700;
@@ -182,7 +182,7 @@
 }
 
 .modal-content {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: var(--radius-lg);
   padding: 2.5rem;
   width: 100%;
@@ -228,7 +228,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
   border-color: var(--primary);
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.05);
 }
 

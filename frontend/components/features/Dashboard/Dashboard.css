@@ -80,8 +80,8 @@
 }
 
 .metric-icon-wrapper.purple {
-  background: #faf5ff;
-  color: #a855f7;
+  background: var(--purple-light, #faf5ff);
+  color: var(--purple, #a855f7);
 }
 
 .metric-info {
@@ -193,7 +193,7 @@
 
 .recent-app-item:hover {
   border-color: var(--border-strong);
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .recent-app-meta {
@@ -263,6 +263,6 @@
 
 .config-input-field input:focus {
   border-color: var(--primary);
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.05);
 }

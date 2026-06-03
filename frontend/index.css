@@ -21,6 +21,9 @@
   --danger: #ef4444;            /* Soft red */
   --danger-light: #fef2f2;
   
+  --purple: #a855f7;            /* Elegant purple */
+  --purple-light: #faf5ff;
+  
   --border: #f1f5f9;            /* Very soft border */
   --border-strong: #cbd5e1;     /* Interactive elements outline */
   
@@ -39,6 +42,10 @@
   --transition-normal: 0.2s;
   --transition-slow: 0.3s;
   --bounce-easing: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.dark-mode {
+  --purple-light: rgba(168, 85, 247, 0.15);
 }
 
 /* ── Base Reset & Defaults ── */

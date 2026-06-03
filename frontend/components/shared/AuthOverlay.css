@@ -194,7 +194,7 @@
 .input-with-icon input:focus {
   outline: none;
   border-color: var(--primary);
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: 0 0 0 4px var(--primary-light);
 }
 
