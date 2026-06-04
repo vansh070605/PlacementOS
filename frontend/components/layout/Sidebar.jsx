@@ -6,6 +6,7 @@ import { authService, dbService } from '../../services/firebase';
 export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModal, isMobileMenuOpen, setIsMobileMenuOpen }) {
   const [showPopover, setShowPopover] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const popoverRef = useRef(null);
 
   // Close popover when clicking outside
@@ -19,11 +20,12 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch up-to-date user profile name
+  // Fetch up-to-date user profile name and avatar
   useEffect(() => {
     if (user?.uid) {
       dbService.getUserProfile(user.uid)
         .then((profile) => {
+          setAvatarUrl(profile?.avatarUrl || '');
           if (profile?.fullName) {
             setDisplayName(profile.fullName);
           } else {
@@ -32,9 +34,11 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
         })
         .catch(() => {
           setDisplayName(user.displayName || 'Candidate');
+          setAvatarUrl('');
         });
     } else {
       setDisplayName('');
+      setAvatarUrl('');
     }
   }, [user]);
 
@@ -43,6 +47,9 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
     const handleProfileUpdate = (e) => {
       if (e.detail?.fullName) {
         setDisplayName(e.detail.fullName);
+      }
+      if (e.detail?.avatarUrl !== undefined) {
+        setAvatarUrl(e.detail.avatarUrl || '');
       }
     };
     document.addEventListener('pos:profile-updated', handleProfileUpdate);
@@ -124,7 +131,13 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
                 onClick={() => setShowPopover(!showPopover)}
                 aria-expanded={showPopover}
               >
-                <div className="user-avatar">{displayName ? displayName.substring(0, 2).toUpperCase() : 'U'}</div>
+                <div className="user-avatar" style={{ overflow: 'hidden' }}>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    displayName ? displayName.substring(0, 2).toUpperCase() : 'U'
+                  )}
+                </div>
                 <div className="user-info">
                   <span className="user-name">{displayName || 'Candidate'}</span>
                   <span className="user-role">View Profile</span>

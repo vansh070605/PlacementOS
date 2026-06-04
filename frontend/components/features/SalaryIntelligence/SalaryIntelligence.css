@@ -406,3 +406,108 @@
   color: var(--text-secondary, var(--text-muted));
   font-weight: 500;
 }
+
+/* ── Custom Dropdown / Select Styles ─────────────────────── */
+.si-custom-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.si-custom-select-trigger {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-primary);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  font-family: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.si-custom-select-trigger:focus,
+.si-custom-select-trigger:hover {
+  border-color: var(--primary);
+}
+
+.si-custom-select-trigger:focus {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.si-chevron {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.si-chevron.open {
+  transform: rotate(180deg);
+}
+
+.si-custom-select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.35rem;
+  padding: 0.35rem;
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-premium);
+  list-style: none;
+  z-index: 50;
+  max-height: 250px;
+  overflow-y: auto;
+  animation: si-dropdown-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes si-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.si-custom-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.925rem;
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.si-custom-option:hover {
+  background: var(--bg-secondary);
+  color: var(--primary);
+}
+
+.si-custom-option.selected {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.si-custom-option .check-icon {
+  font-size: 1.1rem;
+  color: var(--primary);
+}

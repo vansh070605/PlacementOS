@@ -114,7 +114,7 @@ export default function AuthOverlay({ isOpen, onClose, onLoginSuccess }) {
                 <input
                   type="text"
                   id="fullName"
-                  placeholder="e.g. Vansh Agrawal"
+                  placeholder="e.g. Aarav Sharma"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   disabled={loading}

@@ -7,7 +7,7 @@ export default function ProfileScreen({ user }) {
   const { profile: globalProfile, refreshProfile } = useProfile();
   const [profile, setProfile] = useState({
     fullName: '', title: '', email: '', phone: '', location: '',
-    github: '', linkedin: '', website: '', bio: '', skills: []
+    github: '', linkedin: '', website: '', leetcode: '', bio: '', skills: []
   });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -56,6 +56,21 @@ export default function ProfileScreen({ user }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfile(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        alert("Please upload an image smaller than 1MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfile(prev => ({ ...prev, avatarUrl: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSave = async () => {
@@ -160,7 +175,7 @@ export default function ProfileScreen({ user }) {
   if (loading) return <div style={{ padding: '2rem' }}>Loading profile...</div>;
 
   const calculateCompletion = () => {
-    const fields = ['fullName', 'title', 'email', 'phone', 'location', 'github', 'linkedin', 'bio'];
+    const fields = ['fullName', 'title', 'email', 'phone', 'location', 'github', 'linkedin', 'leetcode', 'bio'];
     const filled = fields.filter(f => profile[f] && profile[f].trim() !== '').length;
     const skillsFilled = profile.skills.length > 0 ? 1 : 0;
     return Math.round(((filled + skillsFilled) / (fields.length + 1)) * 100);
@@ -175,20 +190,70 @@ export default function ProfileScreen({ user }) {
         </div>
         <div className="profile-header-actions">
            {!isEditing ? (
-             <button className="btn-pill btn-pill-primary" onClick={() => setIsEditing(true)}>
+             <button className="btn-pill btn-pill-primary" onClick={() => setIsEditing(true)} aria-label="Edit Profile">
                <span className="material-symbols-outlined">edit</span>
-               Edit Profile
+               <span className="btn-text">Edit Profile</span>
              </button>
            ) : (
-             <button className="btn-pill btn-pill-primary" onClick={handleSave} disabled={saving}>
-               {saving ? 'Saving...' : 'Save Changes'}
+             <button className="btn-pill btn-pill-primary" onClick={handleSave} disabled={saving} aria-label="Save Changes">
+               <span className={`material-symbols-outlined ${saving ? 'icon-spin' : ''}`}>{saving ? 'sync' : 'save'}</span>
+               <span className="btn-text">{saving ? 'Saving...' : 'Save Changes'}</span>
              </button>
            )}
         </div>
       </div>
 
-      <div className="bento-card profile-completion-card">
-         <div className="completion-avatar">{profile.fullName ? profile.fullName.substring(0, 2).toUpperCase() : 'VA'}</div>
+      <div className="bento-card profile-completion-card animate-slide-up delay-100">
+         <div className="avatar-wrapper" style={{ position: 'relative' }}>
+           <div className="completion-avatar" style={{ position: 'relative', overflow: 'hidden' }}>
+             {profile.avatarUrl ? (
+               <img src={profile.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+             ) : (
+               profile.fullName ? profile.fullName.substring(0, 2).toUpperCase() : 'VA'
+             )}
+             {isEditing && (
+               <label className="avatar-upload-overlay" style={{
+                 position: 'absolute',
+                 inset: 0,
+                 background: 'rgba(15, 23, 42, 0.6)',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 color: '#ffffff',
+                 cursor: 'pointer',
+                 opacity: 0,
+                 transition: 'opacity 0.2s ease',
+                 zIndex: 2
+               }}>
+                 <span className="material-symbols-outlined" style={{ fontSize: '1.6rem', color: '#ffffff' }}>photo_camera</span>
+                 <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
+               </label>
+             )}
+           </div>
+           {isEditing && (
+             <label className="avatar-edit-badge" style={{
+               position: 'absolute',
+               bottom: '-4px',
+               right: '-4px',
+               width: '28px',
+               height: '28px',
+               borderRadius: '50%',
+               background: 'var(--primary)',
+               border: '2px solid var(--surface)',
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+               color: '#ffffff',
+               cursor: 'pointer',
+               boxShadow: 'var(--shadow-sm)',
+               zIndex: 3,
+               transition: 'all 0.2s ease'
+             }}>
+               <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#ffffff' }}>edit</span>
+               <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
+             </label>
+           )}
+         </div>
          <div className="completion-details">
            <h3 className="completion-name">{profile.fullName || 'Complete your profile'}</h3>
            <p className="completion-title">{profile.title || 'Add your current role'}</p>
@@ -201,7 +266,7 @@ export default function ProfileScreen({ user }) {
          </div>
       </div>
 
-      <div className="bento-card profile-section-card">
+      <div className="bento-card profile-section-card animate-slide-up delay-200">
         <div className="section-header">
           <h3 className="section-title"><span className="material-symbols-outlined">person</span> Personal Details</h3>
         </div>
@@ -229,7 +294,7 @@ export default function ProfileScreen({ user }) {
         </div>
       </div>
 
-      <div className="bento-card profile-section-card">
+      <div className="bento-card profile-section-card animate-slide-up delay-300">
         <div className="section-header">
           <h3 className="section-title"><span className="material-symbols-outlined">link</span> Professional Links</h3>
         </div>
@@ -246,10 +311,14 @@ export default function ProfileScreen({ user }) {
             <span className="profile-field-label">Personal Website</span>
             {isEditing ? <input type="text" name="website" className="profile-edit-input" value={profile.website} onChange={handleChange} /> : <a href={profile.website} target="_blank" rel="noreferrer" className="profile-field-value">{profile.website || <span className="empty">Not provided</span>}</a>}
           </div>
+          <div className="profile-field">
+            <span className="profile-field-label">LeetCode Username</span>
+            {isEditing ? <input type="text" name="leetcode" className="profile-edit-input" value={profile.leetcode || ''} onChange={handleChange} /> : profile.leetcode ? <a href={`https://leetcode.com/${profile.leetcode}`} target="_blank" rel="noreferrer" className="profile-field-value">{profile.leetcode}</a> : <span className="profile-field-value empty">Not provided</span>}
+          </div>
         </div>
       </div>
 
-      <div className="bento-card profile-section-card full-width">
+      <div className="bento-card profile-section-card full-width animate-slide-up delay-400">
         <div className="section-header">
           <h3 className="section-title"><span className="material-symbols-outlined">description</span> Professional Bio</h3>
         </div>
@@ -260,7 +329,7 @@ export default function ProfileScreen({ user }) {
         </div>
       </div>
 
-      <div className="bento-card profile-section-card full-width">
+      <div className="bento-card profile-section-card full-width animate-slide-up delay-500">
         <div className="section-header">
           <h3 className="section-title"><span className="material-symbols-outlined">psychology</span> Technical Skills</h3>
         </div>
@@ -294,7 +363,7 @@ export default function ProfileScreen({ user }) {
         )}
       </div>
 
-      <div className="bento-card profile-section-card full-width animate-slide-up delay-400">
+      <div className="bento-card profile-section-card full-width animate-slide-up delay-600">
         <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 className="section-title"><span className="material-symbols-outlined">folder_special</span> Indexed Portfolio Projects</h3>
           <span className="pa-project-tag" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>

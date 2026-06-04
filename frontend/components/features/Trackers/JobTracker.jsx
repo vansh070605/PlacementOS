@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { convertAndFormatSalary } from '../../../utils/currencyFormatter';
 import './JobTracker.css';
 
 export default function JobTracker({ applications, setApplications }) {
+  const { settings } = useTheme();
   const [modalOpen, setModalOpen] = useState(false);
   const [newApp, setNewApp] = useState({
     title: '',
@@ -119,7 +122,7 @@ export default function JobTracker({ applications, setApplications }) {
 
                             <div className="job-details-row">
                               {app.location && <span className="job-tag">{app.location}</span>}
-                              {app.salary && <span className="job-salary">{app.salary}</span>}
+                              {app.salary && <span className="job-salary">{convertAndFormatSalary(app.salary, settings.currency)}</span>}
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -235,7 +238,7 @@ export default function JobTracker({ applications, setApplications }) {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Stripe"
+                    placeholder="e.g. Swiggy"
                     value={newApp.company}
                     onChange={(e) => setNewApp({ ...newApp, company: e.target.value })}
                   />
@@ -247,7 +250,7 @@ export default function JobTracker({ applications, setApplications }) {
                   <label>Location Type</label>
                   <input
                     type="text"
-                    placeholder="e.g. Remote (US) or Seattle, WA"
+                    placeholder="e.g. Remote (India) or Bengaluru, KA"
                     value={newApp.location}
                     onChange={(e) => setNewApp({ ...newApp, location: e.target.value })}
                   />
@@ -256,7 +259,7 @@ export default function JobTracker({ applications, setApplications }) {
                   <label>Salary Bracket</label>
                   <input
                     type="text"
-                    placeholder="e.g. $120,000/yr"
+                    placeholder={settings.currency === 'INR' ? "e.g. ₹15,00,000/yr" : "e.g. $120,000/yr"}
                     value={newApp.salary}
                     onChange={(e) => setNewApp({ ...newApp, salary: e.target.value })}
                   />

@@ -81,13 +81,30 @@ const ANIMATIONS = {
 export const ThemeProvider = ({ children }) => {
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('placementos_settings');
-    return saved ? JSON.parse(saved) : {
+    const defaults = {
       color: 'blue',
       mode: 'light',
       radius: 'rounded',
       font: 'inter',
-      animation: 'smooth'
+      animation: 'smooth',
+      currency: 'INR',
+      backendUrl: 'http://127.0.0.1:8000',
+      aiTone: 'professional',
+      aiTemperature: 0.7,
+      showAnalytics: true,
+      showJobPipeline: true,
+      showDsaRoadmap: true,
+      showVectorIndex: true
     };
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return { ...defaults, ...parsed };
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return defaults;
   });
 
   useEffect(() => {

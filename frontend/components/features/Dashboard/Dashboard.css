@@ -17,7 +17,6 @@
   .dashboard-metrics {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
-    padding: 0 1.5rem;
   }
   
   .metric-card {
@@ -266,3 +265,178 @@
   background: var(--surface);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.05);
 }
+
+/* Cockpit Dashboard Style Additions */
+.dashboard-linked-account {
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-account-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.dashboard-account-status.active {
+  background: var(--success-light);
+  color: var(--success);
+  border-color: rgba(16, 185, 129, 0.15);
+}
+
+.dashboard-account-status.active span {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dashboard-account-status.inactive {
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  border-color: var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dashboard-account-status.inactive:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.dashboard-account-status.inactive span {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dashboard-cockpit-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cockpit-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.cockpit-stat-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.cockpit-stat-val {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-left: auto;
+  margin-top: -1.45rem;
+}
+
+.cockpit-progress-track {
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 9999px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.cockpit-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s ease;
+}
+
+.cockpit-progress-fill.success {
+  background: var(--success);
+}
+
+.cockpit-progress-fill.primary {
+  background: var(--primary);
+}
+
+/* Vector Store pulse green dot */
+.pulse-green-dot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--success);
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  margin-right: 0.25rem;
+}
+
+.pulse-green-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--success);
+  animation: pulse-dot 1.5s infinite ease-out;
+  opacity: 0;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Project Chips & Skills */
+.vector-stats-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-project-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.project-chip {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--purple-light);
+  color: var(--purple);
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.skill-chip {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.chip-more {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.4rem;
+}
+

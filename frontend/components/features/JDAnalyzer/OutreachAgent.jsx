@@ -116,7 +116,7 @@ export default function OutreachAgent({ analysisResult, jdText }) {
   );
 
   return (
-    <div className={`bento-card span-12 animate-slide-up delay-100 ${isLoading ? 'outreach-loading-card' : ''}`}>
+    <div className={`bento-card span-12 animate-slide-up delay-500 ${isLoading ? 'outreach-loading-card' : ''}`}>
 
       {/* ── Header ── */}
       <div className="outreach-section-label">

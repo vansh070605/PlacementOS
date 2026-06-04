@@ -12,6 +12,7 @@ import Settings from './components/features/Settings/Settings';
 import ATSScorer from './components/features/ATSScorer/ATSScorer';
 import MockInterview from './components/features/MockInterview/MockInterview';
 import OnboardingModal from './components/shared/OnboardingModal';
+import AIChat from './components/shared/AIChat';
 import { ProfileProvider } from './contexts/ProfileContext';
 import AuthOverlay from './components/shared/AuthOverlay';
 import ProfileScreen from './components/features/Profile/ProfileScreen';
@@ -75,9 +76,9 @@ const DEFAULT_DSA_PROGRESS = {
     'System Design': false,
   },
   questions: [
-    { id: 1, title: 'Two Sum', platform: 'LeetCode', difficulty: 'Easy', status: 'Solved', notes: 'Hash map lookups in O(1) space.' },
+    { id: 1, title: 'Two Sum', platform: 'LeetCode', difficulty: 'Easy', status: 'Solved', timestamp: Math.floor(Date.now() / 1000) - 86400, notes: 'Hash map lookups in O(1) space.' },
     { id: 2, title: 'Merge K Sorted Lists', platform: 'LeetCode', difficulty: 'Hard', status: 'Todo', notes: 'Use priority queues or divide & conquer.' },
-    { id: 3, title: 'Longest Palindromic Substring', platform: 'LeetCode', difficulty: 'Medium', status: 'Solved', notes: 'Expand around center method.' },
+    { id: 3, title: 'Longest Palindromic Substring', platform: 'LeetCode', difficulty: 'Medium', status: 'Solved', timestamp: Math.floor(Date.now() / 1000) - 259200, notes: 'Expand around center method.' },
   ],
 };
 
@@ -223,6 +224,7 @@ export default function App() {
         >
           {renderActiveScreen()}
         </DashboardLayout>
+        <AIChat />
       </div>
     </ProfileProvider>
   );

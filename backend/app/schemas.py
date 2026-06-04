@@ -161,12 +161,13 @@ class SalaryRequest(BaseModel):
         description="Seniority level: one of 'entry', 'mid', 'senior', 'staff', 'principal'."
     )
     experience_years: int = Field(..., ge=0, le=40, description="Total years of professional experience.")
+    currency: Optional[str] = Field("INR", description="Preferred currency: 'INR' or 'USD'.")
 
 class CompensationBand(BaseModel):
-    """Three-point compensation range in USD per year."""
-    p25: int = Field(..., description="25th percentile annual compensation in USD.")
-    median: int = Field(..., description="Median (50th percentile) annual compensation in USD.")
-    p75: int = Field(..., description="75th percentile annual compensation in USD.")
+    """Three-point compensation range in INR per year."""
+    p25: int = Field(..., description="25th percentile annual compensation in INR.")
+    median: int = Field(..., description="Median (50th percentile) annual compensation in INR.")
+    p75: int = Field(..., description="75th percentile annual compensation in INR.")
 
 class SalaryIntelligenceResponse(BaseModel):
     """
@@ -174,12 +175,12 @@ class SalaryIntelligenceResponse(BaseModel):
     Provides compensation bands, negotiation guidance, and market context.
     Generated via Gemini structured outputs.
     """
-    base_salary_band: CompensationBand = Field(..., description="Base salary range only (no equity or bonus).")
-    total_comp_band: CompensationBand = Field(..., description="Total compensation range including base + average bonus + equity value annualized.")
-    equity_range: str = Field(..., description="Typical equity grant range for this role/level (e.g., '$20K–$80K RSUs over 4 years').")
-    signing_bonus_range: str = Field(..., description="Typical signing bonus range (e.g., '$5K–$25K one-time').")
-    negotiation_floor: int = Field(..., description="Minimum base salary the candidate should accept — below this, walk away.")
-    negotiation_ceiling: int = Field(..., description="Aspirational maximum base to anchor the negotiation conversation.")
+    base_salary_band: CompensationBand = Field(..., description="Base salary range only (no equity or bonus) in INR.")
+    total_comp_band: CompensationBand = Field(..., description="Total compensation range including base + average bonus + equity value annualized in INR.")
+    equity_range: str = Field(..., description="Typical equity grant range for this role/level (e.g., '₹10L–₹30L ESOPs/RSUs over 4 years').")
+    signing_bonus_range: str = Field(..., description="Typical signing bonus range (e.g., '₹1L–₹3L one-time').")
+    negotiation_floor: int = Field(..., description="Minimum base salary the candidate should accept in INR — below this, walk away.")
+    negotiation_ceiling: int = Field(..., description="Aspirational maximum base to anchor the negotiation conversation in INR.")
     negotiation_script: str = Field(..., description="A 3-4 sentence script the candidate can use verbatim when discussing compensation with a recruiter.")
     market_insights: List[str] = Field(..., description="3-5 data-backed insights about the compensation landscape for this role/location/level.")
 
@@ -281,6 +282,8 @@ class MockInterviewRequest(BaseModel):
     candidate_profile: str = Field(..., description="The candidate's unified profile or resume text.")
     conversation_history: List[ConversationTurn] = Field(default_factory=list, description="The chat history so far. If empty, the agent asks the first question.")
     latest_answer: Optional[str] = Field(None, description="The candidate's latest answer to process.")
+    ai_tone: Optional[str] = Field("professional", description="The tone style of the interviewer.")
+    ai_temperature: Optional[float] = Field(0.7, description="The generation temperature parameter.")
 
 class MockInterviewResponse(BaseModel):
     """

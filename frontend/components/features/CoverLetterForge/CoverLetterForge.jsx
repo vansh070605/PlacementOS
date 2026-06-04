@@ -137,7 +137,7 @@ export default function CoverLetterForge() {
       {/* Form Card (always visible until result) */}
       {!result && (
         <div className="bento-grid">
-          <div className="clf-form-card span-5" style={{ margin: 0 }}>
+          <div className="clf-form-card span-5 animate-slide-up delay-100" style={{ margin: 0 }}>
             <div className="card-title">
               <span className="material-symbols-outlined">draw</span>
               <span>Draft Settings</span>
@@ -157,7 +157,7 @@ export default function CoverLetterForge() {
                    className="clf-input"
                    value={targetCompany}
                    onChange={(e) => setTargetCompany(e.target.value)}
-                   placeholder="e.g. Anthropic"
+                   placeholder="e.g. Razorpay"
                  />
                </div>
             </div>
@@ -270,7 +270,7 @@ export default function CoverLetterForge() {
           </div>
 
           {/* Key Hooks Side Panel */}
-          <div className="clf-hooks-card">
+          <div className="clf-hooks-card animate-slide-up delay-200">
             <div className="card-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
                <span className="material-symbols-outlined">lightbulb</span>
                <span>Key Hooks Used</span>

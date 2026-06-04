@@ -42,6 +42,15 @@
   --transition-normal: 0.2s;
   --transition-slow: 0.3s;
   --bounce-easing: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Map legacy custom properties to dynamic theme variables */
+  --border-color: var(--border);
+  --text-color: var(--text-main);
+  --bg-surface: var(--bg-secondary);
+  --primary-color: var(--primary);
+  --bg-hover: var(--bg-secondary);
+  --text-primary: var(--text-main);
+  --text-secondary: var(--text-muted);
 }
 
 body.dark-mode {
@@ -70,8 +79,25 @@ a {
   color: inherit;
 }
 
-button, input, textarea {
+button, input, select, textarea {
   font-family: inherit;
+  color: inherit;
+}
+
+input, select, textarea {
+  background-color: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-main);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+select option {
+  background-color: var(--surface);
+  color: var(--text-main);
 }
 
 /* ── Page Grid & Layout Helpers ── */
@@ -111,7 +137,6 @@ button, input, textarea {
   box-shadow: var(--shadow-premium);
   border: 1px solid var(--border);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
 }
 
 .bento-card:hover {
@@ -199,7 +224,7 @@ button, input, textarea {
 }
 
 .btn-pill-secondary:hover {
-  background: #f8fafc;
+  background: var(--bg-secondary);
   color: var(--text-main);
   border-color: var(--text-main);
   transform: translateY(-2px) scale(1.02);
@@ -286,11 +311,18 @@ button, input, textarea {
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
 
 
 /* Hide styling overrides for icons */
 .material-symbols-outlined {
   font-size: 22px;
+}
+
+.dashboard-header-mobile {
+  display: none;
 }
 
 /* ── Mobile Responsiveness ── */
@@ -345,12 +377,12 @@ button, input, textarea {
   }
   
   .main-content {
-    padding: 0 0 2rem 0 !important;
+    padding: 0 1.5rem 2rem 1.5rem !important;
   }
 
-  /* Provide top breathing room below the sticky header for all feature pages and remove horizontal padding to avoid double-padding */
+  /* Provide top breathing room below the sticky header for all feature pages */
   .main-content > div:not(.dashboard-header-mobile) {
-    padding: 2rem 0 !important;
+    padding: 1.5rem 0 0 0 !important;
   }
 
   .dashboard-header-mobile {
@@ -362,8 +394,61 @@ button, input, textarea {
     box-shadow: var(--shadow-sm);
     display: flex;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
-    margin: -2rem -1.5rem 2rem -1.5rem;
+    align-items: center;
+    padding: 0.85rem 1.5rem;
+    margin: 0 -1.5rem 1.5rem -1.5rem;
+    width: calc(100% + 3rem);
+  }
+
+  .mobile-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .mobile-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mobile-logo-container .logo-icon {
+    width: 28px !important;
+    height: 28px !important;
+    background: transparent !important;
+    padding: 0 !important;
+    object-fit: contain;
+  }
+
+  .mobile-logo-container .logo-text {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    letter-spacing: -0.03em;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(241, 245, 249, 0.8);
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 0.45rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mobile-menu-btn:hover {
+    background: var(--bg-secondary);
+    border-color: var(--text-muted);
+  }
+
+  .mobile-menu-btn:active {
+    transform: scale(0.95);
   }
 
   .hide-on-mobile {
@@ -372,20 +457,14 @@ button, input, textarea {
 
   .text-hero-title {
     font-size: 2rem;
-    padding: 0 1.5rem;
   }
   
   .text-hero-desc {
-    padding: 0 1.5rem;
-  }
-
-  .mobile-padded-btn {
-    margin-left: 1.5rem;
+    margin-top: 0.5rem;
   }
 
   .bento-card {
     padding: 1.5rem;
-    margin: 0 1.5rem;
   }
 
   .bento-grid {

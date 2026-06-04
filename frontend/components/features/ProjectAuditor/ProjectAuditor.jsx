@@ -18,8 +18,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import './ProjectAuditor.css';
+import { getBackendUrl } from '../../../utils/config';
 
-const BACKEND_URL = `http://${window.location.hostname}:8000`;
+const BACKEND_URL = getBackendUrl();
 
 export default function ProjectAuditor() {
   // Input Modes: 'paste' or 'path'
@@ -44,6 +45,50 @@ export default function ProjectAuditor() {
   const [expandedQA, setExpandedQA] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Portfolio indexing state
+  const [portfolioProjects, setPortfolioProjects] = useState([]);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+
+  const loadPortfolioProjects = async () => {
+    setLoadingProjects(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/portfolio/list`);
+      if (response.ok) {
+        const data = await response.json();
+        setPortfolioProjects(data.projects || []);
+      }
+    } catch (err) {
+      console.error('Failed to load portfolio projects:', err);
+    } finally {
+      setLoadingProjects(false);
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    if (!confirm("Are you sure you want to delete this project from your portfolio index?")) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/portfolio/${projectId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        loadPortfolioProjects();
+        document.dispatchEvent(new CustomEvent('pos:portfolio-updated'));
+      } else {
+        alert("Failed to delete project.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting project.");
+    }
+  };
+
+  useEffect(() => {
+    loadPortfolioProjects();
+    const handlePortfolioUpdate = () => loadPortfolioProjects();
+    document.addEventListener('pos:portfolio-updated', handlePortfolioUpdate);
+    return () => document.removeEventListener('pos:portfolio-updated', handlePortfolioUpdate);
+  }, []);
 
   // Mermaid CDN Loading State
   const [mermaidLoaded, setMermaidLoaded] = useState(false);
@@ -322,7 +367,8 @@ export default function ProjectAuditor() {
 
       {/* Ingest Input Cards */}
       {!result && !isLoading && (
-        <div className="pa-input-card">
+        <div className="bento-grid">
+          <div className="pa-input-card bento-card span-8 animate-slide-up delay-100">
           <div className="pa-mode-toggles">
             <button
               className={`pa-mode-btn ${inputMode === 'paste' ? 'active' : ''}`}
@@ -371,6 +417,45 @@ export default function ProjectAuditor() {
                 <div className="pa-input-hint">
                   PlacementOS will fetch the default branch zipball directly from the GitHub API and scan the source files. <strong>Only public repositories are supported.</strong>
                 </div>
+
+                <div className="pa-workflow-visual">
+                  <div className="workflow-title">GitHub Audit Workflow</div>
+                  <div className="workflow-steps">
+                    <div className="workflow-step">
+                      <div className="step-icon blue">
+                        <span className="material-symbols-outlined">cloud_download</span>
+                      </div>
+                      <div className="step-content">
+                        <div className="step-name">1. Fetch Zipball</div>
+                        <div className="step-desc">Downloads repository zip directly from GitHub API.</div>
+                      </div>
+                    </div>
+                    <div className="workflow-arrow">
+                      <span className="material-symbols-outlined">arrow_forward</span>
+                    </div>
+                    <div className="workflow-step">
+                      <div className="step-icon purple">
+                        <span className="material-symbols-outlined">biotech</span>
+                      </div>
+                      <div className="step-content">
+                        <div className="step-name">2. Agent 6 Static Audit</div>
+                        <div className="step-desc">Analyzes source modules and designs system flowcharts.</div>
+                      </div>
+                    </div>
+                    <div className="workflow-arrow">
+                      <span className="material-symbols-outlined">arrow_forward</span>
+                    </div>
+                    <div className="workflow-step">
+                      <div className="step-icon emerald">
+                        <span className="material-symbols-outlined">database</span>
+                      </div>
+                      <div className="step-content">
+                        <div className="step-name">3. RAG Indexing</div>
+                        <div className="step-desc">Project details are vector-embedded in ChromaDB.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : inputMode === 'path' ? (
               <div className="pa-path-section">
@@ -388,48 +473,100 @@ export default function ProjectAuditor() {
                 <div className="pa-input-hint">
                   The backend server will recursively scan source files, skipping build bundles and dependency folders like <code>node_modules</code>.
                 </div>
+
+                <div className="pa-workflow-visual">
+                  <div className="workflow-title">Local Directory Audit Workflow</div>
+                  <div className="workflow-steps">
+                    <div className="workflow-step">
+                      <div className="step-icon orange">
+                        <span className="material-symbols-outlined">folder_open</span>
+                      </div>
+                      <div className="step-content">
+                        <div className="step-name">1. Code Ingestion</div>
+                        <div className="step-desc">Specify directory path to locate local repository files.</div>
+                      </div>
+                    </div>
+                    <div className="workflow-arrow">
+                      <span className="material-symbols-outlined">arrow_forward</span>
+                    </div>
+                    <div className="workflow-step">
+                      <div className="step-icon purple">
+                        <span className="material-symbols-outlined">biotech</span>
+                      </div>
+                      <div className="step-content">
+                        <div className="step-name">2. Agent 6 Static Audit</div>
+                        <div className="step-desc">Parses codebase structure & writes interview defense questions.</div>
+                      </div>
+                    </div>
+                    <div className="workflow-arrow">
+                      <span className="material-symbols-outlined">arrow_forward</span>
+                    </div>
+                    <div className="workflow-step">
+                      <div className="step-icon emerald">
+                        <span className="material-symbols-outlined">database</span>
+                      </div>
+                      <div className="step-content">
+                        <div className="step-name">3. Semantic RAG Index</div>
+                        <div className="step-desc">Project details are vector-embedded in ChromaDB.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : inputMode === 'manual' ? (
-              <div className="pa-manual-section" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="pa-path-section">
-                  <label className="pa-input-label">Project Title *</label>
-                  <input
-                    type="text"
-                    value={manualProject.title}
-                    onChange={(e) => setManualProject({ ...manualProject, title: e.target.value })}
-                    placeholder="e.g. E-Commerce Backend API"
-                    className="pa-path-input"
-                  />
+              <div className="pa-manual-grid">
+                <div className="pa-manual-col">
+                  <div className="pa-field-group">
+                    <label className="pa-input-label">Project Title *</label>
+                    <div className="pa-input-wrapper">
+                      <span className="material-symbols-outlined">title</span>
+                      <input
+                        type="text"
+                        value={manualProject.title}
+                        onChange={(e) => setManualProject({ ...manualProject, title: e.target.value })}
+                        placeholder="e.g. E-Commerce Backend"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pa-field-group">
+                    <label className="pa-input-label">Technologies Used (comma separated)</label>
+                    <div className="pa-input-wrapper">
+                      <span className="material-symbols-outlined">developer_board</span>
+                      <input
+                        type="text"
+                        value={manualProject.technologies}
+                        onChange={(e) => setManualProject({ ...manualProject, technologies: e.target.value })}
+                        placeholder="e.g. Node.js, Express, MongoDB, Docker"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pa-field-group">
+                    <label className="pa-input-label">Key Metrics / Impact (optional)</label>
+                    <div className="pa-input-wrapper">
+                      <span className="material-symbols-outlined">monitoring</span>
+                      <input
+                        type="text"
+                        value={manualProject.metrics}
+                        onChange={(e) => setManualProject({ ...manualProject, metrics: e.target.value })}
+                        placeholder="e.g. Reduced API latency by 40%"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="pa-path-section">
-                  <label className="pa-input-label">Project Description *</label>
-                  <textarea
-                    value={manualProject.description}
-                    onChange={(e) => setManualProject({ ...manualProject, description: e.target.value })}
-                    placeholder="Describe what the project does, its purpose, and key features..."
-                    className="pa-textarea"
-                    rows={4}
-                  />
-                </div>
-                <div className="pa-path-section">
-                  <label className="pa-input-label">Technologies Used (comma separated)</label>
-                  <input
-                    type="text"
-                    value={manualProject.technologies}
-                    onChange={(e) => setManualProject({ ...manualProject, technologies: e.target.value })}
-                    placeholder="e.g. Node.js, Express, MongoDB, Docker"
-                    className="pa-path-input"
-                  />
-                </div>
-                <div className="pa-path-section">
-                  <label className="pa-input-label">Key Metrics / Impact (optional)</label>
-                  <input
-                    type="text"
-                    value={manualProject.metrics}
-                    onChange={(e) => setManualProject({ ...manualProject, metrics: e.target.value })}
-                    placeholder="e.g. Reduced API latency by 40%"
-                    className="pa-path-input"
-                  />
+
+                <div className="pa-manual-col" style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div className="pa-field-group" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <label className="pa-input-label">Project Description *</label>
+                    <div className="pa-textarea-wrapper">
+                      <textarea
+                        value={manualProject.description}
+                        onChange={(e) => setManualProject({ ...manualProject, description: e.target.value })}
+                        placeholder="Describe what the project does, its purpose, and key features..."
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -497,12 +634,72 @@ export default function ProjectAuditor() {
               Saved to Portfolio
             </div>
           )}
+          </div>
+
+          {/* Right Side: Vector Index Dashboard */}
+          <div className="bento-card span-4 pa-portfolio-card animate-slide-up delay-200" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div className="card-title">
+              <span className="material-symbols-outlined" style={{ color: 'var(--purple)' }}>database</span>
+              <span>Vector Portfolio Index</span>
+            </div>
+            
+            <div className="db-status-widget">
+              <div className="db-status-indicator active">
+                <span className="pulse-green-dot"></span>
+                <span>ChromaDB: <strong>Connected</strong></span>
+              </div>
+              <span className="db-stats-badge">{portfolioProjects.length} Indexed</span>
+            </div>
+
+            <div className="pa-portfolio-projects-list">
+              {loadingProjects ? (
+                <div className="loading-state">
+                  <span className="material-symbols-outlined icon-spin">sync</span>
+                  Loading vector index...
+                </div>
+              ) : portfolioProjects.length > 0 ? (
+                portfolioProjects.map((p) => (
+                  <div key={p.id} className="pa-portfolio-project-item">
+                    <div className="project-item-meta">
+                      <h4 className="project-item-title">{p.title}</h4>
+                      <div className="project-item-tech">
+                        {p.technologies?.slice(0, 3).map((tech, idx) => (
+                          <span key={idx} className="tech-badge">{tech}</span>
+                        ))}
+                        {p.technologies?.length > 3 && <span className="tech-badge-more">+{p.technologies.length - 3}</span>}
+                      </div>
+                    </div>
+                    <button 
+                      className="project-item-delete-btn" 
+                      onClick={() => handleDeleteProject(p.id)}
+                      title="Remove from Index"
+                    >
+                      <span className="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="empty-portfolio-state">
+                  <span className="material-symbols-outlined">folder_open</span>
+                  <p>No projects indexed in ChromaDB yet.</p>
+                  <span className="helper-text">Audit a project or use Manual Entry to build your local RAG index.</span>
+                </div>
+              )}
+            </div>
+
+            <div className="pa-info-box">
+              <span className="material-symbols-outlined">info</span>
+              <p>
+                <strong>Agent 6 Insight:</strong> Audited projects are automatically vector-embedded to evaluate ATS skill matches and tailor resume achievements.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Loading Skeleton */}
       {isLoading && (
-        <div className="pa-loading-wrapper">
+        <div className="pa-loading-wrapper animate-fade-in">
           <div className="pa-loading-brain">
             <span className="material-symbols-outlined spinner-brain">biotech</span>
           </div>
@@ -555,7 +752,7 @@ export default function ProjectAuditor() {
               </div>
             </div>
 
-            <div className="pa-tech-stack-row">
+            <div className="pa-tech-stack-row animate-slide-up delay-200">
               {result.technologies.map((tech, idx) => (
                 <span key={idx} className="pa-tech-pill">{tech}</span>
               ))}
@@ -569,7 +766,7 @@ export default function ProjectAuditor() {
           </div>
 
           {/* Results Navigation Tabs */}
-          <div className="pa-tabs-container">
+          <div className="pa-tabs-container animate-slide-up delay-300">
             <button
               className={`pa-tab ${activeTab === 'overview' ? 'active' : ''}`}
               onClick={() => setActiveTab('overview')}

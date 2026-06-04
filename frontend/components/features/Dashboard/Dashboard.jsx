@@ -1,9 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
+import { curriculumData } from '../Trackers/curriculumData';
+import { useProfile } from '../../../contexts/ProfileContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function Dashboard({ applications, dsaProgress, goals, setGoals, setActiveTab }) {
+  const { profile } = useProfile();
+  const { settings } = useTheme();
+  const leetcodeUsername = profile?.leetcode;
+
   const [configOpen, setConfigOpen] = useState(false);
   const [tempGoals, setTempGoals] = useState({ ...goals });
+  const [projects, setProjects] = useState([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+
+  // Fetch portfolio list for project stats
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${BACKEND_URL}/api/portfolio/list`);
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data.projects || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch projects for dashboard:', err);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   // Calculate Metrics
   const totalApps = applications.length;
@@ -27,6 +55,20 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
   const weeklyDSAPercent = Math.min(100, Math.round((solvedDSA / goals.weeklyDSAQuestions) * 100)) || 0;
   const offersPercent = Math.min(100, Math.round((offersReceived / goals.targetOffers) * 100)) || 0;
 
+  // Calculate syllabus stats
+  const totalRecQuestions = curriculumData.reduce((acc, topic) => acc + topic.problems.length, 0);
+  const solvedRecQuestions = curriculumData.reduce((acc, topic) => {
+    return acc + topic.problems.filter(p => 
+      dsaProgress.questions.some(q => q.titleSlug === p.slug || q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === p.slug)
+    ).length;
+  }, 0);
+
+  const totalVideos = curriculumData.reduce((acc, topic) => acc + topic.videos.length, 0);
+  const watchedVideosCount = dsaProgress.watchedVideos ? dsaProgress.watchedVideos.length : 0;
+  
+  const dsaPercent = totalRecQuestions > 0 ? Math.round((solvedRecQuestions / totalRecQuestions) * 100) : 0;
+  const videoPercent = totalVideos > 0 ? Math.round((watchedVideosCount / totalVideos) * 100) : 0;
+
   const handleSaveGoals = (e) => {
     e.preventDefault();
     setGoals({
@@ -37,27 +79,12 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
     setConfigOpen(false);
   };
 
-  // Get status badge class
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case 'offered':
-        return 'badge-offered';
-      case 'interviewing':
-        return 'badge-interviewing';
-      case 'applied':
-        return 'badge-applied';
-      case 'rejected':
-      default:
-        return 'badge-rejected';
-    }
-  };
-
   return (
     <div className="dashboard-wrapper animate-fade-in">
       {/* Title block */}
       <div className="text-hero-title">Command Center</div>
       <p className="text-hero-desc">
-        Welcome back, Vansh. Here is an overview of your active applications, DSA achievements, and milestone targets.
+        Welcome back, Vansh. Here is a site-wide overview of your career progress, active applications, codebase indexing, and roadmap achievements.
       </p>
 
       {/* Bento Row 1: Metrics */}
@@ -106,6 +133,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
       {/* Bento Grid */}
       <div className="bento-grid">
         {/* Card 1: Target Gauges */}
+        {settings.showAnalytics !== false && (
         <div className="bento-card span-6 animate-slide-up delay-100">
           <div className="dashboard-section-title">
             <span className="material-symbols-outlined">ads_click</span>
@@ -157,9 +185,11 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
             </button>
           </div>
         </div>
+        )}
 
         {/* Card 2: Configure Targets Panel (Conditional inline) */}
-        {configOpen ? (
+        {settings.showJobPipeline !== false && (
+        configOpen ? (
           <div className="bento-card span-6 animate-slide-up">
             <div className="dashboard-section-title">
               <span className="material-symbols-outlined">tune</span>
@@ -226,7 +256,6 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
                       <span className="recent-app-company">{app.company} • {app.date}</span>
                     </div>
                     
-                    {/* Simplified styling mapping */}
                     <span className="recent-app-status" style={{
                       background: app.status === 'offered' ? 'var(--success-light)' : app.status === 'interviewing' ? 'var(--primary-light)' : app.status === 'applied' ? 'var(--bg-secondary)' : 'var(--danger-light)',
                       color: app.status === 'offered' ? 'var(--success)' : app.status === 'interviewing' ? 'var(--primary)' : app.status === 'applied' ? 'var(--text-muted)' : 'var(--danger)',
@@ -249,7 +278,131 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
               </button>
             </div>
           </div>
+        )
         )}
+
+        {/* Card 4: LeetCode & DSA Prep Hub Cockpit */}
+        {settings.showDsaRoadmap !== false && (
+        <div className="bento-card span-6 animate-slide-up delay-300">
+          <div className="dashboard-section-title">
+            <span className="material-symbols-outlined" style={{ color: '#FFA116' }}>code</span>
+            <span>LeetCode & DSA Roadmap</span>
+          </div>
+
+          <div className="dashboard-linked-account">
+            {leetcodeUsername ? (
+              <div className="dashboard-account-status active">
+                <span className="material-symbols-outlined">check_circle</span>
+                <span>Linked LeetCode: <strong>{leetcodeUsername}</strong></span>
+              </div>
+            ) : (
+              <div className="dashboard-account-status inactive" onClick={() => setActiveTab('profile')}>
+                <span className="material-symbols-outlined">info</span>
+                <span>No LeetCode profile linked. Link in Profile.</span>
+              </div>
+            )}
+          </div>
+
+          <div className="dashboard-cockpit-metrics">
+            <div className="cockpit-stat-item">
+              <span className="cockpit-stat-label">Syllabus Solved</span>
+              <span className="cockpit-stat-val">{solvedRecQuestions} / {totalRecQuestions}</span>
+              <div className="cockpit-progress-track">
+                <div className="cockpit-progress-fill success" style={{ width: `${dsaPercent}%` }}></div>
+              </div>
+            </div>
+
+            <div className="cockpit-stat-item">
+              <span className="cockpit-stat-label">Video Tutorials watched</span>
+              <span className="cockpit-stat-val">{watchedVideosCount} / {totalVideos}</span>
+              <div className="cockpit-progress-track">
+                <div className="cockpit-progress-fill primary" style={{ width: `${videoPercent}%` }}></div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '2rem' }}>
+            <button className="btn-pill btn-pill-secondary" onClick={() => setActiveTab('prep')}>
+              Resume DSA Syllabus
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+        )}
+
+        {/* Card 5: Local Database & AI Assets Cockpit */}
+        {settings.showVectorIndex !== false && (
+        <div className="bento-card span-6 animate-slide-up delay-400">
+          <div className="dashboard-section-title">
+            <span className="material-symbols-outlined" style={{ color: 'var(--purple)' }}>database</span>
+            <span>RAG Vector Store & Profile Assets</span>
+          </div>
+
+          <div className="dashboard-linked-account">
+            <div className="dashboard-account-status active">
+              <div className="pulse-green-dot"></div>
+              <span>ChromaDB Vector Store: <strong>Active</strong></span>
+            </div>
+          </div>
+
+          <div className="vector-stats-layout">
+            <div className="vector-projects-summary">
+              <div className="summary-label">Indexed Codebase Projects:</div>
+              {loadingProjects ? (
+                <div className="summary-val text-muted" style={{ fontSize: '0.85rem' }}>Loading index...</div>
+              ) : projects.length > 0 ? (
+                <div className="dashboard-project-chips">
+                  {projects.map(p => (
+                    <span key={p.id} className="project-chip">{p.title}</span>
+                  ))}
+                </div>
+              ) : (
+                <div className="summary-val text-muted" style={{ fontSize: '0.85rem', fontStyle: 'italic' }}>
+                  No projects indexed. Use the Project Auditor to index your repositories.
+                </div>
+              )}
+            </div>
+
+            {profile?.skills && profile.skills.length > 0 && (
+              <div className="vector-skills-summary" style={{ marginTop: '1.25rem' }}>
+                <div className="summary-label">Candidate Skills:</div>
+                <div className="dashboard-project-chips" style={{ marginTop: '0.5rem' }}>
+                  {profile.skills.slice(0, 6).map(skill => (
+                    <span key={skill} className="skill-chip">{skill}</span>
+                  ))}
+                  {profile.skills.length > 6 && <span className="chip-more">+{profile.skills.length - 6} more</span>}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '2rem', flexWrap: 'wrap' }}>
+            <button className="btn-pill btn-pill-secondary" onClick={() => setActiveTab('auditor')}>
+              Audit Codebase
+              <span className="material-symbols-outlined">terminal</span>
+            </button>
+            <button className="btn-pill btn-pill-secondary" onClick={() => setActiveTab('compass')}>
+              Career Paths
+              <span className="material-symbols-outlined">explore</span>
+            </button>
+          </div>
+        </div>
+        )}
+
+        {/* Fallback View in Case All Cards Are Hidden */}
+        {!(settings.showAnalytics !== false || settings.showJobPipeline !== false || settings.showDsaRoadmap !== false || settings.showVectorIndex !== false) && (
+          <div className="bento-card span-12 animate-slide-up" style={{ padding: '4rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem', background: 'var(--surface)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: 'var(--text-muted)' }}>dashboard_customize</span>
+            <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700' }}>All Bento Cards Hidden</h3>
+            <p className="text-muted" style={{ maxWidth: '480px', margin: 0, fontSize: '0.95rem', lineHeight: '1.6' }}>
+              You have disabled all widgets. Visit the Settings dashboard to choose which bento panels to display.
+            </p>
+            <button className="btn-pill btn-pill-primary" onClick={() => setActiveTab('settings')} style={{ marginTop: '0.5rem' }}>
+              Configure Widgets
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );

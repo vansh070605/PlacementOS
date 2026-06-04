@@ -11,23 +11,62 @@
  *      script card, and market insights list.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useTheme } from '../../../contexts/ThemeContext';
 import './SalaryIntelligence.css';
 
 const BACKEND_URL = `http://${window.location.hostname}:8000`;
 
 const LEVELS = ['entry', 'mid', 'senior', 'staff', 'principal'];
 
-const formatUSD = (n) =>
-  n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n}`;
+const ROLES = [
+  'Software Engineer',
+  'Frontend Engineer',
+  'Backend Engineer',
+  'Full-Stack Engineer',
+  'Data Scientist',
+  'ML Engineer',
+  'DevOps Engineer',
+  'Product Manager'
+];
+
+const US_LOCATIONS = [
+  'San Francisco, CA',
+  'New York, NY',
+  'Seattle, WA',
+  'Austin, TX',
+  'Boston, MA',
+  'Remote - USA'
+];
+
+const IN_LOCATIONS = [
+  'Bengaluru, KA',
+  'Delhi NCR',
+  'Mumbai, MH',
+  'Hyderabad, TS',
+  'Pune, MH',
+  'Chennai, TN'
+];
 
 // Animated horizontal salary band bar component
-function BandBar({ band, color, label, icon }) {
+function BandBar({ band, color, label, icon, currency, className }) {
   const range = band.p75 - band.p25 || 1;
   const medianPct = ((band.median - band.p25) / range) * 100;
 
+  const formatValue = (n) => {
+    if (currency === 'INR') {
+      if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
+      if (n >= 100000) return `₹${(n / 100000).toFixed(1)} LPA`;
+      if (n >= 1000) return `₹${(n / 1000).toFixed(0)}K`;
+      return `₹${n}`;
+    } else {
+      if (n >= 1000) return `$${(n / 1000).toFixed(0)}K`;
+      return `$${n}`;
+    }
+  };
+
   return (
-    <div className="si-band-card">
+    <div className={`si-band-card ${className || ''}`}>
       <div className="si-band-title">
         <span className="material-symbols-outlined">{icon}</span>
         {label}
@@ -57,32 +96,110 @@ function BandBar({ band, color, label, icon }) {
       <div className="si-band-markers">
         <div className="si-band-marker">
           <span className="si-band-marker-label">P25</span>
-          <span className="si-band-marker-value">{formatUSD(band.p25)}</span>
+          <span className="si-band-marker-value">{formatValue(band.p25)}</span>
         </div>
         <div className="si-band-marker">
           <span className="si-band-marker-label">Median</span>
           <span className={`si-band-marker-value median`} style={{ color }}>
-            {formatUSD(band.median)}
+            {formatValue(band.median)}
           </span>
         </div>
         <div className="si-band-marker">
           <span className="si-band-marker-label">P75</span>
-          <span className="si-band-marker-value">{formatUSD(band.p75)}</span>
+          <span className="si-band-marker-value">{formatValue(band.p75)}</span>
         </div>
       </div>
     </div>
   );
 }
 
+// Custom dropdown select component for a premium experience
+function CustomSelect({ value, onChange, options }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="si-custom-select-container" ref={containerRef}>
+      <button
+        type="button"
+        className="si-custom-select-trigger"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span>{value}</span>
+        <span className={`material-symbols-outlined si-chevron ${isOpen ? 'open' : ''}`}>
+          expand_more
+        </span>
+      </button>
+
+      {isOpen && (
+        <ul className="si-custom-select-options" role="listbox">
+          {options.map((opt) => (
+            <li
+              key={opt}
+              role="option"
+              aria-selected={value === opt}
+              className={`si-custom-option ${value === opt ? 'selected' : ''}`}
+              onClick={() => {
+                onChange(opt);
+                setIsOpen(false);
+              }}
+            >
+              <span>{opt}</span>
+              {value === opt && (
+                <span className="material-symbols-outlined check-icon">check</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function SalaryIntelligence() {
-  const [roleTitle, setRoleTitle]       = useState('');
-  const [location, setLocation]         = useState('');
+  const { settings } = useTheme();
+  const isINR = settings.currency === 'INR';
+  const LOCATIONS = isINR ? IN_LOCATIONS : US_LOCATIONS;
+
+  const [roleTitle, setRoleTitle]       = useState(ROLES[0]);
+  const [location, setLocation]         = useState(() => isINR ? IN_LOCATIONS[0] : US_LOCATIONS[0]);
   const [level, setLevel]               = useState('mid');
   const [years, setYears]               = useState(3);
   const [isLoading, setIsLoading]       = useState(false);
   const [result, setResult]             = useState(null);
   const [error, setError]               = useState(null);
   const [scriptCopied, setScriptCopied] = useState(false);
+
+  // Sync selected location when switching currencies
+  useEffect(() => {
+    if (!LOCATIONS.includes(location)) {
+      setLocation(LOCATIONS[0]);
+    }
+  }, [settings.currency, LOCATIONS, location]);
+
+  const formatCurrency = (n) => {
+    if (isINR) {
+      if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
+      if (n >= 100000) return `₹${(n / 100000).toFixed(1)} LPA`;
+      if (n >= 1000) return `₹${(n / 1000).toFixed(0)}K`;
+      return `₹${n}`;
+    } else {
+      if (n >= 1000) return `$${(n / 1000).toFixed(0)}K`;
+      return `$${n}`;
+    }
+  };
 
   const handleAnalyze = async () => {
     if (!roleTitle.trim() || !location.trim()) return;
@@ -99,6 +216,7 @@ export default function SalaryIntelligence() {
           location,
           experience_level: level,
           experience_years: years,
+          currency: settings.currency,
         }),
       });
       if (!res.ok) {
@@ -178,20 +296,18 @@ export default function SalaryIntelligence() {
             <div className="si-form-grid">
               <div className="si-field">
                 <label className="si-label">Job Title</label>
-                <input
-                  className="si-input"
+                <CustomSelect
                   value={roleTitle}
-                  onChange={(e) => setRoleTitle(e.target.value)}
-                  placeholder="e.g. Senior ML Engineer"
+                  onChange={setRoleTitle}
+                  options={ROLES}
                 />
               </div>
               <div className="si-field">
                 <label className="si-label">Location / Market</label>
-                <input
-                  className="si-input"
+                <CustomSelect
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="e.g. San Francisco, CA"
+                  onChange={setLocation}
+                  options={LOCATIONS}
                 />
               </div>
             </div>
@@ -254,11 +370,11 @@ export default function SalaryIntelligence() {
         <>
           <div className="si-results-grid">
             {/* Compensation Bands */}
-            <BandBar band={result.base_salary_band} color="#2563eb" label="Base Salary Only" icon="account_balance_wallet" />
-            <BandBar band={result.total_comp_band}  color="#10b981" label="Total Compensation" icon="trending_up" />
+            <BandBar band={result.base_salary_band} color="#2563eb" label="Base Salary Only" icon="account_balance_wallet" currency={settings.currency} className="animate-slide-up delay-100" />
+            <BandBar band={result.total_comp_band}  color="#10b981" label="Total Compensation" icon="trending_up" currency={settings.currency} className="animate-slide-up delay-200" />
 
             {/* Negotiation Range */}
-            <div className="si-negot-card">
+            <div className="si-negot-card animate-slide-up delay-300">
               <div className="card-title" style={{ marginBottom: '0' }}>
                 <span className="material-symbols-outlined">gavel</span>
                 <span>Negotiation Range</span>
@@ -266,12 +382,12 @@ export default function SalaryIntelligence() {
               <div className="si-negot-range">
                 <div className="si-negot-box floor">
                   <div className="si-negot-box-label">Walk-Away Floor</div>
-                  <div className="si-negot-box-value">{formatUSD(result.negotiation_floor)}</div>
+                  <div className="si-negot-box-value">{formatCurrency(result.negotiation_floor)}</div>
                 </div>
                 <span className="si-negot-arrow">→</span>
                 <div className="si-negot-box ceiling">
                   <div className="si-negot-box-label">Aspirational Ceiling</div>
-                  <div className="si-negot-box-value">{formatUSD(result.negotiation_ceiling)}</div>
+                  <div className="si-negot-box-value">{formatCurrency(result.negotiation_ceiling)}</div>
                 </div>
               </div>
               <div className="si-extra-row">
@@ -293,7 +409,7 @@ export default function SalaryIntelligence() {
             </div>
 
             {/* Negotiation Script */}
-            <div className="si-script-card">
+            <div className="si-script-card animate-slide-up delay-400">
               <div className="card-title" style={{ marginBottom: '0' }}>
                 <span className="material-symbols-outlined">record_voice_over</span>
                 <span>Verbatim Negotiation Script</span>
@@ -313,7 +429,7 @@ export default function SalaryIntelligence() {
             </div>
 
             {/* Market Insights */}
-            <div className="si-insights-card">
+            <div className="si-insights-card animate-slide-up delay-500">
               <div className="card-title" style={{ marginBottom: '1.25rem' }}>
                 <span className="material-symbols-outlined">insights</span>
                 <span>Market Insights</span>
@@ -328,7 +444,7 @@ export default function SalaryIntelligence() {
           </div>
 
           {/* Reset */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+          <div className="animate-slide-up delay-500" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
             <button className="btn-pill btn-pill-secondary" onClick={handleReset}>
               <span className="material-symbols-outlined">refresh</span>
               New Search

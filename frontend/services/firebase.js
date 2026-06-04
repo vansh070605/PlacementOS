@@ -58,8 +58,10 @@ const DEFAULT_PROFILE = {
   github: 'https://github.com/vansh070605',
   linkedin: 'https://linkedin.com/in/vansh-agrawal',
   website: 'https://vanshagrawal.dev',
+  leetcode: 'va2583',
   bio: 'Computer Science student and software engineering enthusiast. Experienced in React, JavaScript, Python, and building intelligent agents.',
-  skills: ['React', 'JavaScript', 'Python', 'FastAPI', 'CSS', 'ChromaDB', 'SQL', 'Git']
+  skills: ['React', 'JavaScript', 'Python', 'FastAPI', 'CSS', 'ChromaDB', 'SQL', 'Git'],
+  avatarUrl: ''
 };
 
 const getLocalUsers = () => {

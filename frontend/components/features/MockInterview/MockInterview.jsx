@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useProfile } from '../../../contexts/ProfileContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { formatProfileToText } from '../../../utils/profileFormatter';
 import './MockInterview.css';
 
+import { getBackendUrl } from '../../../utils/config';
+
 export default function MockInterview() {
   const { profile } = useProfile();
-  const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const { settings } = useTheme();
+  const backendUrl = getBackendUrl();
   
   const [jobDescription, setJobDescription] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
@@ -39,7 +43,9 @@ export default function MockInterview() {
           job_description: jobDescription,
           candidate_profile: profile ? formatProfileToText(profile) : '',
           conversation_history: [],
-          latest_answer: null
+          latest_answer: null,
+          ai_tone: settings.aiTone || 'professional',
+          ai_temperature: settings.aiTemperature ?? 0.7
         }),
       });
 
@@ -88,7 +94,9 @@ export default function MockInterview() {
           job_description: jobDescription,
           candidate_profile: profile ? formatProfileToText(profile) : '',
           conversation_history: apiHistory,
-          latest_answer: userMessage
+          latest_answer: userMessage,
+          ai_tone: settings.aiTone || 'professional',
+          ai_temperature: settings.aiTemperature ?? 0.7
         }),
       });
 

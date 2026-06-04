@@ -739,8 +739,15 @@ Perform a rigorous evaluation and return a structured JSON object matching the r
             
         latest_ans_str = request.latest_answer if request.latest_answer else "None yet."
         
+        tone_style = "Professional & Analytical (concise, direct, constructive feedback)"
+        if request.ai_tone == "harsh":
+            tone_style = "Critical Roast Reviewer (extremely tough, blunt, directly calls out mistakes or weaknesses, roasts weak answers, high expectations)"
+        elif request.ai_tone == "encouraging":
+            tone_style = "Encouraging & Constructive Mentor (supportive, warm, focuses on coaching, gives friendly hints, positive reinforcement)"
+        
         prompt = f"""
 You are an expert technical and behavioral interviewer at a top-tier tech company.
+Your persona and interviewing tone should be: {tone_style}.
 Your goal is to conduct a mock interview with a candidate for a specific job description, based on their profile.
 
 TARGET JOB DESCRIPTION:
@@ -757,7 +764,7 @@ CANDIDATE'S LATEST ANSWER:
 
 INSTRUCTIONS:
 1. If this is the first question (no conversation history or latest answer), introduce the interview briefly and ask the first question (can be behavioral or technical based on the JD). 'feedback' should be null.
-2. If there is a latest answer, evaluate it. Provide constructive 'feedback' using the STAR (Situation, Task, Action, Result) method where applicable. Be honest, professional, and point out what they did well and what could be improved.
+2. If there is a latest answer, evaluate it. Provide constructive 'feedback' using the STAR (Situation, Task, Action, Result) method where applicable. Align this feedback with your tone persona (e.g. if roast reviewer, call out logic gaps or resume inflation directly and sarcastically/bluntly; if mentor, suggest how to refine it gently).
 3. Determine the 'next_question'. It should logically follow the conversation or shift to a new relevant topic from the JD.
 4. Indicate if the next question 'is_technical' (true/false).
 """
@@ -768,7 +775,7 @@ INSTRUCTIONS:
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=MockInterviewResponse,
-                temperature=0.7,
+                temperature=request.ai_temperature if request.ai_temperature is not None else 0.7,
             )
         )
         

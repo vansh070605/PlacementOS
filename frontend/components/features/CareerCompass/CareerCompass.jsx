@@ -116,7 +116,7 @@ function LoadingSkeleton() {
 
 // ── Pathway Card ───────────────────────────────────────────────────────────────
 function PathwayCard({ pathway, rank }) {
-  const staggerDelay = rank === 1 ? 'delay-100' : rank === 2 ? 'delay-200' : 'delay-300';
+  const staggerDelay = rank === 1 ? 'delay-200' : rank === 2 ? 'delay-300' : 'delay-400';
 
   return (
     <div className={`cc-pathway-card animate-slide-up ${staggerDelay} ${rank === 1 ? 'top-card' : ''}`}>
@@ -283,7 +283,7 @@ export default function CareerCompass() {
       {/* Upload card (always visible when no result or loading) */}
       {!result && !isLoading && (
         <div className="bento-grid">
-          <div className="cc-upload-card span-5" style={{ margin: 0 }}>
+          <div className="cc-upload-card span-5 animate-slide-up delay-100" style={{ margin: 0 }}>
             {/* Drop zone */}
             <div
               className={`cc-drop-zone ${isDragOver ? 'drag-over' : ''}`}
@@ -366,7 +366,7 @@ export default function CareerCompass() {
           </div>
         </div>
 
-        <div className="bento-card span-7" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-muted)', borderStyle: 'dashed', backgroundColor: 'transparent' }}>
+        <div className="bento-card span-7 animate-slide-up delay-200" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-muted)', borderStyle: 'dashed', backgroundColor: 'transparent' }}>
              <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', marginBottom: '1rem', opacity: 0.4 }}>explore</span>
              <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-main)', fontSize: '1.25rem' }}>Discover Your Path</h3>
              <p style={{ maxWidth: '400px', fontSize: '0.95rem' }}>Upload your resume to receive AI-driven career trajectories, skill gaps, and transition strategies.</p>
@@ -381,7 +381,7 @@ export default function CareerCompass() {
       {result && !isLoading && (
         <>
           {/* Resume summary banner */}
-          <div className="cc-summary-banner">
+          <div className="cc-summary-banner animate-slide-up delay-100">
             <span className="material-symbols-outlined cc-summary-banner-icon">auto_awesome</span>
             <div className="cc-summary-banner-content">
               <div className="cc-summary-banner-label">AI Profile Summary</div>
@@ -397,7 +397,7 @@ export default function CareerCompass() {
           </div>
 
           {/* Results footer */}
-          <div className="cc-results-footer">
+          <div className="cc-results-footer animate-slide-up delay-500">
             <div className="cc-results-footer-note">
               <span className="material-symbols-outlined">auto_awesome</span>
               Powered by Gemini · Agent 5 (Career Compass Strategist)

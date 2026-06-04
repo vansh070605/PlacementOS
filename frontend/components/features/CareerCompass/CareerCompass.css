@@ -496,6 +496,32 @@
   gap: 0.4rem;
 }
 
+@media (max-width: 600px) {
+  .cc-upload-card {
+    padding: 1.5rem;
+  }
+  .cc-drop-zone {
+    padding: 2.25rem 1rem;
+  }
+  .cc-summary-banner {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .cc-pathway-card {
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+  .cc-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cc-action-bar button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .cc-results-footer-note .material-symbols-outlined {
   font-size: 1rem;
   color: var(--primary);

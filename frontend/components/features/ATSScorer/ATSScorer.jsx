@@ -124,7 +124,7 @@ export default function ATSScorer() {
             </div>
           )}
           <button 
-            className="btn-pill btn-primary" 
+            className="btn-pill btn-pill-primary" 
             onClick={handleAnalyze} 
             disabled={isAnalyzing}
             style={{ width: '100%', justifyContent: 'center', padding: '1rem' }}

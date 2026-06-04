@@ -189,7 +189,7 @@ export default function JDAnalyzer() {
       ) : !analysisResult ? (
         // Input Form State
         <div className="bento-grid">
-          <div className="bento-card span-12 animate-slide-up delay-500">
+          <div className="bento-card span-12 animate-slide-up delay-100">
             <div className="card-title">
               <span className="material-symbols-outlined">edit_note</span>
               <span>Paste Job Description</span>

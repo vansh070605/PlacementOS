@@ -315,7 +315,70 @@
 @media (max-width: 768px) {
   .profile-header {
     flex-direction: column;
-    padding: 0 1.5rem;
     gap: 1.5rem;
   }
+
+  .profile-header-actions {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+  }
+
+  .profile-header-actions .btn-pill {
+    width: 56px;
+    height: 56px;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+  }
+
+  .profile-header-actions .btn-text {
+    display: none;
+  }
+
+  .profile-header-actions .material-symbols-outlined {
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .profile-header-actions .icon-spin {
+    animation: profile-spin 1.2s infinite linear;
+  }
+}
+
+@keyframes profile-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+  .profile-completion-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+  .completion-bar-wrapper {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .completion-percent {
+    text-align: center;
+    min-width: unset;
+  }
+}
+
+.completion-avatar:hover .avatar-upload-overlay {
+  opacity: 1 !important;
+}
+
+.avatar-edit-badge:hover {
+  transform: scale(1.1);
+  background: var(--primary-hover) !important;
 }

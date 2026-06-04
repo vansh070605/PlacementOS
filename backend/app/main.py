@@ -792,3 +792,225 @@ async def mock_interview_endpoint(request: MockInterviewRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while processing the mock interview. Please try again."
         )
+
+
+@app.get("/api/leetcode/submissions/{username}", status_code=status.HTTP_200_OK)
+async def get_leetcode_submissions(username: str, limit: int = 20):
+    """
+    LeetCode Submissions Proxy Endpoint:
+    Fetches recent accepted submissions for a given username using LeetCode's public GraphQL API,
+    resolving the difficulty and topic tags of each submission concurrently.
+    """
+    if not username.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username cannot be empty."
+        )
+
+    url = "https://leetcode.com/graphql"
+    headers = {
+        "Content-Type": "application/json",
+        "Referer": "https://leetcode.com",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+
+    # Query recent submissions
+    payload = {
+        "query": """
+        query recentSubmissions($username: String!, $limit: Int) {
+          recentSubmissionList(username: $username, limit: $limit) {
+            title
+            titleSlug
+            timestamp
+            statusDisplay
+            lang
+          }
+        }
+        """,
+        "variables": {
+            "username": username,
+            "limit": limit
+        }
+    }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, headers=headers, timeout=12.0)
+            if response.status_code != 200:
+                logger.error(f"LeetCode GraphQL returned error code {response.status_code}")
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail=f"Failed to fetch submissions from LeetCode. Server returned: {response.status_code}"
+                )
+
+            data = response.json()
+            submissions = data.get("data", {}).get("recentSubmissionList")
+            if submissions is None:
+                errors = data.get("errors")
+                error_msg = errors[0].get("message") if errors else "User not found or profile is private."
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"LeetCode error: {error_msg}"
+                )
+
+            accepted_subs = [s for s in submissions if s.get("statusDisplay") == "Accepted"]
+            if not accepted_subs:
+                return []
+
+            # De-duplicate slugs to minimize queries
+            unique_slugs = list(set(s.get("titleSlug") for s in accepted_subs))
+
+            async def get_question_details(slug: str):
+                q_payload = {
+                    "query": """
+                    query getQuestionDetail($titleSlug: String!) {
+                      question(titleSlug: $titleSlug) {
+                        difficulty
+                        topicTags {
+                          name
+                          slug
+                        }
+                      }
+                    }
+                    """,
+                    "variables": {"titleSlug": slug}
+                }
+                try:
+                    r = await client.post(url, json=q_payload, headers=headers, timeout=6.0)
+                    if r.status_code == 200:
+                        q_data = r.json().get("data", {}).get("question", {})
+                        if q_data:
+                            return slug, {
+                                "difficulty": q_data.get("difficulty", "Easy"),
+                                "tags": [tag.get("name") for tag in q_data.get("topicTags", []) if tag.get("name")]
+                            }
+                except Exception as e:
+                    logger.error(f"Failed to fetch details for LeetCode slug '{slug}': {e}")
+                return slug, {"difficulty": "Easy", "tags": []}
+
+            # Run requests in parallel
+            tasks = [get_question_details(slug) for slug in unique_slugs]
+            results = await asyncio.gather(*tasks)
+            details_map = dict(results)
+
+            # Build enriched list
+            enriched_submissions = []
+            for sub in accepted_subs:
+                slug = sub.get("titleSlug")
+                details = details_map.get(slug, {"difficulty": "Easy", "tags": []})
+                enriched_submissions.append({
+                    "id": f"lc_{sub.get('timestamp')}_{slug}",
+                    "title": sub.get("title"),
+                    "titleSlug": slug,
+                    "timestamp": int(sub.get("timestamp")),
+                    "difficulty": details["difficulty"],
+                    "tags": details["tags"],
+                    "platform": "LeetCode",
+                    "status": "Solved",
+                    "notes": f"Auto-synced from LeetCode. Lang: {sub.get('lang')}"
+                })
+
+            return enriched_submissions
+
+    except HTTPException:
+        raise
+    except httpx.ConnectError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Failed to connect to LeetCode server. Please check internet connection."
+        )
+    except Exception as e:
+        logger.error(f"Error proxying LeetCode submissions: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching LeetCode data."
+        )
+
+
+
+# ── Floating AI Chat Endpoint ──────────────────────────────────────────────────
+
+from pydantic import BaseModel
+from google import genai
+from google.genai import types
+
+class ChatMessage(BaseModel):
+    role: str   # "user" or "assistant"
+    text: str
+
+class ChatRequest(BaseModel):
+    message: str
+    history: list[ChatMessage] = []
+
+class ChatResponse(BaseModel):
+    reply: str
+
+
+_CHAT_SYSTEM_PROMPT = """You are the PlacementOS AI Assistant — an expert career advisor embedded in the PlacementOS platform.
+You specialize in:
+- Job hunting strategy, resume optimization, and ATS scoring
+- DSA (Data Structures & Algorithms), LeetCode problems, and interview prep
+- System design interviews and STAR method behavioral answers
+- Salary negotiation and compensation benchmarking
+- Cover letter writing and LinkedIn optimization
+- Career path planning and role transitions
+
+Respond in a concise, friendly, and actionable tone. Use markdown formatting (bold, bullets, numbered lists) to structure answers clearly.
+If the user asks something unrelated to careers or tech, gently redirect them back.
+Keep responses under 300 words unless a detailed explanation is specifically needed."""
+
+
+@app.post("/api/chat", response_model=ChatResponse, status_code=status.HTTP_200_OK)
+async def chat_with_ai(request: ChatRequest):
+    """
+    Floating AI Chatbot endpoint.
+    Accepts a message + conversation history, returns a Gemini-powered reply.
+    """
+    if not settings.gemini_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI service unavailable: GEMINI_API_KEY is not configured."
+        )
+
+    if not request.message.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Message cannot be empty."
+        )
+
+    try:
+        client = genai.Client(api_key=settings.gemini_api_key)
+
+        # Build multi-turn history for Gemini
+        history = []
+        for msg in request.history:
+            role = "user" if msg.role == "user" else "model"
+            history.append(
+                types.Content(role=role, parts=[types.Part(text=msg.text)])
+            )
+
+        # Add the latest user message
+        history.append(
+            types.Content(role="user", parts=[types.Part(text=request.message)])
+        )
+
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model=settings.gemini_model,
+            contents=history,
+            config=types.GenerateContentConfig(
+                system_instruction=_CHAT_SYSTEM_PROMPT,
+                temperature=0.7,
+                max_output_tokens=600,
+            )
+        )
+
+        reply = response.text or "I couldn't generate a response. Please try again."
+        return ChatResponse(reply=reply)
+
+    except Exception as e:
+        logger.error(f"Chat endpoint error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while processing your message."
+        )

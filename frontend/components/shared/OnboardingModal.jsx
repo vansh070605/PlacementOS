@@ -1,7 +1,7 @@
 /**
  * OnboardingModal.jsx
  * -------------------
- * Animated 3-step onboarding overlay for PlacementOS.
+ * Animated 4-step onboarding overlay for PlacementOS.
  * Shown once per user (persisted in localStorage).
  */
 
@@ -36,11 +36,39 @@ export default function OnboardingModal({ isOpen, onClose }) {
       case 1:
         return (
           <div className="onboard-step" key="step1">
-            <div className="onboard-step-tag">Welcome</div>
+            <div className="onboard-step-tag">Step 1 of 4 • Welcome</div>
             <h2 className="onboard-title">Meet <span>PlacementOS</span></h2>
             <p className="onboard-desc">
-              Your local-first, AI-powered career command center. We've replaced generic advice with
-              multi-agent architectures that analyze your actual code and experience.
+              Your privacy-respecting, AI-powered career command center. We've built specialized multi-agent architectures that analyze your codebase, optimize application materials, and sync preparation targets—all in one place.
+            </p>
+            
+            <div className="welcome-hero-graphic">
+              <div className="graphic-pillar">
+                <span className="material-symbols-outlined graphic-icon">shield</span>
+                <span className="graphic-label">Privacy First</span>
+                <span className="graphic-sub">Local vector store & embeddings</span>
+              </div>
+              <div className="graphic-pillar">
+                <span className="material-symbols-outlined graphic-icon">hub</span>
+                <span className="graphic-label">Multi-Agent</span>
+                <span className="graphic-sub">10 targeted AI engines</span>
+              </div>
+              <div className="graphic-pillar">
+                <span className="material-symbols-outlined graphic-icon">sync_alt</span>
+                <span className="graphic-label">Auto Integration</span>
+                <span className="graphic-sub">Connected LeetCode progress</span>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 2:
+        return (
+          <div className="onboard-step" key="step2">
+            <div className="onboard-step-tag">Step 2 of 4 • Platform Capabilities</div>
+            <h2 className="onboard-title">Explore the <span>Feature Suite</span></h2>
+            <p className="onboard-desc">
+              PlacementOS includes 10 integrated tools to automate and supercharge your hiring preparation lifecycle.
             </p>
             
             <div className="onboard-feature-grid">
@@ -50,84 +78,110 @@ export default function OnboardingModal({ isOpen, onClose }) {
                 </div>
                 <div>
                   <div className="onboard-feature-name">Dashboard</div>
-                  <div className="onboard-feature-desc">Command center overview</div>
+                  <div className="onboard-feature-desc">Active application pipeline metrics & milestone goals.</div>
                 </div>
               </div>
+
               <div className="onboard-feature-card">
                 <div className="onboard-feature-icon-wrap" style={{ background: '#10b981' }}>
                   <span className="material-symbols-outlined">work</span>
                 </div>
                 <div>
                   <div className="onboard-feature-name">Job Tracker</div>
-                  <div className="onboard-feature-desc">Manage applications</div>
+                  <div className="onboard-feature-desc">Organize applications, salaries, status, and custom logs.</div>
                 </div>
               </div>
+
               <div className="onboard-feature-card">
-                <div className="onboard-feature-icon-wrap" style={{ background: '#f59e0b' }}>
+                <div className="onboard-feature-icon-wrap" style={{ background: '#FFA116' }}>
                   <span className="material-symbols-outlined">code</span>
                 </div>
                 <div>
-                  <div className="onboard-feature-name">DSA Prep</div>
-                  <div className="onboard-feature-desc">Track algorithm progress</div>
+                  <div className="onboard-feature-name">DSA Prep & LeetCode</div>
+                  <div className="onboard-feature-desc">Roadmap syllabus + automated LeetCode progress syncing.</div>
                 </div>
               </div>
+
               <div className="onboard-feature-card">
                 <div className="onboard-feature-icon-wrap" style={{ background: '#8b5cf6' }}>
                   <span className="material-symbols-outlined">terminal</span>
                 </div>
                 <div>
                   <div className="onboard-feature-name">Project Auditor</div>
-                  <div className="onboard-feature-desc">Audit your codebase</div>
+                  <div className="onboard-feature-desc">Extract system diagrams & prep Q&As from local codebases.</div>
                 </div>
               </div>
+
               <div className="onboard-feature-card">
                 <div className="onboard-feature-icon-wrap" style={{ background: '#2563eb' }}>
                   <span className="material-symbols-outlined">manage_search</span>
                 </div>
                 <div>
                   <div className="onboard-feature-name">JD Analyzer</div>
-                  <div className="onboard-feature-desc">Match jobs to your repo</div>
+                  <div className="onboard-feature-desc">Matches job description keywords to your indexed portfolio.</div>
                 </div>
               </div>
+
               <div className="onboard-feature-card">
                 <div className="onboard-feature-icon-wrap" style={{ background: '#06b6d4' }}>
                   <span className="material-symbols-outlined">explore</span>
                 </div>
                 <div>
                   <div className="onboard-feature-name">Career Compass</div>
-                  <div className="onboard-feature-desc">AI maps your PDF resume</div>
+                  <div className="onboard-feature-desc">Upload PDF resume to map pathways & missing skill roadmaps.</div>
                 </div>
               </div>
+
               <div className="onboard-feature-card">
                 <div className="onboard-feature-icon-wrap" style={{ background: '#f97316' }}>
                   <span className="material-symbols-outlined">payments</span>
                 </div>
                 <div>
                   <div className="onboard-feature-name">Salary Intel</div>
-                  <div className="onboard-feature-desc">Negotiation scripts & data</div>
+                  <div className="onboard-feature-desc">Compensation calculations & verbatim negotiation scripts.</div>
                 </div>
               </div>
+
               <div className="onboard-feature-card">
                 <div className="onboard-feature-icon-wrap" style={{ background: '#14b8a6' }}>
                   <span className="material-symbols-outlined">draw</span>
                 </div>
                 <div>
-                  <div className="onboard-feature-name">Letter Forge</div>
-                  <div className="onboard-feature-desc">Style-driven cover letters</div>
+                  <div className="onboard-feature-name">Cover Letter Forge</div>
+                  <div className="onboard-feature-desc">Generate tailored, style-based cover letters for target JDs.</div>
+                </div>
+              </div>
+
+              <div className="onboard-feature-card">
+                <div className="onboard-feature-icon-wrap" style={{ background: '#ef4444' }}>
+                  <span className="material-symbols-outlined">radar</span>
+                </div>
+                <div>
+                  <div className="onboard-feature-name">ATS Scorer</div>
+                  <div className="onboard-feature-desc">Verify keyword compliance & structural suggestions.</div>
+                </div>
+              </div>
+
+              <div className="onboard-feature-card">
+                <div className="onboard-feature-icon-wrap" style={{ background: '#ec4899' }}>
+                  <span className="material-symbols-outlined">record_voice_over</span>
+                </div>
+                <div>
+                  <div className="onboard-feature-name">Mock Interview</div>
+                  <div className="onboard-feature-desc">Interactive, voice-capable interview simulator by job context.</div>
                 </div>
               </div>
             </div>
           </div>
         );
       
-      case 2:
+      case 3:
         return (
-          <div className="onboard-step" key="step2">
-            <div className="onboard-step-tag">How It Works</div>
-            <h2 className="onboard-title">Your AI Workflow</h2>
+          <div className="onboard-step" key="step3">
+            <div className="onboard-step-tag">Step 3 of 4 • How It Works</div>
+            <h2 className="onboard-title">Your <span>AI Workforce</span></h2>
             <p className="onboard-desc">
-              PlacementOS uses Gemini GenAI and ChromaDB locally. Your data stays private while 
-              specialized agents help you land the offer.
+              PlacementOS maps your background and automates preparation. It orchestrates 10 specialized agents under the hood.
             </p>
 
             <div className="onboard-checklist">
@@ -136,8 +190,8 @@ export default function OnboardingModal({ isOpen, onClose }) {
                   <span className="material-symbols-outlined">check</span>
                 </div>
                 <div className="onboard-check-body">
-                  <div className="onboard-check-title">1. Upload Resume & Portfolio</div>
-                  <div className="onboard-check-sub">Agent 5 finds your ideal pathways in Career Compass.</div>
+                  <div className="onboard-check-title">1. Build Your Global profile</div>
+                  <div className="onboard-check-sub">Add resume details, social handles, and link your public LeetCode username.</div>
                 </div>
               </div>
               <div className="onboard-check-item">
@@ -145,8 +199,8 @@ export default function OnboardingModal({ isOpen, onClose }) {
                   <span className="material-symbols-outlined">check</span>
                 </div>
                 <div className="onboard-check-body">
-                  <div className="onboard-check-title">2. Analyze Job Descriptions</div>
-                  <div className="onboard-check-sub">Agent 3 extracts skills and Agent 4 drafts networking emails.</div>
+                  <div className="onboard-check-title">2. Index Your Projects & Prep DSA</div>
+                  <div className="onboard-check-sub">Auditor scans your code into ChromaDB locally. Sync LeetCode to check off DSA targets automatically.</div>
                 </div>
               </div>
               <div className="onboard-check-item">
@@ -154,24 +208,60 @@ export default function OnboardingModal({ isOpen, onClose }) {
                   <span className="material-symbols-outlined">check</span>
                 </div>
                 <div className="onboard-check-body">
-                  <div className="onboard-check-title">3. Negotiate & Close</div>
-                  <div className="onboard-check-sub">Use Salary Intel for market bands and verbatim negotiation scripts.</div>
+                  <div className="onboard-check-title">3. Target Specific Jobs</div>
+                  <div className="onboard-check-sub">Analyze JDs for fit, compute market salary bands, score ATS compliance, and run practice mock interviews.</div>
                 </div>
               </div>
             </div>
           </div>
         );
 
-      case 3:
+      case 4:
         return (
-          <div className="onboard-step" key="step3">
-            <div className="onboard-step-tag">Ready</div>
-            <h2 className="onboard-title">Let's Get Started</h2>
+          <div className="onboard-step" key="step4">
+            <div className="onboard-step-tag">Step 4 of 4 • Ready</div>
+            <h2 className="onboard-title">Choose Your <span>First Move</span></h2>
             <p className="onboard-desc">
-              You're all set up. Choose your first action below to test the AI engines.
+              You are ready to launch! Choose an action below to start indexing your achievements or exploring careers.
             </p>
 
             <div className="onboard-cta-grid">
+              <button 
+                className="onboard-cta-btn"
+                onClick={() => {
+                   document.dispatchEvent(new CustomEvent('pos:navigate', { detail: 'profile' }));
+                   handleClose();
+                }}
+              >
+                <span className="material-symbols-outlined onboard-cta-icon" style={{ color: '#ec4899' }}>account_circle</span>
+                <span className="onboard-cta-label">Set Up Profile</span>
+                <span className="onboard-cta-sub">Link your LeetCode and contact links</span>
+              </button>
+              
+              <button 
+                className="onboard-cta-btn"
+                onClick={() => {
+                   document.dispatchEvent(new CustomEvent('pos:navigate', { detail: 'prep' }));
+                   handleClose();
+                }}
+              >
+                <span className="material-symbols-outlined onboard-cta-icon" style={{ color: '#FFA116' }}>code</span>
+                <span className="onboard-cta-label">DSA Prep Hub</span>
+                <span className="onboard-cta-sub">Track syllabus & sync submissions</span>
+              </button>
+
+              <button 
+                className="onboard-cta-btn"
+                onClick={() => {
+                   document.dispatchEvent(new CustomEvent('pos:navigate', { detail: 'auditor' }));
+                   handleClose();
+                }}
+              >
+                <span className="material-symbols-outlined onboard-cta-icon" style={{ color: '#8b5cf6' }}>terminal</span>
+                <span className="onboard-cta-label">Audit a Codebase</span>
+                <span className="onboard-cta-sub">Reverse-engineer a repository</span>
+              </button>
+
               <button 
                 className="onboard-cta-btn"
                 onClick={() => {
@@ -179,21 +269,9 @@ export default function OnboardingModal({ isOpen, onClose }) {
                    handleClose();
                 }}
               >
-                <span className="material-symbols-outlined onboard-cta-icon">analytics</span>
+                <span className="material-symbols-outlined onboard-cta-icon" style={{ color: '#2563eb' }}>manage_search</span>
                 <span className="onboard-cta-label">Analyze a JD</span>
-                <span className="onboard-cta-sub">Find out if you're a match</span>
-              </button>
-              
-              <button 
-                className="onboard-cta-btn"
-                onClick={() => {
-                   document.dispatchEvent(new CustomEvent('pos:navigate', { detail: 'compass' }));
-                   handleClose();
-                }}
-              >
-                <span className="material-symbols-outlined onboard-cta-icon">explore</span>
-                <span className="onboard-cta-label">Career Compass</span>
-                <span className="onboard-cta-sub">Upload your PDF resume</span>
+                <span className="onboard-cta-sub">Find match scoring and keywords</span>
               </button>
             </div>
           </div>
@@ -209,7 +287,7 @@ export default function OnboardingModal({ isOpen, onClose }) {
         
         {/* Progress Bar Top */}
         <div className="onboard-progress-bar">
-          <div className="onboard-progress-fill" style={{ width: `${(step / 3) * 100}%` }} />
+          <div className="onboard-progress-fill" style={{ width: `${(step / 4) * 100}%` }} />
         </div>
 
         {/* Content area */}
@@ -220,7 +298,7 @@ export default function OnboardingModal({ isOpen, onClose }) {
         {/* Footer Navigation */}
         <div className="onboard-footer">
           <div className="onboard-dots">
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3, 4].map(i => (
               <div 
                 key={i} 
                 className={`onboard-dot ${step === i ? 'active' : ''} ${step > i ? 'done' : ''}`} 
@@ -229,7 +307,7 @@ export default function OnboardingModal({ isOpen, onClose }) {
           </div>
 
           <div className="onboard-nav-group">
-            {step < 3 && (
+            {step < 4 && (
               <button className="onboard-skip-btn" onClick={handleClose}>
                 Skip intro
               </button>
@@ -241,12 +319,18 @@ export default function OnboardingModal({ isOpen, onClose }) {
               </button>
             )}
             
-            {step < 3 ? (
+            {step < 4 ? (
               <button className="btn-pill btn-pill-primary" onClick={() => setStep(step + 1)}>
                 Next <span className="material-symbols-outlined" style={{ fontSize: '1.2rem', marginLeft: '4px' }}>arrow_forward</span>
               </button>
             ) : (
-              <button className="btn-pill btn-pill-primary" onClick={handleClose}>
+              <button 
+                className="btn-pill btn-pill-primary" 
+                onClick={() => {
+                  document.dispatchEvent(new CustomEvent('pos:navigate', { detail: 'dashboard' }));
+                  handleClose();
+                }}
+              >
                 Go to Dashboard
               </button>
             )}

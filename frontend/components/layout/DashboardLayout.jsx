@@ -22,13 +22,20 @@ export default function DashboardLayout({ children, activeTab, setActiveTab, use
       {/* Main Content Pane */}
       <div className="main-content">
         <header className="dashboard-header-mobile">
-          <button
-            className="mobile-menu-btn"
-            onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="Open Menu"
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
+          <div className="mobile-header-left">
+            <button
+              className="mobile-menu-btn"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open Menu"
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+            
+            <div className="mobile-logo-container">
+              <img src="/favicon.png" alt="PlacementOS" className="logo-icon" />
+              <span className="logo-text">PlacementOS</span>
+            </div>
+          </div>
         </header>
 
         <div key={activeTab} className="animate-fade-in" style={{ height: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>

@@ -256,3 +256,33 @@
   justify-content: flex-end;
   margin-top: 1.5rem;
 }
+
+@media (max-width: 600px) {
+  .clf-form-card {
+    padding: 1.5rem;
+  }
+  .clf-letter-card {
+    padding: 1.5rem 1.25rem;
+  }
+  .clf-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .clf-action-bar button {
+    width: 100%;
+    justify-content: center;
+  }
+  .clf-letter-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .clf-letter-actions {
+    width: 100%;
+  }
+  .clf-letter-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+}

@@ -320,3 +320,43 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+@media (max-width: 640px) {
+  .jda-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+  
+  .jda-action-bar > div:first-child {
+    width: 100%;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .jda-action-bar > div:first-child span {
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+
+  .jda-action-bar > div:first-child button {
+    flex: 1 1 calc(50% - 0.25rem);
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .jda-action-bar > div:last-child {
+    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  .jda-action-bar > div:last-child button {
+    width: 100%;
+    justify-content: center;
+  }
+}
