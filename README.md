@@ -71,31 +71,47 @@ PlacementOS is powered by a suite of **10 specialized autonomous agents** runnin
 
 ```mermaid
 graph TD
-  subgraph JD Analysis RAG Pipeline [JD Analysis RAG Pipeline]
-    A[Raw Job Description] -->|Agent 1: JD Extractor| B(Parsed Requirements)
-    B -->|Agent 2: RAG Matcher| C(Query Vector Database)
-    D[(ChromaDB Vector Store)] <-->|Semantic Search| C
-    C -->|Agent 3: Synthesis Strategist| E[Tailored Resumes, Gap Checklist & Interview Prep]
-  end
-  
-  subgraph Interactive & Generative Helpers [Interactive & Generative Helpers]
-    E -->|Agent 4: The Networker| F[LinkedIn Outreach & DMs]
-    E -->|Agent 8: Cover Letter Forge| G[Professional/Story/Data Cover Letters]
-    E & H[Global Profile / Resume] -->|Agent 10: Mock Interview Agent| IA[Interactive STAR Mock Interview]
+  %% ── LAYER 1: PRIMARY INPUTS ──
+  subgraph Inputs [1. Primary Inputs]
+    A[Raw Job Description]
+    H[Global Profile / Resume]
+    J[Local Codebase / Git URL]
+    L[Role & Location]
   end
 
-  subgraph Profile & Code Auditors [Profile & Code Auditors]
-    H -->|Agent 5: Career Compass| I[3 Ranked Career Paths & Roadmaps]
-    H -->|Agent 9: ATS Scorer| ATS[Match Score & Missing Keywords]
-    J[Local Folder / Git URL] -->|Agent 6: Project Auditor| K[Code Audit, Mermaid Charts & Q/As]
-    L[Role & Location] -->|Agent 7: Salary Intelligence| M[Local Neural Net Prediction & Negotiation Script]
-  end
-
-  subgraph System Trackers & Utilities [System Trackers & Utilities]
+  %% ── LAYER 2: SYSTEM TRACKERS & UTILITIES ──
+  subgraph Utilities [2. Trackers & AI Assistant]
     LC[LeetCode API] <-->|GraphQL Proxy| T_DSA[DSA Progress Tracker]
     T_JOB[Job Application Tracker] -->|Firebase Sync| H
     CB[Floating AI Chatbot] <-->|Gemini-Powered Q&A| H
   end
+
+  %% ── LAYER 3: MULTI-AGENT ORCHESTRATION & RAG ──
+  subgraph Agents [3. Multi-Agent Orchestration & RAG]
+    %% JD Analysis RAG Flow
+    A -->|Agent 1: JD Extractor| B(Parsed Requirements)
+    B -->|Agent 2: RAG Matcher| C(Query Vector Database)
+    D[(ChromaDB Vector Store)] <-->|Semantic Search| C
+    C -->|Agent 3: Synthesis Strategist| E[Tailored Resumes, Gap Checklist & Study Plan]
+
+    %% Code, Career, & ATS Auditors
+    H -->|Agent 5: Career Compass| I[3 Ranked Career Paths & Roadmaps]
+    H -->|Agent 9: ATS Scorer| ATS[Match Score & Missing Keywords]
+    J -->|Agent 6: Project Auditor| K[Code Audit & Mermaid Flowcharts]
+    L -->|Agent 7: Salary Intelligence| M[Local Neural Net Prediction & Negotiation Script]
+  end
+
+  %% ── LAYER 4: GENERATIVE OUTPUTS & INTERACTIVE PRACTICE ──
+  subgraph Outputs [4. Generative Outputs & Practice]
+    E -->|Agent 4: The Networker| F[LinkedIn Outreach & DMs]
+    E -->|Agent 8: Cover Letter Forge| G[Tailored Cover Letters]
+    E & H -->|Agent 10: Mock Interview Agent| IA[Interactive STAR Mock Interview]
+  end
+
+  %% Invisible alignment links to force strict vertical layout stacking
+  Inputs ~~~ Utilities
+  Utilities ~~~ Agents
+  Agents ~~~ Outputs
 
   style D fill:#f96,stroke:#333,stroke-width:2px
   style E fill:#9cf,stroke:#333,stroke-width:2px
