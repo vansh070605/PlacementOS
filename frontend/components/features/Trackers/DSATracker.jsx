@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './DSATracker.css';
 import { curriculumData } from './curriculumData';
 import { useProfile } from '../../../contexts/ProfileContext';
+import { getBackendUrl } from '../../../utils/config';
 
 export default function DSATracker({ dsaProgress, setDsaProgress }) {
   const { profile } = useProfile();
@@ -240,7 +241,7 @@ export default function DSATracker({ dsaProgress, setDsaProgress }) {
     setIsSyncing(true);
     setSyncStatus({ success: null, message: 'Fetching submissions...' });
 
-    const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const BACKEND_URL = getBackendUrl();
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/leetcode/submissions/${leetcodeUsername}`);

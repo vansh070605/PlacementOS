@@ -189,7 +189,7 @@ export default function ProjectAuditor() {
       setActiveTab('overview');
     } catch (err) {
       console.error('[ProjectAuditor] fetch error:', err);
-      setError(err.message || 'Failed to complete project audit. Is the FastAPI server running on port 8000?');
+      setError(err.message || 'Failed to complete project audit. Is the FastAPI server running?');
     } finally {
       setIsLoading(false);
     }

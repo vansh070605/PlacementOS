@@ -14,8 +14,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import './SalaryIntelligence.css';
-
-const BACKEND_URL = `http://${window.location.hostname}:8000`;
+import { getBackendUrl } from '../../../utils/config';
 
 const LEVELS = ['entry', 'mid', 'senior', 'staff', 'principal'];
 
@@ -169,6 +168,7 @@ function CustomSelect({ value, onChange, options }) {
 }
 
 export default function SalaryIntelligence() {
+  const BACKEND_URL = getBackendUrl();
   const { settings } = useTheme();
   const isINR = settings.currency === 'INR';
   const LOCATIONS = isINR ? IN_LOCATIONS : US_LOCATIONS;

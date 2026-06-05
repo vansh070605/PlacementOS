@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './AIChat.css';
-
-const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import { getBackendUrl } from '../../utils/config';
 
 const SUGGESTED_PROMPTS = [
   "How do I improve my ATS score?",
@@ -11,6 +10,7 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export default function AIChat() {
+  const backendUrl = getBackendUrl();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {

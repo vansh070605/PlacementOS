@@ -96,14 +96,28 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Explicit CORS configuration for Vite Frontend local dev
+# Explicit CORS configuration supporting local dev and production
+allowed_origins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://placementosai.vercel.app",
+]
+
+env_origins = os.getenv("ALLOWED_ORIGINS")
+if env_origins:
+    for origin in env_origins.split(","):
+        clean_origin = origin.strip()
+        if clean_origin and clean_origin not in allowed_origins:
+            allowed_origins.append(clean_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],  # Allow GET, POST, OPTIONS etc.
     allow_headers=["*"],  # Allow all default headers
 )
+
 
 @app.get("/health", status_code=status.HTTP_200_OK)
 async def health_check():

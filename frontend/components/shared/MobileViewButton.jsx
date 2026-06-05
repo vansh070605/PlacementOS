@@ -1,21 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { getBackendUrl } from '../../utils/config';
 
 export default function MobileViewButton() {
   const [showQR, setShowQR] = useState(false);
   const [networkIp, setNetworkIp] = useState('');
 
+  const isLocalHost = () => {
+    const hostname = window.location.hostname;
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      hostname.startsWith('172.')
+    );
+  };
+
   useEffect(() => {
-    fetch(`http://${window.location.hostname}:8000/api/network-ip`)
+    if (!isLocalHost()) {
+      return; // Skip fetching local network IP when deployed in production
+    }
+
+    const backendUrl = getBackendUrl();
+    fetch(`${backendUrl}/api/network-ip`)
       .then(res => res.json())
       .then(data => setNetworkIp(data.ip))
       .catch(err => console.error('Failed to get network IP', err));
   }, []);
 
   const getMobileUrl = () => {
+    if (!isLocalHost()) {
+      return window.location.origin;
+    }
     if (!networkIp || networkIp === '127.0.0.1') return 'http://localhost:5173';
     return `http://${networkIp}:5173`;
   };
+
 
   return (
     <>
@@ -34,7 +55,9 @@ export default function MobileViewButton() {
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ textAlign: 'center', padding: '2rem', maxWidth: '350px' }}>
             <h2>Scan to View on Mobile</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-              Ensure your phone is on the same Wi-Fi network as this computer.
+              {isLocalHost()
+                ? "Ensure your phone is on the same Wi-Fi network as this computer."
+                : "Scan this QR code to view the live app on your mobile device."}
             </p>
             
             <div style={{ background: 'white', padding: '1rem', borderRadius: '12px', display: 'inline-block', marginBottom: '1.5rem' }}>

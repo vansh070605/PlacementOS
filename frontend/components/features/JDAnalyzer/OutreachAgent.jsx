@@ -14,8 +14,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import './OutreachAgent.css';
-
-const BACKEND_URL = `http://${window.location.hostname}:8000`;
+import { getBackendUrl } from '../../../utils/config';
 
 const TONE_OPTIONS = [
   { id: 'professional', label: 'Professional', icon: 'work' },
@@ -24,6 +23,7 @@ const TONE_OPTIONS = [
 ];
 
 export default function OutreachAgent({ analysisResult, jdText }) {
+  const BACKEND_URL = getBackendUrl();
   const [tone, setTone]                   = useState('professional');
   const [isLoading, setIsLoading]         = useState(false);
   const [outreachData, setOutreachData]   = useState(null);
@@ -61,7 +61,7 @@ export default function OutreachAgent({ analysisResult, jdText }) {
       setOutreachData(data);
     } catch (err) {
       console.error('[OutreachAgent] fetch error:', err);
-      setError(err.message || 'Failed to generate outreach drafts. Is the backend running on port 8000?');
+      setError(err.message || 'Failed to generate outreach drafts. Is the backend running?');
     } finally {
       setIsLoading(false);
     }

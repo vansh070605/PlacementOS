@@ -88,7 +88,7 @@ export const ThemeProvider = ({ children }) => {
       font: 'inter',
       animation: 'smooth',
       currency: 'INR',
-      backendUrl: 'http://127.0.0.1:8000',
+      backendUrl: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000',
       aiTone: 'professional',
       aiTemperature: 0.7,
       showAnalytics: true,

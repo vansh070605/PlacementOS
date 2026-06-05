@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import './ProfileScreen.css';
 import { dbService } from '../../../services/firebase';
 import { useProfile } from '../../../contexts/ProfileContext';
+import { getBackendUrl } from '../../../utils/config';
 
 export default function ProfileScreen({ user }) {
   const { profile: globalProfile, refreshProfile } = useProfile();
+  const backendUrl = getBackendUrl();
+
   const [profile, setProfile] = useState({
     fullName: '', title: '', email: '', phone: '', location: '',
     github: '', linkedin: '', website: '', leetcode: '', bio: '', skills: []
@@ -32,7 +35,7 @@ export default function ProfileScreen({ user }) {
   const loadPortfolioProjects = async () => {
     setLoadingProjects(true);
     try {
-      const response = await fetch(`http://${window.location.hostname}:8000/api/portfolio/list`);
+      const response = await fetch(`${backendUrl}/api/portfolio/list`);
       if (response.ok) {
         const data = await response.json();
         setPortfolioProjects(data.projects || []);
@@ -132,7 +135,7 @@ export default function ProfileScreen({ user }) {
         metrics: editProjectData.metrics.trim() || undefined
       };
 
-      const response = await fetch(`http://${window.location.hostname}:8000/api/portfolio/ingest`, {
+      const response = await fetch(`${backendUrl}/api/portfolio/ingest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -157,7 +160,7 @@ export default function ProfileScreen({ user }) {
     if (!confirm("Are you sure you want to delete this project?")) return;
     
     try {
-      const response = await fetch(`http://${window.location.hostname}:8000/api/portfolio/${projectId}`, {
+      const response = await fetch(`${backendUrl}/api/portfolio/${projectId}`, {
         method: 'DELETE',
       });
       if (response.ok) {

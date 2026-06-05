@@ -19,8 +19,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import './CareerCompass.css';
 import { useProfile } from '../../../contexts/ProfileContext';
 import { formatProfileToText } from '../../../utils/profileFormatter';
-
-const BACKEND_URL = `http://${window.location.hostname}:8000`;
+import { getBackendUrl } from '../../../utils/config';
 
 // ── Score ring colour thresholds ──────────────────────────────────────────────
 const scoreColor = (score) => {
@@ -173,6 +172,7 @@ function PathwayCard({ pathway, rank }) {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function CareerCompass() {
+  const BACKEND_URL = getBackendUrl();
   const { profile } = useProfile();
   const [isDragOver, setIsDragOver]     = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -246,7 +246,7 @@ export default function CareerCompass() {
       setResult(data);
     } catch (err) {
       console.error('[CareerCompass] fetch error:', err);
-      setError(err.message || 'Failed to analyze the resume. Is the FastAPI backend running on port 8000?');
+      setError(err.message || 'Failed to analyze the resume. Is the FastAPI backend running?');
     } finally {
       setIsLoading(false);
     }

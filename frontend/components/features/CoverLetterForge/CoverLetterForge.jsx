@@ -14,11 +14,12 @@ import React, { useState, useEffect } from 'react';
 import './CoverLetterForge.css';
 import { useProfile } from '../../../contexts/ProfileContext';
 import { formatProfileToText } from '../../../utils/profileFormatter';
+import { getBackendUrl } from '../../../utils/config';
 
-const BACKEND_URL = `http://${window.location.hostname}:8000`;
 const STYLES = ['professional', 'story_driven', 'data_first'];
 
 export default function CoverLetterForge() {
+  const BACKEND_URL = getBackendUrl();
   const { profile } = useProfile();
   const [jobDescription, setJobDescription] = useState('');
   const [targetCompany, setTargetCompany]   = useState('');

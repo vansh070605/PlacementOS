@@ -3,6 +3,7 @@ import './Dashboard.css';
 import { curriculumData } from '../Trackers/curriculumData';
 import { useProfile } from '../../../contexts/ProfileContext';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { getBackendUrl } from '../../../utils/config';
 
 export default function Dashboard({ applications, dsaProgress, goals, setGoals, setActiveTab }) {
   const { profile } = useProfile();
@@ -18,7 +19,7 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const BACKEND_URL = getBackendUrl();
         const response = await fetch(`${BACKEND_URL}/api/portfolio/list`);
         if (response.ok) {
           const data = await response.json();

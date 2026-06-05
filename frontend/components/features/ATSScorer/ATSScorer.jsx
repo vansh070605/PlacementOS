@@ -2,10 +2,10 @@ import React, { useState, useRef } from 'react';
 import './ATSScorer.css';
 import { useProfile } from '../../../contexts/ProfileContext';
 import { formatProfileToText } from '../../../utils/profileFormatter';
-
-const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import { getBackendUrl } from '../../../utils/config';
 
 export default function ATSScorer() {
+  const backendUrl = getBackendUrl();
   const { profile } = useProfile();
   const [jobDescription, setJobDescription] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);

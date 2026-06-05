@@ -48,7 +48,7 @@ export default function JDAnalyzer() {
       localStorage.setItem('pos_analyzer_result', JSON.stringify(data));
     } catch (err) {
       console.error('JD Analysis error:', err);
-      setError(err.message || 'Failed to analyze the job description. Please check if the FastAPI server is running on port 8000.');
+      setError(err.message || 'Failed to analyze the job description. Please check if the FastAPI server is running.');
     } finally {
       setIsAnalyzing(false);
     }
