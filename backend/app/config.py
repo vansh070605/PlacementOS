@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     gemini_api_key: Optional[str] = None
 
     # Gemini model selection
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-2.5-flash"
 
     # Local SentenceTransformer model for ChromaDB embeddings.
     # Replaces gemini-embedding-2 to eliminate embedding API calls and
@@ -42,10 +42,14 @@ class Settings(BaseSettings):
 
     @field_validator("gemini_model")
     def validate_gemini_model(cls, v: str) -> str:
-        allowed = {"gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-flash", "gemini-1.0-pro"}
+        allowed = {
+            "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-flash", "gemini-2.5-pro",
+            "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-flash-latest",
+            "gemini-pro-latest", "gemini-1.0-pro"
+        }
         if v not in allowed:
-            logger.warning(f"Gemini model '{v}' not recognized. Falling back to default 'gemini-1.5-flash'.")
-            return "gemini-1.5-flash"
+            logger.warning(f"Gemini model '{v}' not recognized. Falling back to default 'gemini-2.5-flash'.")
+            return "gemini-2.5-flash"
         return v
 
     @field_validator("local_embedding_model")

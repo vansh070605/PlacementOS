@@ -84,22 +84,22 @@ _GEMINI_SEMAPHORE = asyncio.Semaphore(3)
 # ── Retry Predicate ───────────────────────────────────────────────────────────
 def _is_rate_limit_error(exc: BaseException) -> bool:
     """
-    Returns True only for 429 Resource Exhausted errors from the Gemini API.
-    All other exceptions (auth errors, network errors, etc.) are NOT retried
-    so they surface immediately for debugging.
+    Returns True for 429 (Resource Exhausted) and 503 (Service Unavailable/High Demand) errors.
+    This ensures tenacity retries requests during temporary traffic spikes or model overload.
     """
     try:
-        # google-genai SDK raises google.genai.errors.ClientError for 4xx codes.
-        # The status_code attribute carries the HTTP status integer.
         from google.genai import errors as genai_errors
-        if isinstance(exc, genai_errors.ClientError):
-            # The SDK sets code = HTTP status (e.g. 429)
-            return getattr(exc, "code", None) == 429
+        if isinstance(exc, genai_errors.APIError):
+            code = getattr(exc, "code", None)
+            if code in (429, 503):
+                return True
     except ImportError:
         pass
 
     # Fallback: inspect the string representation for SDK version variance
-    return "429" in str(exc) or "resource_exhausted" in str(exc).lower()
+    exc_str = str(exc).lower()
+    retry_keywords = ["429", "503", "resource_exhausted", "high demand", "unavailable", "overloaded"]
+    return any(kw in exc_str for kw in retry_keywords)
 
 
 # ── Retry Decorator Factory ───────────────────────────────────────────────────

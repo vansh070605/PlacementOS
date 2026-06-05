@@ -165,7 +165,8 @@ select option {
   font-weight: 800;
   letter-spacing: -0.035em;
   color: var(--text-main);
-  line-height: 1.15;
+  line-height: 1.25;
+  padding-top: 0.1em;
 }
 
 .text-hero-desc {
