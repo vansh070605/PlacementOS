@@ -96,10 +96,35 @@ export const ThemeProvider = ({ children }) => {
       showDsaRoadmap: true,
       showVectorIndex: true
     };
+    const isLocalHost = () => {
+      const hostname = window.location.hostname;
+      return (
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname.startsWith('192.168.') ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('172.')
+      );
+    };
+
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return { ...defaults, ...parsed };
+        const resolved = { ...defaults, ...parsed };
+        if (resolved.backendUrl && !isLocalHost()) {
+          const url = resolved.backendUrl;
+          const isUrlLocal = (
+            url.includes('localhost') ||
+            url.includes('127.0.0.1') ||
+            url.includes('192.168.') ||
+            url.includes('10.') ||
+            url.includes('172.')
+          );
+          if (isUrlLocal) {
+            resolved.backendUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+          }
+        }
+        return resolved;
       } catch (e) {
         console.error(e);
       }
