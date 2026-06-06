@@ -320,14 +320,14 @@
 
   .profile-header-actions {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 5rem;
+    right: 1.25rem;
     z-index: 1000;
   }
 
   .profile-header-actions .btn-pill {
-    width: 56px;
-    height: 56px;
+    width: 50px;
+    height: 50px;
     border-radius: 50% !important;
     padding: 0 !important;
     display: flex;
