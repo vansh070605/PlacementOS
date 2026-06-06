@@ -28,6 +28,7 @@ export default function CoverLetterForge() {
   const [result, setResult]                 = useState(null);
   const [error, setError]                   = useState(null);
   const [copied, setCopied]                 = useState(false);
+  const [copiedHookIdx, setCopiedHookIdx]   = useState(null);
 
   // State to hold data imported from JD Analyzer
   const [importedData, setImportedData] = useState(null);
@@ -95,6 +96,13 @@ export default function CoverLetterForge() {
     navigator.clipboard.writeText(result.cover_letter).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
+    });
+  };
+
+  const handleCopyHook = (text, idx) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedHookIdx(idx);
+      setTimeout(() => setCopiedHookIdx(null), 2000);
     });
   };
 
@@ -272,17 +280,36 @@ export default function CoverLetterForge() {
 
           {/* Key Hooks Side Panel */}
           <div className="clf-hooks-card animate-slide-up delay-200">
-            <div className="card-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
-               <span className="material-symbols-outlined">lightbulb</span>
-               <span>Key Hooks Used</span>
+            <div className="clf-hooks-header">
+              <div className="card-title" style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>
+                 <span className="material-symbols-outlined clf-lightbulb-icon">lightbulb</span>
+                 <span>Key Hooks Used</span>
+              </div>
+              <p className="text-hero-desc" style={{ fontSize: '0.8rem', marginTop: '0', marginBottom: '1.25rem' }}>
+                 Agent 8 embedded these power phrases to grab the recruiter's attention:
+              </p>
             </div>
-            <p className="text-hero-desc" style={{ fontSize: '0.8rem', marginTop: '0', marginBottom: '1rem' }}>
-               Agent 8 embedded these power phrases to grab the recruiter's attention:
-            </p>
-            <div>
+            <div className="clf-hooks-list">
                {result.key_hooks.map((hook, idx) => (
-                  <div key={idx} className="clf-hook-item">
-                     {hook}
+                  <div 
+                    key={idx} 
+                    className="clf-hook-item clf-hook-item-animate"
+                    style={{ animationDelay: `${idx * 80 + 200}ms` }}
+                  >
+                     <button 
+                       className="clf-hook-copy-btn" 
+                       onClick={() => handleCopyHook(hook, idx)}
+                       title="Copy key phrase"
+                       aria-label="Copy key phrase"
+                     >
+                       <span className="material-symbols-outlined">
+                         {copiedHookIdx === idx ? 'done' : 'content_copy'}
+                       </span>
+                       {copiedHookIdx === idx && <span className="clf-hook-copy-tooltip">Copied!</span>}
+                     </button>
+                     <div className="clf-hook-content">
+                       {hook}
+                     </div>
                   </div>
                ))}
             </div>

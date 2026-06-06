@@ -5,9 +5,19 @@ import { analyzeJobDescription } from '../../../services/analyzerService';
 import OutreachAgent from './OutreachAgent';
 import './JDAnalyzer.css';
 
+const ANALYZER_STEPS = [
+  { label: 'Decomposing job description requirements...' },
+  { label: 'Scanning portfolio vector database for matching projects...' },
+  { label: 'Computing semantic skills alignment matrix...' },
+  { label: 'Synthesizing tailored Google X-Y-Z resume bullets...' },
+  { label: 'Generating customized interview prep checklist...' },
+  { label: 'Initializing Outreach Agent with dynamic templates...' }
+];
+
 export default function JDAnalyzer() {
   const [jdText, setJdText]                 = useState('');
   const [isAnalyzing, setIsAnalyzing]       = useState(false);
+  const [loadingStep, setLoadingStep]       = useState(0);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError]                   = useState(null);
   const [completedStudyTopics, setCompletedStudyTopics] = useState(new Set());
@@ -37,12 +47,33 @@ export default function JDAnalyzer() {
 
     lastAnalyzedJD.current = jdText;  // snapshot before clearing
     setIsAnalyzing(true);
+    setLoadingStep(0);
     setError(null);
     setCopiedIndex(null);
     setCompletedStudyTopics(new Set());
 
+    // Start simulated progress steps matching network analyzer load
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      currentStep++;
+      if (currentStep < ANALYZER_STEPS.length) {
+        setLoadingStep(currentStep);
+      } else {
+        clearInterval(interval);
+      }
+    }, 400); // 400ms per step
+
     try {
+      const startTime = Date.now();
       const data = await analyzeJobDescription(jdText);
+      
+      // Ensure smooth visual progress of at least 2.4s to showcase the dashboard analysis
+      const elapsed = Date.now() - startTime;
+      const minWait = 2400;
+      if (elapsed < minWait) {
+        await new Promise(resolve => setTimeout(resolve, minWait - elapsed));
+      }
+
       setAnalysisResult(data);
       // Save result to local storage for Cover Letter Forge
       localStorage.setItem('pos_analyzer_result', JSON.stringify(data));
@@ -50,6 +81,7 @@ export default function JDAnalyzer() {
       console.error('JD Analysis error:', err);
       setError(err.message || 'Failed to analyze the job description. Please check if the FastAPI server is running.');
     } finally {
+      clearInterval(interval);
       setIsAnalyzing(false);
     }
   };
@@ -127,42 +159,58 @@ export default function JDAnalyzer() {
     setCompletedStudyTopics(nextSet);
   };
 
-  // Renders the elegant skeleton loading cards matching the bento layout
+  // Renders the elegant alignment engine loading console alongside muted skeleton placeholders
   const renderLoadingState = () => (
-    <div className="bento-grid">
-      <div className="bento-card span-4 animate-slide-up delay-100">
-        <div className="jda-score-container">
-          <div className="jda-skeleton-circle"></div>
-          <div className="skeleton-bar" style={{ width: '60%', marginTop: '1.5rem' }}></div>
-          <div className="skeleton-bar" style={{ width: '40%', marginTop: '0.75rem' }}></div>
-        </div>
-      </div>
-      
-      <div className="bento-card span-12 animate-slide-up delay-200">
-        <div className="skeleton-bar" style={{ width: '30%', marginBottom: '1.5rem', height: '1.5rem' }}></div>
-        <div className="gap-y-4">
-          <div className="skeleton-bar" style={{ width: '90%' }}></div>
-          <div className="skeleton-bar" style={{ width: '85%' }}></div>
-          <div className="skeleton-bar" style={{ width: '95%' }}></div>
-          <div className="skeleton-bar" style={{ width: '70%' }}></div>
-        </div>
-      </div>
+    <div className="jda-loading-console-wrapper animate-fade-in">
+      <div className="jda-loading-card">
+        <div className="jda-loading-layout">
+          {/* Left: Radar Scanning Graphic */}
+          <div className="jda-scanner-container">
+            <div className="jda-scanner-circle">
+              <div className="jda-scanner-sweep"></div>
+              <div className="jda-scanner-crosshair"></div>
+              <div className="jda-scanner-center"></div>
+              <div className="jda-scanner-pulse"></div>
+            </div>
+            <div className="jda-scanner-label">Scanning JD</div>
+          </div>
 
-      <div className="bento-card span-12 animate-slide-up delay-300">
-        <div className="skeleton-bar" style={{ width: '40%', marginBottom: '1.5rem', height: '1.5rem' }}></div>
-        <div className="gap-y-4">
-          <div className="skeleton-bar" style={{ width: '95%', height: '3rem' }}></div>
-          <div className="skeleton-bar" style={{ width: '90%', height: '3rem' }}></div>
-          <div className="skeleton-bar" style={{ width: '95%', height: '3rem' }}></div>
-        </div>
-      </div>
+          {/* Right: Live Log Console */}
+          <div className="jda-status-container">
+            <div className="jda-status-header">
+              <div className="jda-status-title">
+                <span className="material-symbols-outlined" style={{ color: 'var(--primary)', animation: 'jda-text-pulse 1.5s infinite' }}>
+                  memory
+                </span>
+                <span>AI Alignment Engine Active</span>
+              </div>
+            </div>
+            <div className="jda-status-list">
+              {ANALYZER_STEPS.map((step, idx) => {
+                let statusClass = 'pending';
+                if (idx < loadingStep) {
+                  statusClass = 'complete';
+                } else if (idx === loadingStep) {
+                  statusClass = 'active';
+                }
 
-      <div className="bento-card span-4 animate-slide-up delay-400">
-        <div className="skeleton-bar" style={{ width: '50%', marginBottom: '1.5rem', height: '1.5rem' }}></div>
-        <div className="gap-y-4">
-          <div className="skeleton-bar" style={{ width: '80%', height: '2.5rem' }}></div>
-          <div className="skeleton-bar" style={{ width: '85%', height: '2.5rem' }}></div>
-          <div className="skeleton-bar" style={{ width: '75%', height: '2.5rem' }}></div>
+                return (
+                  <div key={idx} className={`jda-status-item ${statusClass}`}>
+                    <div className="jda-status-indicator">
+                      {statusClass === 'complete' ? (
+                        <span className="material-symbols-outlined">check</span>
+                      ) : statusClass === 'active' ? (
+                        <div className="jda-status-spinner"></div>
+                      ) : (
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--border-strong)' }}></span>
+                      )}
+                    </div>
+                    <span className="jda-status-text">{step.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
+import ServerStatus from '../shared/ServerStatus';
 
 export default function DashboardLayout({ children, activeTab, setActiveTab, user, setShowAuthModal }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -36,6 +37,7 @@ export default function DashboardLayout({ children, activeTab, setActiveTab, use
               <span className="logo-text">PlacementOS</span>
             </div>
           </div>
+          <ServerStatus compact={true} />
         </header>
 
         <div key={activeTab} className="animate-fade-in" style={{ height: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>

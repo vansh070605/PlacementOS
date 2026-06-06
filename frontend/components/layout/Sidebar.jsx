@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import MobileViewButton from '../shared/MobileViewButton';
+import ServerStatus from '../shared/ServerStatus';
 import './Sidebar.css';
 import { authService, dbService } from '../../services/firebase';
 
@@ -64,18 +65,33 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
     }
   };
 
-  const navItems = [
-    { id: 'dashboard',    label: 'Dashboard',      icon: 'grid_view'       },
-    { id: 'applications', label: 'Job Tracker',     icon: 'business_center' },
-    { id: 'prep',         label: 'DSA Prep',        icon: 'code'            },
-    { id: 'auditor',      label: 'Project Auditor', icon: 'terminal'        },
-    { id: 'analyzer',     label: 'JD Analyzer',     icon: 'manage_search'   },
-    { id: 'compass',      label: 'Career Compass',  icon: 'explore'         },
-    { id: 'salary',       label: 'Salary Intel',    icon: 'payments'        },
-    { id: 'cover-letter', label: 'Cover Letter',    icon: 'draw'            },
-    { id: 'ats-scorer',   label: 'ATS Scorer',      icon: 'radar'           },
-    { id: 'mock-interview', label: 'Mock Interview', icon: 'record_voice_over' },
-    { id: 'settings',     label: 'Settings',        icon: 'settings'        },
+  const navGroups = [
+    {
+      title: 'Workspace',
+      items: [
+        { id: 'dashboard',    label: 'Dashboard',      icon: 'grid_view'       },
+        { id: 'applications', label: 'Job Tracker',     icon: 'business_center' },
+        { id: 'prep',         label: 'DSA Prep',        icon: 'code'            },
+      ]
+    },
+    {
+      title: 'AI Copilot Suite',
+      items: [
+        { id: 'auditor',      label: 'Project Auditor', icon: 'terminal'        },
+        { id: 'analyzer',     label: 'JD Analyzer',     icon: 'manage_search'   },
+        { id: 'compass',      label: 'Career Compass',  icon: 'explore'         },
+        { id: 'ats-scorer',   label: 'ATS Scorer',      icon: 'radar'           },
+        { id: 'cover-letter', label: 'Cover Letter',    icon: 'draw'            },
+        { id: 'mock-interview', label: 'Mock Interview', icon: 'record_voice_over' },
+        { id: 'salary',       label: 'Salary Intel',    icon: 'payments'        },
+      ]
+    },
+    {
+      title: 'System',
+      items: [
+        { id: 'settings',     label: 'Settings',        icon: 'settings'        },
+      ]
+    }
   ];
 
   return (
@@ -102,26 +118,32 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
           </button>
         </div>
 
-        <nav>
-        <ul className="nav-links">
-          {navItems.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => setActiveTab(item.id)}
-                  className={`nav-item ${isActive ? 'active' : ''}`}
-                >
-                  <span className="material-symbols-outlined">{item.icon}</span>
-                  {item.label}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+        <nav className="sidebar-nav">
+          {navGroups.map((group, groupIdx) => (
+            <div key={groupIdx} className="nav-group">
+              <h4 className="nav-group-title">{group.title}</h4>
+              <ul className="nav-links">
+                {group.items.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => setActiveTab(item.id)}
+                        className={`nav-item ${isActive ? 'active' : ''}`}
+                      >
+                        <span className="material-symbols-outlined">{item.icon}</span>
+                        <span className="nav-item-label">{item.label}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </nav>
 
       <div className="sidebar-footer">
+        <ServerStatus />
         <MobileViewButton />
         <div className="sidebar-footer-actions">
           {user ? (

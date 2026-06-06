@@ -342,8 +342,8 @@
 }
 
 .si-script-bubble {
-  background: linear-gradient(135deg, #f0f7ff 0%, #eff6ff 100%);
-  border: 1px solid rgba(37, 99, 235, 0.1);
+  background: var(--primary-light);
+  border: 1px solid rgba(37, 99, 235, 0.12);
   border-left: 4px solid var(--primary);
   border-radius: 0 14px 14px 0;
   padding: 1.5rem 1.75rem;

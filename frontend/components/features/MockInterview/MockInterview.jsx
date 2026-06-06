@@ -17,8 +17,83 @@ export default function MockInterview() {
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
   
   const chatEndRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const hasSpeechSupport = !!SpeechRecognition;
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const initSpeechRecognition = () => {
+    if (!hasSpeechSupport || recognitionRef.current) return;
+
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.lang = 'en-US';
+
+    rec.onstart = () => {
+      setIsRecording(true);
+    };
+
+    rec.onresult = (event) => {
+      const result = event.results[event.results.length - 1];
+      if (result.isFinal) {
+        const transcript = result[0].transcript;
+        setCurrentInput(prev => {
+          const separator = prev.trim() ? ' ' : '';
+          return prev + separator + transcript.trim();
+        });
+      }
+    };
+
+    rec.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      setIsRecording(false);
+      if (event.error === 'not-allowed') {
+        setError('Microphone permission denied. Please allow microphone access in settings.');
+      } else {
+        setError(`Speech recognition error: ${event.error}`);
+      }
+    };
+
+    rec.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = rec;
+  };
+
+  const toggleRecording = () => {
+    if (!hasSpeechSupport) {
+      setError('Speech recognition is not supported in your browser.');
+      return;
+    }
+
+    if (!recognitionRef.current) {
+      initSpeechRecognition();
+    }
+
+    setError(null);
+    if (isRecording) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        recognitionRef.current.start();
+      } catch (err) {
+        console.error('Failed to start speech recognition:', err);
+      }
+    }
+  };
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
@@ -138,7 +213,7 @@ export default function MockInterview() {
           <p className="text-hero-desc">Practice technical and behavioral interviews tailored to your target role.</p>
         </div>
         {isInterviewStarted && (
-          <button className="btn-pill btn-secondary" onClick={resetInterview}>
+          <button className="btn-pill btn-pill-secondary" onClick={resetInterview}>
             End Interview
           </button>
         )}
@@ -172,7 +247,7 @@ export default function MockInterview() {
               
               <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
                 <button 
-                  className="btn-pill btn-primary" 
+                  className="btn-pill btn-pill-primary" 
                   onClick={startInterview}
                   disabled={isLoading || !jobDescription.trim()}
                   style={{ padding: '0.75rem 2rem' }}
@@ -256,9 +331,25 @@ export default function MockInterview() {
                   className="jd-textarea"
                   style={{ minHeight: '60px', marginTop: '0', flex: 1 }}
                 />
+                
+                {hasSpeechSupport && (
+                  <button
+                    type="button"
+                    onClick={toggleRecording}
+                    className={`mic-btn ${isRecording ? 'recording' : ''}`}
+                    title={isRecording ? 'Listening... click to stop' : 'Answer with voice (Speech-to-Text)'}
+                    disabled={isLoading}
+                    style={{ width: '60px', height: '60px', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', marginBottom: '0.5rem' }}
+                  >
+                    <span className="material-symbols-outlined">
+                      {isRecording ? 'mic' : 'mic_none'}
+                    </span>
+                  </button>
+                )}
+
                 <button 
                   type="submit" 
-                  className="btn-pill btn-primary"
+                  className="btn-pill btn-pill-primary"
                   disabled={isLoading || !currentInput.trim()}
                   style={{ width: '60px', height: '60px', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', marginBottom: '0.5rem' }}
                 >

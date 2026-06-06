@@ -188,7 +188,7 @@ cd PlacementOS
 ### 3. Frontend Setup
 1. In a new terminal, navigate to the project root:
    ```bash
-   cd PlacementOS/frontend
+   cd frontend
    ```
 2. Install npm packages:
    ```bash

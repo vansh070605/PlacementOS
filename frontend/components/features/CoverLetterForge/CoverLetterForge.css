@@ -224,30 +224,151 @@
   animation: clf-card-in 0.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.clf-lightbulb-icon {
+  color: #f59e0b !important;
+  filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.45));
+  animation: clf-pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes clf-pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.3));
+    opacity: 0.95;
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.75));
+    opacity: 1;
+  }
+}
+
+@keyframes hook-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.clf-hook-item-animate {
+  animation: hook-item-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .clf-hook-item {
-  background: linear-gradient(135deg, var(--primary-light) 0%, #f8fbff 100%);
-  border: 1px solid rgba(37, 99, 235, 0.1);
-  border-radius: 14px;
-  padding: 1rem 1.15rem;
-  margin-top: 0.85rem;
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: var(--text-main);
-  font-weight: 500;
-  font-style: italic;
   position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 16px;
+  padding: 1.15rem 2.25rem 1.15rem 1.5rem; /* right padding leaves space for copy button, left padding for spacing */
+  margin-top: 1rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+  overflow: hidden;
+}
+
+.clf-hook-item:hover {
+  transform: translateY(-3px) scale(1.005);
+  border-color: rgba(37, 99, 235, 0.25);
+  border-left-color: var(--primary);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.08);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--primary-light) 100%);
 }
 
 .clf-hook-item::before {
-  content: '"';
+  content: '“';
   position: absolute;
-  top: -8px;
-  left: 12px;
-  font-size: 2.5rem;
+  top: -10px;
+  left: 6px;
+  font-size: 3.5rem;
   color: var(--primary);
-  opacity: 0.25;
+  opacity: 0.06;
   font-family: Georgia, serif;
   line-height: 1;
+  pointer-events: none;
+}
+
+.clf-hook-item::after {
+  content: '”';
+  position: absolute;
+  bottom: -32px;
+  right: 12px;
+  font-size: 3.5rem;
+  color: var(--primary);
+  opacity: 0.06;
+  font-family: Georgia, serif;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.clf-hook-content {
+  font-style: italic;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--text-main);
+  position: relative;
+  z-index: 1;
+}
+
+/* Copy Button for individual hooks */
+.clf-hook-copy-btn {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-muted);
+  z-index: 2;
+  box-shadow: var(--shadow-sm);
+}
+
+.clf-hook-item:hover .clf-hook-copy-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.clf-hook-copy-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+  transform: scale(1.05);
+}
+
+.clf-hook-copy-btn span.material-symbols-outlined {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Tooltip styles */
+.clf-hook-copy-tooltip {
+  position: absolute;
+  bottom: 100%;
+  right: 50%;
+  transform: translateX(50%) translateY(-6px);
+  background: var(--text-main);
+  color: var(--surface);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-family: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  animation: tooltip-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Reset link at bottom */

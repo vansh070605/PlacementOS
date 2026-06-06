@@ -16,7 +16,7 @@ import AIChat from './components/shared/AIChat';
 import { ProfileProvider } from './contexts/ProfileContext';
 import AuthOverlay from './components/shared/AuthOverlay';
 import ProfileScreen from './components/features/Profile/ProfileScreen';
-import { authService } from './services/firebase';
+import { authService, dbService } from './services/firebase';
 
 // Helper to safely load data from localStorage
 const loadLocalStorageData = (key, defaultValue) => {
@@ -94,11 +94,37 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [loadingUserData, setLoadingUserData] = useState(false);
 
-  // Check auth state
+  // Application Data States
+  const [applications, setApplications] = useState(() => loadLocalStorageData('pos_applications', DEFAULT_APPLICATIONS));
+  const [dsaProgress, setDsaProgress] = useState(() => loadLocalStorageData('pos_dsa_progress', DEFAULT_DSA_PROGRESS));
+  const [goals, setGoals] = useState(() => loadLocalStorageData('pos_goals', DEFAULT_GOALS));
+
+  // Check auth state and load user data from cloud database
   useEffect(() => {
-    const unsubscribe = authService.onAuthStateChange((currentUser) => {
+    const unsubscribe = authService.onAuthStateChange(async (currentUser) => {
       setUser(currentUser);
+      if (currentUser?.uid) {
+        setLoadingUserData(true);
+        try {
+          const data = await dbService.getUserData(currentUser.uid);
+          if (data) {
+            if (data.applications) setApplications(data.applications);
+            if (data.dsaProgress) setDsaProgress(data.dsaProgress);
+            if (data.goals) setGoals(data.goals);
+          }
+        } catch (e) {
+          console.error('Failed to load user workspace data from cloud:', e);
+        } finally {
+          setLoadingUserData(false);
+        }
+      } else {
+        // Reset states back to local defaults on logout
+        setApplications(loadLocalStorageData('pos_applications', DEFAULT_APPLICATIONS));
+        setDsaProgress(loadLocalStorageData('pos_dsa_progress', DEFAULT_DSA_PROGRESS));
+        setGoals(loadLocalStorageData('pos_goals', DEFAULT_GOALS));
+      }
     });
     return () => unsubscribe && unsubscribe();
   }, []);
@@ -123,28 +149,32 @@ export default function App() {
     document.addEventListener('pos:navigate', handleNavEvent);
     return () => document.removeEventListener('pos:navigate', handleNavEvent);
   }, []);
-  
-  // Application Data States
-  const [applications, setApplications] = useState(() => loadLocalStorageData('pos_applications', DEFAULT_APPLICATIONS));
-  const [dsaProgress, setDsaProgress] = useState(() => loadLocalStorageData('pos_dsa_progress', DEFAULT_DSA_PROGRESS));
-  const [goals, setGoals] = useState(() => loadLocalStorageData('pos_goals', DEFAULT_GOALS));
 
-  // Sync to LocalStorage on modifications
+  // Sync to LocalStorage and cloud db on modifications
   useEffect(() => {
     localStorage.setItem('pos_active_tab', JSON.stringify(activeTab));
   }, [activeTab]);
 
   useEffect(() => {
     localStorage.setItem('pos_applications', JSON.stringify(applications));
-  }, [applications]);
+    if (user?.uid && !loadingUserData) {
+      dbService.saveUserData(user.uid, { applications, dsaProgress, goals });
+    }
+  }, [applications, user, loadingUserData]);
 
   useEffect(() => {
     localStorage.setItem('pos_dsa_progress', JSON.stringify(dsaProgress));
-  }, [dsaProgress]);
+    if (user?.uid && !loadingUserData) {
+      dbService.saveUserData(user.uid, { applications, dsaProgress, goals });
+    }
+  }, [dsaProgress, user, loadingUserData]);
 
   useEffect(() => {
     localStorage.setItem('pos_goals', JSON.stringify(goals));
-  }, [goals]);
+    if (user?.uid && !loadingUserData) {
+      dbService.saveUserData(user.uid, { applications, dsaProgress, goals });
+    }
+  }, [goals, user, loadingUserData]);
 
   // Screen Router Selection
   const renderActiveScreen = () => {

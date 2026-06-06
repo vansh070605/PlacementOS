@@ -238,5 +238,39 @@ export const dbService = {
         }, 300);
       });
     }
+  },
+
+  async getUserData(uid) {
+    if (db) {
+      const docRef = doc(db, 'userData', uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data();
+      }
+      return null;
+    } else {
+      // Mock Firestore Get User Workspace
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const saved = localStorage.getItem(`pos_userdata_${uid}`);
+          resolve(saved ? JSON.parse(saved) : null);
+        }, 300);
+      });
+    }
+  },
+
+  async saveUserData(uid, data) {
+    if (db) {
+      const docRef = doc(db, 'userData', uid);
+      await setDoc(docRef, data, { merge: true });
+    } else {
+      // Mock Firestore Save User Workspace
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          localStorage.setItem(`pos_userdata_${uid}`, JSON.stringify(data));
+          resolve(data);
+        }, 300);
+      });
+    }
   }
 };
