@@ -50,17 +50,17 @@ if (isFirebaseConfigured) {
 
 // ── Mock Fallback Database (LocalStorage) ────────────────────────────────────
 const DEFAULT_PROFILE = {
-  fullName: 'Vansh Agrawal',
+  fullName: '',
   title: 'Candidate Profile',
-  email: 'vansh.agrawal@example.com',
-  phone: '+91 98765 43210',
-  location: 'Mumbai, India',
-  github: 'https://github.com/vansh070605',
-  linkedin: 'https://linkedin.com/in/vansh-agrawal',
-  website: 'https://vanshagrawal.dev',
-  leetcode: 'va2583',
-  bio: 'Computer Science student and software engineering enthusiast. Experienced in React, JavaScript, Python, and building intelligent agents.',
-  skills: ['React', 'JavaScript', 'Python', 'FastAPI', 'CSS', 'ChromaDB', 'SQL', 'Git'],
+  email: '',
+  phone: '',
+  location: '',
+  github: '',
+  linkedin: '',
+  website: '',
+  leetcode: '',
+  bio: '',
+  skills: [],
   avatarUrl: ''
 };
 
@@ -76,9 +76,7 @@ const saveLocalUsers = (users) => {
 const getLocalProfile = (uid) => {
   const profile = localStorage.getItem(`pos_profile_${uid}`);
   if (profile) return JSON.parse(profile);
-  // Default fallback for Vansh
-  if (uid === 'vansh_default') return DEFAULT_PROFILE;
-  return { ...DEFAULT_PROFILE, email: '' }; // blank template
+  return { ...DEFAULT_PROFILE }; // blank template for any new user
 };
 
 const saveLocalProfile = (uid, profile) => {
@@ -172,26 +170,23 @@ export const authService = {
         if (saved) {
           return JSON.parse(saved);
         }
-        // If first load and no user is logged in, we initialize with a default user
-        const firstLoad = !localStorage.getItem('pos_has_loaded_before');
-        if (firstLoad) {
-          localStorage.setItem('pos_has_loaded_before', 'true');
-          const defaultSession = { uid: 'vansh_default', email: 'vansh.agrawal@example.com', displayName: 'Vansh Agrawal' };
-          localStorage.setItem('pos_fallback_current_user', JSON.stringify(defaultSession));
-          return defaultSession;
-        }
+        // No saved session — user is not logged in
         return null;
       };
 
       // Initial callback call
+      let currentTrackedUid = null;
       const user = checkUser();
+      currentTrackedUid = user?.uid ?? null;
       callback(user);
 
       // Simple interval based simulation of auth state changes (checking storage changes)
       const interval = setInterval(() => {
         const currentUser = localStorage.getItem('pos_fallback_current_user');
         const parsed = currentUser ? JSON.parse(currentUser) : null;
-        if (JSON.stringify(parsed?.uid) !== JSON.stringify(user?.uid)) {
+        const newUid = parsed?.uid ?? null;
+        if (newUid !== currentTrackedUid) {
+          currentTrackedUid = newUid;
           callback(parsed);
         }
       }, 1000);

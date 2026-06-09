@@ -31,55 +31,36 @@ const loadLocalStorageData = (key, defaultValue) => {
   return defaultValue;
 };
 
-// ── Default Seed Data (Light & Clean Theme) ───────────────────────────────────
-const DEFAULT_APPLICATIONS = [
-  {
-    id: 'app_1',
-    title: 'Frontend Engineer Intern',
-    company: 'Google',
-    status: 'interviewing',
-    date: '2026-05-20',
-    salary: '$45/hr',
-    location: 'Hybrid',
-    notes: 'First technical interview scheduled. Main focus: Tree algorithms and Three.js canvas optimizations.',
-  },
-  {
-    id: 'app_2',
-    title: 'Software Engineer',
-    company: 'Stripe',
-    status: 'applied',
-    date: '2026-05-24',
-    salary: '$135,000/yr',
-    location: 'Remote',
-    notes: 'Applied with custom resume bullet points generated via JD Analyzer.',
-  },
-  {
-    id: 'app_3',
-    title: 'Machine Learning Engineer',
-    company: 'Airbnb',
-    status: 'offered',
-    date: '2026-05-10',
-    salary: '$165,000/yr',
-    location: 'San Francisco',
-    notes: 'Received written offer! Base base base: 165k. Equity details attached in HR portal.',
+// ── One-time migration: clear stale "vansh_default" auto-login sessions ────────
+// This removes any leftover hardcoded session from older app versions so
+// returning visitors are not auto-logged in as Vansh Agrawal.
+const STORAGE_MIGRATION_KEY = 'pos_migration_v2';
+if (!localStorage.getItem(STORAGE_MIGRATION_KEY)) {
+  const staleSession = localStorage.getItem('pos_fallback_current_user');
+  if (staleSession) {
+    try {
+      const parsed = JSON.parse(staleSession);
+      if (parsed?.uid === 'vansh_default') {
+        localStorage.removeItem('pos_fallback_current_user');
+        localStorage.removeItem('pos_has_loaded_before');
+        localStorage.removeItem('pos_profile_vansh_default');
+        localStorage.removeItem('pos_userdata_vansh_default');
+        // Clear stale application data seeded from the old default
+        localStorage.removeItem('pos_applications');
+        localStorage.removeItem('pos_dsa_progress');
+        localStorage.removeItem('pos_goals');
+      }
+    } catch (_) { /* ignore parse errors */ }
   }
-];
+  localStorage.setItem(STORAGE_MIGRATION_KEY, 'true');
+}
+
+// ── Default Seed Data (Empty for new users) ───────────────────────────────────
+const DEFAULT_APPLICATIONS = [];
 
 const DEFAULT_DSA_PROGRESS = {
-  topics: {
-    'Arrays': true,
-    'Strings': true,
-    'Linked Lists': true,
-    'Trees': false,
-    'Graphs': false,
-    'Dynamic Programming': false,
-    'System Design': false,
-  },
-  questions: [
-    { id: 1, title: 'Two Sum', platform: 'LeetCode', difficulty: 'Easy', status: 'Solved', timestamp: Math.floor(Date.now() / 1000) - 86400, notes: 'Hash map lookups in O(1) space.' },
-    { id: 2, title: 'Merge K Sorted Lists', platform: 'LeetCode', difficulty: 'Hard', status: 'Todo', notes: 'Use priority queues or divide & conquer.' },
-    { id: 3, title: 'Longest Palindromic Substring', platform: 'LeetCode', difficulty: 'Medium', status: 'Solved', timestamp: Math.floor(Date.now() / 1000) - 259200, notes: 'Expand around center method.' },
-  ],
+  topics: {},
+  questions: [],
 };
 
 const DEFAULT_GOALS = {
