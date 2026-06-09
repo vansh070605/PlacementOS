@@ -80,12 +80,19 @@ export default function Dashboard({ applications, dsaProgress, goals, setGoals, 
     setConfigOpen(false);
   };
 
+  const getGreetingName = () => {
+    if (profile?.fullName && profile.fullName.trim() !== '') {
+      return ` back, ${profile.fullName.trim().split(' ')[0]}`;
+    }
+    return '';
+  };
+
   return (
     <div className="dashboard-wrapper animate-fade-in">
       {/* Title block */}
       <div className="text-hero-title">Command Center</div>
       <p className="text-hero-desc">
-        Welcome back, Vansh. Here is a site-wide overview of your career progress, active applications, codebase indexing, and roadmap achievements.
+        Welcome{getGreetingName()}. Here is a site-wide overview of your career progress, active applications, codebase indexing, and roadmap achievements.
       </p>
 
       {/* Bento Row 1: Metrics */}

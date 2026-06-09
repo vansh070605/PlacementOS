@@ -15,6 +15,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './OutreachAgent.css';
 import { getBackendUrl } from '../../../utils/config';
+import { useProfile } from '../../../contexts/ProfileContext';
 
 const TONE_OPTIONS = [
   { id: 'professional', label: 'Professional', icon: 'work' },
@@ -23,6 +24,7 @@ const TONE_OPTIONS = [
 ];
 
 export default function OutreachAgent({ analysisResult, jdText }) {
+  const { profile } = useProfile();
   const BACKEND_URL = getBackendUrl();
   const [tone, setTone]                   = useState('professional');
   const [isLoading, setIsLoading]         = useState(false);
@@ -48,7 +50,7 @@ export default function OutreachAgent({ analysisResult, jdText }) {
           alignment_score:   analysisResult.alignment_score,
           tailored_bullets:  analysisResult.tailored_resume_bullets,
           tone:              selectedTone,
-          candidate_name:    'Vansh Agrawal',
+          candidate_name:    profile?.fullName || 'Candidate',
         }),
       });
 
