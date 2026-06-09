@@ -34,7 +34,7 @@ from .schemas import (
     MockInterviewResponse,
 )
 from .vector_store import vector_store
-from .agents import orchestrator, RateLimitExceeded
+from .agents import orchestrator, RateLimitExceeded, _call_gemini
 from .dl_salary import predict as dl_predict
 
 # ── Standardised 503 payload for rate-limit exhaustion ────────────────────────
@@ -1008,8 +1008,8 @@ async def chat_with_ai(request: ChatRequest):
             types.Content(role="user", parts=[types.Part(text=request.message)])
         )
 
-        response = await asyncio.to_thread(
-            client.models.generate_content,
+        response = await _call_gemini(
+            client,
             model=settings.gemini_model,
             contents=history,
             config=types.GenerateContentConfig(
@@ -1022,6 +1022,16 @@ async def chat_with_ai(request: ChatRequest):
         reply = response.text or "I couldn't generate a response. Please try again."
         return ChatResponse(reply=reply)
 
+    except RateLimitExceeded as rle:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(rle)
+        )
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
     except Exception as e:
         logger.error(f"Chat endpoint error: {e}", exc_info=True)
         raise HTTPException(
