@@ -1,13 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { getBackendUrl } from '../../utils/config';
 import './ServerStatus.css';
 
 export default function ServerStatus({ compact = false }) {
   const [status, setStatus] = useState('checking'); // 'checking' | 'online' | 'offline'
+  const statusRef = useRef(status);
+
+  // Sync ref with state
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   const checkStatus = useCallback(async () => {
     // Keep checking state visible if it was already offline or checking
-    if (status !== 'online') {
+    if (statusRef.current !== 'online') {
       setStatus('checking');
     }
     
@@ -37,7 +43,7 @@ export default function ServerStatus({ compact = false }) {
       clearTimeout(timeoutId);
       setStatus('offline');
     }
-  }, [status]);
+  }, []);
 
   useEffect(() => {
     // Initial check
