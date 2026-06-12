@@ -55,7 +55,7 @@ class LocalModelRegistry:
                 )
             from tensorflow import keras
             logger.info("Loading local Keras Salary Regression Model...")
-            self._salary_model = keras.models.load_model(model_path)
+            self._salary_model = keras.models.load_model(model_path, compile=False)
             logger.info("Keras Salary Regression Model loaded successfully.")
         return self._salary_model
 
