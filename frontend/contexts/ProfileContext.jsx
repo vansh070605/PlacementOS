@@ -20,6 +20,13 @@ export function ProfileProvider({ children, user }) {
     setLoading(true);
     try {
       const data = await dbService.getUserProfile(uid);
+      // Auto-populate email from auth user object if missing/empty in profile
+      if ((!data.email || data.email.trim() === '') && user?.email) {
+        data.email = user.email;
+        dbService.updateUserProfile(uid, { email: user.email }).catch(err => 
+          console.error('Failed to auto-save profile email:', err)
+        );
+      }
       setProfile(data);
     } catch (err) {
       console.error('Failed to load profile:', err);
