@@ -1,10 +1,13 @@
 import os
+import logging
+import numpy as np
 from .schemas import SalaryRequest, SalaryIntelligenceResponse, CompensationBand
+from .ml_models import local_models
 
-def predict(request: SalaryRequest) -> SalaryIntelligenceResponse:
-    """Predict salary compensation using a calibrated, deterministic market model.
-    Supports both INR (Indian Rupees / LPA) and USD ($) options.
-    """
+logger = logging.getLogger("placementos.dl_salary")
+
+def predict_deterministic(request: SalaryRequest) -> SalaryIntelligenceResponse:
+    """Fallback rules-based prediction model in case DL model is not yet compiled."""
     role = request.role_title.strip()
     location = request.location.strip()
     level = request.experience_level.strip().lower()
@@ -13,8 +16,6 @@ def predict(request: SalaryRequest) -> SalaryIntelligenceResponse:
     if currency not in ("INR", "USD"):
         currency = "INR"
 
-    # Define experience level parameters
-    # Entry: 10% bonus, Mid: 15% bonus, Senior: 20% bonus, Staff/Principal: 25% bonus
     bonus_pct = 0.10
     if level == "mid":
         bonus_pct = 0.15
@@ -23,7 +24,6 @@ def predict(request: SalaryRequest) -> SalaryIntelligenceResponse:
     elif level in ("staff", "principal"):
         bonus_pct = 0.25
 
-    # Annualized equity parameters (ESOPs / RSUs % of base salary)
     equity_pct = 0.10
     if level == "mid":
         equity_pct = 0.20
@@ -35,7 +35,6 @@ def predict(request: SalaryRequest) -> SalaryIntelligenceResponse:
         equity_pct = 0.70
 
     if currency == "INR":
-        # ── Indian Rupees Calibration (in LPA - Lakhs Per Annum) ──
         if level == "entry":
             base_lpa = 6.0 + min(years, 3) * 1.5
         elif level == "mid":
@@ -91,53 +90,8 @@ def predict(request: SalaryRequest) -> SalaryIntelligenceResponse:
 
         lpa = base_lpa * role_mult * loc_mult
         lpa = max(3.5, min(lpa, 150.0))
-
         salary_median = int(lpa * 100000)
-        salary_p25 = int(salary_median * 0.90)
-        salary_p75 = int(salary_median * 1.10)
-
-        bonus_val = salary_median * bonus_pct
-        equity_val_annual = salary_median * equity_pct
-        equity_val_4yr = equity_val_annual * 4
-
-        tc_median = int(salary_median + bonus_val + equity_val_annual)
-        tc_p25 = int(salary_p25 + (bonus_val * 0.90) + (equity_val_annual * 0.90))
-        tc_p75 = int(salary_p75 + (bonus_val * 1.10) + (equity_val_annual * 1.10))
-
-        negotiation_floor = int(salary_p25)
-        negotiation_ceiling = int(salary_median * 1.20)
-
-        def format_inr_str(val):
-            if val >= 10000000:
-                return f"₹{val / 10000000:.2f} Cr"
-            elif val >= 100000:
-                return f"₹{val / 100000:.1f}L"
-            else:
-                return f"₹{val / 1000:.0f}K"
-
-        equity_range_str = f"{format_inr_str(equity_val_4yr * 0.8)}–{format_inr_str(equity_val_4yr * 1.2)} ESOPs/RSUs over 4 years"
-        
-        signing_median = salary_median * (0.05 if level == "entry" else 0.10 if level == "mid" else 0.15)
-        signing_bonus_str = f"{format_inr_str(signing_median * 0.75)}–{format_inr_str(signing_median * 1.25)} one-time"
-
-        floor_lpa_str = f"{negotiation_floor / 100000:.1f}"
-        ceiling_lpa_str = f"{negotiation_ceiling / 100000:.1f}"
-        script = (
-            f"Based on recent compensation benchmarks for a {level.capitalize()}-level {role} in {location}, "
-            f"the standard base salary typically ranges from {floor_lpa_str} LPA to {ceiling_lpa_str} LPA. "
-            f"Given my technical expertise and track record, I am looking for a base salary closer to "
-            f"{salary_median / 100000:.1f} LPA, along with standard performance variable pay and equity."
-        )
-
-        insights = [
-            f"{location} remains a premier market for {role} talent, with salary bands experiencing steady YoY adjustments.",
-            f"Variable pay at the {level.capitalize()} level typically forms about {int(bonus_pct * 100)}% of the total cash compensation in standard Indian tech firms.",
-            "Equity options (ESOPs/RSUs) are increasingly used to attract talent, generally vesting linearly over 4 years with a 1-year cliff.",
-            "Remember to evaluate the in-hand component, taking into account employer PF contributions (12% of basic) and Gratuity benefits."
-        ]
-
     else:
-        # ── US Dollars Calibration (in thousands - $K/yr) ──
         if level == "entry":
             base_usd_k = 70.0 + min(years, 3) * 12.0
         elif level == "mid":
@@ -190,45 +144,209 @@ def predict(request: SalaryRequest) -> SalaryIntelligenceResponse:
 
         usd_k = base_usd_k * role_mult * loc_mult
         usd_k = max(45.0, min(usd_k, 750.0))
-
         salary_median = int(usd_k * 1000)
-        salary_p25 = int(salary_median * 0.90)
-        salary_p75 = int(salary_median * 1.10)
 
-        bonus_val = salary_median * bonus_pct
-        equity_val_annual = salary_median * equity_pct
-        equity_val_4yr = equity_val_annual * 4
+    salary_p25 = int(salary_median * 0.90)
+    salary_p75 = int(salary_median * 1.10)
 
-        tc_median = int(salary_median + bonus_val + equity_val_annual)
-        tc_p25 = int(salary_p25 + (bonus_val * 0.90) + (equity_val_annual * 0.90))
-        tc_p75 = int(salary_p75 + (bonus_val * 1.10) + (equity_val_annual * 1.10))
+    bonus_val = salary_median * bonus_pct
+    equity_val_annual = salary_median * equity_pct
+    equity_val_4yr = equity_val_annual * 4
 
-        negotiation_floor = int(salary_p25)
-        negotiation_ceiling = int(salary_median * 1.20)
+    tc_median = int(salary_median + bonus_val + equity_val_annual)
+    tc_p25 = int(salary_p25 + (bonus_val * 0.90) + (equity_val_annual * 0.90))
+    tc_p75 = int(salary_p75 + (bonus_val * 1.10) + (equity_val_annual * 1.10))
 
-        def format_usd_str(val):
+    negotiation_floor = int(salary_p25)
+    negotiation_ceiling = int(salary_median * 1.20)
+
+    def format_val(val):
+        if currency == "INR":
+            if val >= 10000000:
+                return f"₹{val / 10000000:.2f} Cr"
+            elif val >= 100000:
+                return f"₹{val / 100000:.1f}L"
+            else:
+                return f"₹{val / 1000:.0f}K"
+        else:
             return f"${val / 1000:.0f}K"
 
-        equity_range_str = f"{format_usd_str(equity_val_4yr * 0.8)}–{format_usd_str(equity_val_4yr * 1.2)} RSUs over 4 years"
-        
-        signing_median = salary_median * (0.05 if level == "entry" else 0.10 if level == "mid" else 0.15)
-        signing_bonus_str = f"{format_usd_str(signing_median * 0.75)}–{format_usd_str(signing_median * 1.25)} one-time"
+    equity_range_str = f"{format_val(equity_val_4yr * 0.8)}–{format_val(equity_val_4yr * 1.2)} ESOPs/RSUs over 4 years"
+    signing_median = salary_median * (0.05 if level == "entry" else 0.10 if level == "mid" else 0.15)
+    signing_bonus_str = f"{format_val(signing_median * 0.75)}–{format_val(signing_median * 1.25)} one-time"
 
-        floor_usd_str = f"${negotiation_floor / 1000:.0f}K"
-        ceiling_usd_str = f"${negotiation_ceiling / 1000:.0f}K"
-        script = (
-            f"Based on recent compensation benchmarks for a {level.capitalize()}-level {role} in {location}, "
-            f"the standard base salary typically ranges from {floor_usd_str} to {ceiling_usd_str}. "
-            f"Given my technical expertise and track record, I am looking for a base salary closer to "
-            f"${salary_median / 1000:.0f}K, along with standard performance bonus and equity."
-        )
+    floor_str = format_val(negotiation_floor)
+    ceiling_str = format_val(negotiation_ceiling)
+    median_str = format_val(salary_median)
+    script = (
+        f"Based on recent compensation benchmarks for a {level.capitalize()}-level {role} in {location}, "
+        f"the standard base salary typically ranges from {floor_str} to {ceiling_str}. "
+        f"Given my technical expertise and track record, I am looking for a base salary closer to "
+        f"{median_str}, along with standard performance variable pay and equity."
+    )
 
-        insights = [
-            f"{location} remains a premier market for {role} talent, with salary bands experiencing steady YoY adjustments.",
-            f"Variable bonus at the {level.capitalize()} level typically forms about {int(bonus_pct * 100)}% of the total cash compensation in standard tech firms.",
-            "Equity grants (RSUs/options) are standard in major tech hubs, typically following a 4-year vesting schedule with a 1-year cliff.",
-            "Always factor in cost-of-living adjustments, state taxes, and 401(k) employer matching when evaluating cash compensation."
-        ]
+    insights = [
+        f"{location} remains a premier market for {role} talent, with salary bands experiencing steady YoY adjustments.",
+        f"Variable pay at the {level.capitalize()} level typically forms about {int(bonus_pct * 100)}% of the total cash compensation.",
+        "Equity options are increasingly used to attract talent, generally vesting linearly over 4 years with a 1-year cliff."
+    ]
+
+    return SalaryIntelligenceResponse(
+        base_salary_band=CompensationBand(p25=salary_p25, median=salary_median, p75=salary_p75),
+        total_comp_band=CompensationBand(p25=tc_p25, median=tc_median, p75=tc_p75),
+        equity_range=equity_range_str,
+        signing_bonus_range=signing_bonus_str,
+        negotiation_floor=negotiation_floor,
+        negotiation_ceiling=negotiation_ceiling,
+        negotiation_script=script,
+        market_insights=insights
+    )
+
+def predict(request: SalaryRequest) -> SalaryIntelligenceResponse:
+    """Predict salary compensation using a custom trained deep learning regression model."""
+    try:
+        model = local_models.salary_model
+        features = local_models.salary_features
+    except Exception as e:
+        logger.warning(f"Could not load local DL model: {e}. Falling back to deterministic model.")
+        return predict_deterministic(request)
+
+    role = request.role_title.strip()
+    location = request.location.strip()
+    level = request.experience_level.strip().lower()
+    years = request.experience_years
+    currency = getattr(request, "currency", "INR")
+    if currency not in ("INR", "USD"):
+        currency = "INR"
+
+    # Map level to seniority categories present in training data: Junior, Mid, Senior, Lead
+    mapped_seniority = "Mid"
+    if "junior" in level or "entry" in level:
+        mapped_seniority = "Junior"
+    elif "senior" in level:
+        mapped_seniority = "Senior"
+    elif "lead" in level or "staff" in level or "principal" in level:
+        mapped_seniority = "Lead"
+
+    # Assemble input features dictionary matching the one-hot columns list
+    features_dict = {"years_experience": float(years)}
+    for col in features:
+        if col == "years_experience":
+            continue
+        features_dict[col] = 0.0
+
+    # Match role categories
+    role_matched = False
+    for col in features:
+        if col.startswith("role_"):
+            val = col.replace("role_", "").lower()
+            if val in role.lower():
+                features_dict[col] = 1.0
+                role_matched = True
+
+    if not role_matched and "role_Software Engineer" in features_dict:
+        features_dict["role_Software Engineer"] = 1.0
+
+    # Match location categories
+    location_matched = False
+    for col in features:
+        if col.startswith("location_"):
+            val = col.replace("location_", "").lower()
+            if val in location.lower():
+                features_dict[col] = 1.0
+                location_matched = True
+
+    if not location_matched and "location_Bangalore" in features_dict:
+        features_dict["location_Bangalore"] = 1.0
+
+    # Match seniority categories
+    for col in features:
+        if col.startswith("seniority_"):
+            val = col.replace("seniority_", "").lower()
+            if val == mapped_seniority.lower():
+                features_dict[col] = 1.0
+
+    # Order features matching saved layout
+    input_vector = [features_dict[col] for col in features]
+    input_arr = np.array([input_vector], dtype=np.float32)
+
+    # Perform prediction in raw INR
+    prediction = model.predict(input_arr)
+    predicted_val_inr = float(prediction[0][0])
+    
+    # Clip extreme ranges to realistic tech bands
+    predicted_val_inr = max(350000.0, min(predicted_val_inr, 15000000.0))
+
+    # Apply currency conversion if USD is requested (e.g. 1 USD = 83 INR)
+    if currency == "USD":
+        predicted_val = predicted_val_inr / 83.0
+    else:
+        predicted_val = predicted_val_inr
+
+    salary_median = int(predicted_val)
+    salary_p25 = int(salary_median * 0.90)
+    salary_p75 = int(salary_median * 1.10)
+
+    # Derived bonus and equity percentages depending on level
+    bonus_pct = 0.10
+    if level == "mid":
+        bonus_pct = 0.15
+    elif level == "senior":
+        bonus_pct = 0.20
+    elif level in ("staff", "principal"):
+        bonus_pct = 0.25
+
+    equity_pct = 0.10
+    if level == "mid":
+        equity_pct = 0.20
+    elif level == "senior":
+        equity_pct = 0.35
+    elif level == "staff":
+        equity_pct = 0.50
+    elif level == "principal":
+        equity_pct = 0.70
+
+    bonus_val = salary_median * bonus_pct
+    equity_val_annual = salary_median * equity_pct
+    equity_val_4yr = equity_val_annual * 4
+
+    tc_median = int(salary_median + bonus_val + equity_val_annual)
+    tc_p25 = int(salary_p25 + (bonus_val * 0.90) + (equity_val_annual * 0.90))
+    tc_p75 = int(salary_p75 + (bonus_val * 1.10) + (equity_val_annual * 1.10))
+
+    negotiation_floor = int(salary_p25)
+    negotiation_ceiling = int(salary_median * 1.20)
+
+    def format_val(val):
+        if currency == "INR":
+            if val >= 10000000:
+                return f"₹{val / 10000000:.2f} Cr"
+            elif val >= 100000:
+                return f"₹{val / 100000:.1f}L"
+            else:
+                return f"₹{val / 1000:.0f}K"
+        else:
+            return f"${val / 1000:.0f}K"
+
+    equity_range_str = f"{format_val(equity_val_4yr * 0.8)}–{format_val(equity_val_4yr * 1.2)} ESOPs/RSUs over 4 years"
+    signing_median = salary_median * (0.05 if level == "entry" else 0.10 if level == "mid" else 0.15)
+    signing_bonus_str = f"{format_val(signing_median * 0.75)}–{format_val(signing_median * 1.25)} one-time"
+
+    floor_str = format_val(negotiation_floor)
+    ceiling_str = format_val(negotiation_ceiling)
+    median_str = format_val(salary_median)
+    script = (
+        f"Based on recent compensation benchmarks for a {level.capitalize()}-level {role} in {location}, "
+        f"the standard base salary typically ranges from {floor_str} to {ceiling_str}. "
+        f"Given my technical expertise and track record, I am looking for a base salary closer to "
+        f"{median_str}, along with standard performance variable pay and equity."
+    )
+
+    insights = [
+        f"{location} remains a premier market for {role} talent, with salary bands experiencing steady YoY adjustments.",
+        f"Variable pay at the {level.capitalize()} level typically forms about {int(bonus_pct * 100)}% of the total cash compensation.",
+        "Equity options are increasingly used to attract talent, generally vesting linearly over 4 years with a 1-year cliff."
+    ]
 
     return SalaryIntelligenceResponse(
         base_salary_band=CompensationBand(p25=salary_p25, median=salary_median, p75=salary_p75),

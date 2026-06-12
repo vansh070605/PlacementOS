@@ -134,6 +134,8 @@ graph TD
 ### Backend (Local-First AI & ML)
 *   **FastAPI**: Asynchronous, high-performance Python web framework.
 *   **Google GenAI SDK**: Utilizing **`gemini-1.5-flash`** by default (with configuration support for `gemini-2.5-flash` / `gemini-1.5-pro`) for multi-agent reasoning, safety filtering, and JSON schemas.
+*   **PyTorch & Hugging Face Transformers**: Powers local token classification (BERT NER), sentence embeddings, Cross-Encoders, and local Generative Causal Language Models (Qwen).
+*   **Scikit-Learn**: Used for classical machine learning pipelines (Random Forest classification for Career Compass).
 *   **ChromaDB**: SQLite-backed local vector database for indexing and searching your career portfolio.
 *   **Custom Gemini Embedding Function**: Runs remote `gemini-embedding-2` calls to preserve local RAM usage (optional configuration for local `all-MiniLM-L6-v2` SentenceTransformers).
 *   **TensorFlow & Keras**: Local model inference engine supporting neural networks trained on market compensation datasets.
@@ -227,5 +229,13 @@ Each agent in the pipeline relies on the official `google-genai` SDK using `gemi
 
 ### Local Neural Network Compensation Analysis
 The Salary Intelligence page references a local Deep Learning regression model compiled with Keras. Feature columns like `role`, `location`, and `seniority` are preprocessed via one-hot encoding, matching the training schema configured in `backend/scripts/train_salary_dl_model.py`. This prediction system runs entirely offline on your local machine, protecting user privacy.
+
+### Local Hybrid AI & Model Registry (Local Fallbacks)
+To ensure reliable operation under offline conditions, API rate limits, or for maximum privacy, PlacementOS includes a centralized `LocalModelRegistry` that lazily loads local models onto CUDA (GPU) if available, or CPU:
+*   **Local Generative LLM**: A Hugging Face pipeline wrapping `Qwen/Qwen2.5-1.5B-Instruct` is used locally for agent inference (e.g., Mock Interview Agent 10) with automatic fallback to Gemini.
+*   **ATS Cross-Encoder Scorer**: Employs `cross-encoder/ms-marco-MiniLM-L-6-v2` locally for high-precision semantic matching between resumes and JDs (Agent 9).
+*   **Career Compass Classifier**: Uses a Scikit-Learn `RandomForestClassifier` pipeline to predict matching job families based on candidate profile keyword vectors (Agent 5).
+*   **BERT NER Extractor**: Utilizes `dslim/bert-base-NER` for local entity extraction on job descriptions (skills, roles, locations) for JD Extractor (Agent 1).
+*   **Keras MLP Regression**: Powers offline Salary Intelligence predictions with one-hot encoded categorization (Agent 7).
 
 *Built as a personal career command center to conquer the modern job market.*
