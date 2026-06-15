@@ -306,7 +306,10 @@ export default function ProjectAuditor() {
         // Clean up markdown syntax if Gemini wrapper leaked
         let cleanedChart = chart.replace(/```mermaid/gi, '').replace(/```/g, '').trim();
         
-        window.mermaid.render(uniqueId, cleanedChart)
+        // Fix LLM semicolon issues (e.g. "graph TD;" -> "graph TD")
+        cleanedChart = cleanedChart.replace(/^(graph\s+\w+);/i, '$1\n');
+        
+        window.mermaid.render(uniqueId, cleanedChart, containerRef.current)
           .then(({ svg }) => {
             setSvg(svg);
           })
@@ -723,45 +726,47 @@ export default function ProjectAuditor() {
         <div className="pa-results-container animate-fade-in">
           {/* Bento Header */}
           <div className="bento-grid" style={{ marginBottom: '2rem' }}>
-            <div className="bento-card span-12 animate-slide-up delay-100">
-              <div className="pa-card-header">
-                <span className="pa-project-tag">Audited Project</span>
-                <h3 className="pa-project-title">{result.project_title}</h3>
-                <p className="pa-project-desc">{result.project_description}</p>
-              </div>
-              <div className="pa-actions-side">
-                {saveSuccess ? (
-                  <div className="pa-saved-badge animate-pop">
-                    <span className="material-symbols-outlined">check_circle</span>
-                    Saved to Portfolio
-                  </div>
-                ) : (
-                  <button 
-                    className="btn-pill btn-pill-primary pa-save-btn" 
-                    onClick={handleSaveToPortfolio}
-                    disabled={isSaving}
-                  >
-                    <span className="material-symbols-outlined">save_as</span>
-                    {isSaving ? 'Saving...' : 'Add to Portfolio'}
+            <div className="pa-results-header-card span-12 animate-slide-up delay-100">
+              <div className="pa-title-layout">
+                <div className="pa-title-meta">
+                  <span className="pa-project-tag">Audited Project</span>
+                  <h3 className="pa-project-title">{result.project_title}</h3>
+                  <p className="pa-project-desc">{result.project_description}</p>
+                </div>
+                <div className="pa-actions-side">
+                  {saveSuccess ? (
+                    <div className="pa-saved-badge animate-pop">
+                      <span className="material-symbols-outlined">check_circle</span>
+                      Saved to Portfolio
+                    </div>
+                  ) : (
+                    <button 
+                      className="btn-pill btn-pill-primary pa-save-btn" 
+                      onClick={handleSaveToPortfolio}
+                      disabled={isSaving}
+                    >
+                      <span className="material-symbols-outlined">save_as</span>
+                      {isSaving ? 'Saving...' : 'Add to Portfolio'}
+                    </button>
+                  )}
+                  <button className="btn-pill btn-pill-secondary" onClick={handleReset}>
+                    <span className="material-symbols-outlined">restart_alt</span>
+                    Reset
                   </button>
-                )}
-                <button className="btn-pill btn-pill-secondary" onClick={handleReset}>
-                  <span className="material-symbols-outlined">restart_alt</span>
-                  Reset
-                </button>
+                </div>
               </div>
-            </div>
 
-            <div className="pa-tech-stack-row animate-slide-up delay-200">
-              {result.technologies.map((tech, idx) => (
-                <span key={idx} className="pa-tech-pill">{tech}</span>
-              ))}
-              {result.metrics && (
-                <span className="pa-metrics-pill">
-                  <span className="material-symbols-outlined">bar_chart</span>
-                  {result.metrics}
-                </span>
-              )}
+              <div className="pa-tech-stack-row">
+                {result.technologies.map((tech, idx) => (
+                  <span key={idx} className="pa-tech-pill">{tech}</span>
+                ))}
+                {result.metrics && (
+                  <span className="pa-metrics-pill">
+                    <span className="material-symbols-outlined">bar_chart</span>
+                    {result.metrics}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
