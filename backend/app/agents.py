@@ -56,8 +56,13 @@ from .schemas import (
     ATSScoreResponse,
     MockInterviewRequest,
     MockInterviewResponse,
+    GithubRepoRequest,
+    GithubScoreResponse,
+    GithubChatRequest,
+    GithubChatResponse,
 )
 from .vector_store import vector_store
+from .key_manager import key_manager
 import numpy as np
 from .ml_models import local_models
 from .dl_salary import predict as dl_predict
@@ -142,84 +147,160 @@ def _gemini_retry():
     )
 
 
-# ── Semaphore + Retry Wrapper ─────────────────────────────────────────────────
-async def _call_gemini(client: genai.Client, **kwargs):
+class GroqResponseMock:
+    def __init__(self, text: str):
+        self.text = text
+
+
+async def _call_gemini(client: genai.Client = None, **kwargs):
     """
-    Central choke-point for every Gemini API call in the system.
-
-    1. Acquires _GEMINI_SEMAPHORE  → max 3 concurrent requests.
-    2. Calls generate_content with tenacity retry on 429.
-    3. On final exhaustion converts to RateLimitExceeded so callers get a
-       clean, typed exception rather than a raw tenacity RetryError.
-
-    Usage:
-        response = await _call_gemini(self.genai_client, model=..., contents=..., config=...)
+    Central choke-point for all LLM calls in the system.
+    If settings.llm_provider is "groq", transparently routes to the Groq API
+    via the KeyRotationManager, cleaning the response JSON.
     """
-    @_gemini_retry()
-    async def _inner():
-        # Enforce strict safety settings on every call
-        safety_settings = [
-            types.SafetySetting(
-                category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
-                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
-            ),
-            types.SafetySetting(
-                category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
-            ),
-            types.SafetySetting(
-                category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
-            ),
-            types.SafetySetting(
-                category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
-            ),
-        ]
-        
-        # Merge or inject into config
-        config = kwargs.get('config')
-        if not config:
-            config = types.GenerateContentConfig(safety_settings=safety_settings)
-            kwargs['config'] = config
-        elif isinstance(config, types.GenerateContentConfig):
-            if not config.safety_settings:
-                config.safety_settings = safety_settings
-        
-        return await client.aio.models.generate_content(**kwargs)
+    if settings.llm_provider == "groq":
+        # Extract and format prompt text
+        contents = kwargs.get("contents", "")
+        contents_str = ""
+        if isinstance(contents, list):
+            for c in contents:
+                role_name = "User"
+                parts_texts = []
+                if hasattr(c, "role"):
+                    role_name = "User" if c.role == "user" else "Assistant"
+                elif isinstance(c, dict):
+                    role_name = "User" if c.get("role") == "user" else "Assistant"
 
-    async with _GEMINI_SEMAPHORE:
-        try:
-            return await _inner()
-        except Exception as exc:
-            # With reraise=True, tenacity re-raises the original 429 error
-            # after exhausting all attempts.  We convert it to our sentinel
-            # so FastAPI routes can return a clean HTTP 503.
-            if _is_rate_limit_error(exc) or isinstance(exc, RetryError):
-                logger.error(
-                    "Gemini API rate limit exceeded after all retry attempts. "
-                    "Raising RateLimitExceeded for HTTP 503 response."
-                )
-                raise RateLimitExceeded(
-                    "AI capacity temporarily reached. Please try again in 60 seconds."
-                ) from exc
-            
-            # Check for API key invalid or leaked errors (400 / 403)
+                if hasattr(c, "parts"):
+                    for part in c.parts:
+                        if hasattr(part, "text") and part.text:
+                            parts_texts.append(part.text)
+                elif isinstance(c, dict) and "parts" in c:
+                    for part in c["parts"]:
+                        if isinstance(part, dict) and "text" in part:
+                            parts_texts.append(part["text"])
+                        elif isinstance(part, str):
+                            parts_texts.append(part)
+                elif hasattr(c, "text") and c.text:
+                    parts_texts.append(c.text)
+                elif isinstance(c, str):
+                    parts_texts.append(c)
+
+                if parts_texts:
+                    contents_str += f"{role_name}: {' '.join(parts_texts)}\n"
+        else:
+            contents_str = str(contents)
+
+        # Get temperature from config if available
+        config = kwargs.get("config")
+        temp = 0.2
+        if config and hasattr(config, "temperature") and config.temperature is not None:
+            temp = config.temperature
+
+        # Create system instruction
+        system_prompt = ""
+        if config and hasattr(config, "system_instruction") and config.system_instruction:
+            system_prompt = config.system_instruction
+        else:
+            system_prompt = "You are an expert AI career coach assistant."
+        
+        response_schema = None
+        if config and hasattr(config, "response_schema"):
+            response_schema = config.response_schema
+
+        if response_schema:
+            system_prompt += "\n\nYou must respond ONLY with a valid JSON object matching the requested schema."
             try:
-                from google.genai import errors as genai_errors
-                if isinstance(exc, genai_errors.ClientError):
-                    status_code = getattr(exc, "code", None)
-                    msg_lower = str(exc).lower()
-                    if status_code in (400, 403) or "api_key" in msg_lower or "leaked" in msg_lower or "permission_denied" in msg_lower:
-                        logger.error(f"Gemini API authentication failed: {exc}")
-                        raise ValueError(
-                            "Your GEMINI_API_KEY in backend/.env is invalid or has been reported as leaked. "
-                            "Please obtain a new API key from Google AI Studio and configure it in backend/.env."
-                        ) from exc
-            except ImportError:
-                pass
+                if hasattr(response_schema, "model_json_schema"):
+                    schema_dict = response_schema.model_json_schema()
+                    system_prompt += f" The response must be a JSON object conforming to this JSON Schema:\n{json.dumps(schema_dict, indent=2)}\nMake sure all required fields are populated exactly as defined in the schema."
+                elif hasattr(response_schema, "schema"):
+                    schema_dict = response_schema.schema()
+                    system_prompt += f" The response must be a JSON object conforming to this JSON Schema:\n{json.dumps(schema_dict, indent=2)}\nMake sure all required fields are populated exactly as defined in the schema."
+                else:
+                    system_prompt += f" The response must be a JSON object conforming to this schema structure: {response_schema}."
+            except Exception as se:
+                logger.warning(f"Could not convert response_schema to JSON schema: {se}")
+                system_prompt += f" The response must be a JSON object conforming to this schema structure: {response_schema}."
 
-            raise  # re-raise other errors unchanged
+        logger.info(f"Routing call to Groq using model: {settings.groq_model}")
+        res_text = await key_manager.call_groq_completion(
+            system_prompt=system_prompt,
+            user_input=contents_str,
+            temperature=temp
+        )
+        cleaned_res = clean_json_text(res_text)
+        return GroqResponseMock(text=cleaned_res)
+
+    # Standard Gemini execution path
+    @_gemini_retry()
+    async def _execute():
+        async with _GEMINI_SEMAPHORE:
+            # Enforce safety settings
+            safety_settings = [
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+                ),
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+                ),
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                    threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+                ),
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+                ),
+            ]
+            
+            # Merge or inject into config
+            config = kwargs.get('config')
+            if not config:
+                config = types.GenerateContentConfig(safety_settings=safety_settings)
+                kwargs['config'] = config
+            elif isinstance(config, types.GenerateContentConfig):
+                if not config.safety_settings:
+                    config.safety_settings = safety_settings
+
+            try:
+                return await client.aio.models.generate_content(**kwargs)
+            except Exception as exc:
+                if _is_rate_limit_error(exc):
+                    logger.warning("Generative rate limit hit. Rotating Gemini API key...")
+                    key_manager.rotate_key()
+                raise exc
+
+    try:
+        return await _execute()
+    except Exception as exc:
+        if _is_rate_limit_error(exc) or isinstance(exc, RetryError):
+            logger.error(
+                "Gemini API rate limit exceeded after all retry attempts. "
+                "Raising RateLimitExceeded for HTTP 503 response."
+            )
+            raise RateLimitExceeded(
+                "AI capacity temporarily reached. Please try again in 60 seconds."
+            ) from exc
+        
+        # Check for API key invalid or leaked errors (400 / 403)
+        try:
+            from google.genai import errors as genai_errors
+            if isinstance(exc, genai_errors.ClientError):
+                status_code = getattr(exc, "code", None)
+                msg_lower = str(exc).lower()
+                if status_code in (400, 403) or "api_key" in msg_lower or "leaked" in msg_lower or "permission_denied" in msg_lower:
+                    logger.error(f"Gemini API authentication failed: {exc}")
+                    raise ValueError(
+                        "Your GEMINI_API_KEY in backend/.env is invalid or has been reported as leaked. "
+                        "Please obtain a new API key from Google AI Studio and configure it in backend/.env."
+                    ) from exc
+        except ImportError:
+            pass
+
+        raise
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1099,6 +1180,180 @@ class JDAnalysisOrchestrator:
                 )
             )
             return MockInterviewResponse.model_validate_json(response.text)
+
+    # ── Agent 11: Github Scorer Agent ─────────────────────────────────────────
+    async def run_github_scorer_agent(self, request: GithubRepoRequest) -> GithubScoreResponse:
+        """
+        Ingests the given GitHub URL and evaluates code, documentation, and architecture.
+        """
+        logger.info(f"Running Agent 11: Github Scorer Agent for URL: {request.github_url}...")
+        
+        # 1. Ingest repo
+        ingest_res = await vector_store.ingest_github_repo(request.github_url)
+        logger.info(f"Ingested repo. Stats: {ingest_res}")
+        
+        # 2. Query repo context for project overview (Readme, package.json, main.py, etc.)
+        # We query with generic terms to pull out readme/documentation chunks
+        relevant_chunks = await vector_store.query_github_repo(
+            github_url=request.github_url,
+            query_text="project overview readme main config package.json requirements.txt architecture layout",
+            limit=10
+        )
+        
+        context_str = ""
+        for idx, chunk in enumerate(relevant_chunks):
+            context_str += f"--- Chunk from {chunk['source']} ---\n{chunk['content']}\n\n"
+            
+        user_input = f"""
+        GITHUB REPOSITORY URL: {request.github_url}
+        INGESTED CONTEXT HIGHLIGHTS:
+        {context_str[:15000]}
+        """
+        
+        system_prompt = """
+        You are an elite software architect and codebase auditor. Your goal is to evaluate the provided GitHub repository details and generate an honest, objective code score (out of 100) and actionable insights.
+        
+        INSTRUCTIONS:
+        1. Determine the 'project_title' (actual name or a professional title matching it) and a 2-3 sentence 'project_description'.
+        2. Calculate the 'overall_score' (from 0 to 100) reflecting the repository's health, readability, quality of documentation, and technical depth.
+        3. Provide exactly 4 'metrics' ratings:
+           - 'Code Quality': rating code structure, naming conventions, language best practices.
+           - 'Documentation': rating README completeness, code comments, usage instructions.
+           - 'Complexity & Architecture': rating separation of concerns, design patterns, scale readiness.
+           - 'Testing & Robustness': rating test presence, config management, error handling.
+        4. Generate 3 to 5 'insights' detailing specific code highlights, flaws, or concrete improvement points.
+        
+        Return ONLY a JSON matching the GithubScoreResponse schema:
+        {
+          "project_title": "Title",
+          "project_description": "Description",
+          "overall_score": 80,
+          "metrics": [
+            {"name": "Code Quality", "score": 85, "explanation": "Explanation..."},
+            {"name": "Documentation", "score": 75, "explanation": "Explanation..."}
+          ],
+          "insights": ["Insight 1", "Insight 2"]
+        }
+        """
+        
+        try:
+            response_text = await asyncio.to_thread(
+                local_models.call_local_llm,
+                system_prompt=system_prompt,
+                user_input=user_input,
+                temperature=0.2
+            )
+            clean_json = clean_json_text(response_text)
+            return GithubScoreResponse.model_validate_json(clean_json)
+        except Exception as e:
+            logger.warning(f"Local Agent 11 scorer failed: {e}. Falling back to Gemini.")
+            prompt = f"""
+            You are an elite software architect and codebase auditor.
+            Evaluate this GitHub repository: {request.github_url}
+            
+            Key context chunks retrieved:
+            {context_str[:15000]}
+            
+            Perform a rigorous code audit and generate a structured JSON object matching the requested schema.
+            """
+            response = await _call_gemini(
+                self.genai_client,
+                model=settings.gemini_model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=GithubScoreResponse,
+                    temperature=0.2,
+                )
+            )
+            return GithubScoreResponse.model_validate_json(response.text)
+
+    # ── Agent 12: Github RAG Chat Agent ───────────────────────────────────────
+    async def run_github_rag_agent(self, request: GithubChatRequest) -> GithubChatResponse:
+        """
+        Answers questions strictly using context from the ingested repository.
+        """
+        logger.info(f"Running Agent 12: Github RAG Agent for URL: {request.github_url}...")
+        
+        # 1. Query vector store
+        relevant_chunks = await vector_store.query_github_repo(
+            github_url=request.github_url,
+            query_text=request.question,
+            limit=6
+        )
+        
+        context_str = ""
+        for chunk in relevant_chunks:
+            context_str += f"--- Source File: {chunk['source']} (Similarity: {chunk['similarity']:.2f}) ---\n{chunk['content']}\n\n"
+            
+        history_str = ""
+        if request.chat_history:
+            for turn in request.chat_history:
+                history_str += f"{turn.role.capitalize()}: {turn.content}\n\n"
+                
+        user_input = f"""
+        RELEVANT REPOSITORY CONTEXT:
+        {context_str}
+        
+        CONVERSATION HISTORY:
+        {history_str}
+        
+        USER QUESTION:
+        {request.question}
+        """
+        
+        system_prompt = """
+        You are an AI developer assistant designed to answer questions strictly about the given GitHub repository.
+        
+        CRITICAL RULES:
+        1. Answer the user's question using ONLY the provided repository context.
+        2. If the user's question is completely unrelated to the repository codebase (e.g. general knowledge, unrelated math/history, chat greetings are fine but general questions are not), or if the provided context does not contain the answer, you MUST refuse to answer.
+        3. If you refuse to answer, set 'out_of_context' to true, and explain politely in 'answer' that you can only answer questions related to the codebase/repository.
+        4. If the question IS related to the codebase, set 'out_of_context' to false and answer it comprehensively.
+        
+        Return ONLY a JSON matching the GithubChatResponse schema:
+        {
+          "answer": "Your response here",
+          "out_of_context": false
+        }
+        """
+        
+        try:
+            response_text = await asyncio.to_thread(
+                local_models.call_local_llm,
+                system_prompt=system_prompt,
+                user_input=user_input,
+                temperature=0.2
+            )
+            clean_json = clean_json_text(response_text)
+            return GithubChatResponse.model_validate_json(clean_json)
+        except Exception as e:
+            logger.warning(f"Local Agent 12 RAG failed: {e}. Falling back to Gemini.")
+            prompt = f"""
+            You are an AI developer assistant designed to answer questions strictly about the given GitHub repository.
+            
+            RELEVANT REPOSITORY CONTEXT:
+            {context_str}
+            
+            CONVERSATION HISTORY:
+            {history_str}
+            
+            USER QUESTION:
+            {request.question}
+            
+            Follow the system prompt rules and answer using the requested GithubChatResponse schema.
+            """
+            response = await _call_gemini(
+                self.genai_client,
+                model=settings.gemini_model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=GithubChatResponse,
+                    temperature=0.2,
+                )
+            )
+            return GithubChatResponse.model_validate_json(response.text)
 
 
 # Global orchestrator singleton instance

@@ -39,3 +39,50 @@ export async function analyzeJobDescription(jobDescription) {
     throw error;
   }
 }
+
+/**
+ * Sends a GitHub URL to the backend for ingestion and scoring.
+ */
+export async function analyzeGithubRepo(githubUrl) {
+  const BACKEND_URL = getBackendUrl();
+  const response = await fetch(`${BACKEND_URL}/api/github/analyze`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ github_url: githubUrl }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || `Server error (${response.status})`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Queries the RAG model for a specific repository.
+ */
+export async function chatGithubRepo(githubUrl, question, chatHistory = []) {
+  const BACKEND_URL = getBackendUrl();
+  const response = await fetch(`${BACKEND_URL}/api/github/chat`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      github_url: githubUrl,
+      question: question,
+      chat_history: chatHistory,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || `Server error (${response.status})`);
+  }
+
+  return response.json();
+}
+

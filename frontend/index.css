@@ -108,7 +108,7 @@ select option {
 
 .main-content {
   flex: 1;
-  padding: 3rem 4rem;
+  padding: 4rem 4rem 3rem 4rem;
   max-width: 100%;
   margin: 0 auto;
   width: 100%;

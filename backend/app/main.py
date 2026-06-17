@@ -32,6 +32,10 @@ from .schemas import (
     ATSScoreResponse,
     MockInterviewRequest,
     MockInterviewResponse,
+    GithubRepoRequest,
+    GithubScoreResponse,
+    GithubChatRequest,
+    GithubChatResponse,
 )
 from .vector_store import vector_store
 from .agents import orchestrator, RateLimitExceeded, _call_gemini
@@ -955,30 +959,44 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     history: list[ChatMessage] = []
+    profile: Optional[dict] = None
+    applications: Optional[list] = None
+    dsaProgress: Optional[dict] = None
+    goals: Optional[dict] = None
+    image: Optional[str] = None
+    mime_type: Optional[str] = None
 
 class ChatResponse(BaseModel):
     reply: str
 
 
-_CHAT_SYSTEM_PROMPT = """You are the PlacementOS AI Assistant — an expert career advisor embedded in the PlacementOS platform.
-You specialize in:
-- Job hunting strategy, resume optimization, and ATS scoring
-- DSA (Data Structures & Algorithms), LeetCode problems, and interview prep
-- System design interviews and STAR method behavioral answers
-- Salary negotiation and compensation benchmarking
-- Cover letter writing and LinkedIn optimization
-- Career path planning and role transitions
+_CHAT_SYSTEM_PROMPT = """You are the PlacementOS AI Career Coach — an elite career strategist and technical mentor.
+Your goal is to help the candidate land their dream job by providing expert guidance.
+You have direct, real-time access to the candidate's Profile, Job Application Tracker, and Portfolio database.
 
-Respond in a concise, friendly, and actionable tone. Use markdown formatting (bold, bullets, numbered lists) to structure answers clearly.
-If the user asks something unrelated to careers or tech, gently redirect them back.
-Keep responses under 300 words unless a detailed explanation is specifically needed."""
+Core Focus Areas:
+1. **Resume & Profile Alignment**: Optimize resume bullets, suggest missing keywords, and suggest improvements to their profile details.
+2. **Job Application Tracker**: Give tips on how to prepare for interviews for their tracked roles, write outreach emails to recruiters, or handle specific company interview loops.
+3. **Technical & DSA Prep**: Provide clean code solutions (Java, Python, C++, JavaScript), explain complexity, perform mock system design reviews, or solve LeetCode problems.
+4. **Behavioral Interviews**: Guide them in structuring answers using the STAR method (Situation, Task, Action, Result) based on their background.
+5. **Portfolio Analysis**: Audit their portfolio projects and highlight how they map to target job descriptions.
+6. **Salary & Offer Negotiation**: Benchmarking and strategic negotiation advice.
+
+Instructions:
+- Be highly encouraging, analytical, and professional.
+- Use clean Markdown formatting (bold text, headers, bullets, tables) to make information readable.
+- Contextualize answers: if the candidate asks about project setup, career growth, or interview prep, refer to their skills, target title, and portfolio projects whenever possible.
+- If an image is uploaded (e.g. error message, code block, job description, resume snippet), analyze it thoroughly in the context of their career prep.
+- Gently redirect unrelated queries (e.g. general knowledge, pop culture) back to career and technical prep.
+- Keep responses concise and action-oriented (under 400 words) so they can read them quickly in the chat panel."""
 
 
 @app.post("/api/chat", response_model=ChatResponse, status_code=status.HTTP_200_OK)
 async def chat_with_ai(request: ChatRequest):
     """
-    Floating AI Chatbot endpoint.
-    Accepts a message + conversation history, returns a Gemini-powered reply.
+    Floating AI Career Coach Chatbot endpoint.
+    Retrieves semantic project matches from ChromaDB (RAG) and combines candidate
+    metadata (Profile + Job Tracker) into a tailored System Instruction for Gemini.
     """
     if not settings.gemini_api_key:
         raise HTTPException(
@@ -986,16 +1004,110 @@ async def chat_with_ai(request: ChatRequest):
             detail="AI service unavailable: GEMINI_API_KEY is not configured."
         )
 
-    if not request.message.strip():
+    if not request.message.strip() and not request.image:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Message cannot be empty."
+            detail="Message or image is required."
         )
 
     try:
         client = genai.Client(api_key=settings.gemini_api_key)
 
-        # Build multi-turn history for Gemini
+        # 0. Fetch all project titles & technologies to give the model a broad map of the portfolio
+        all_projects_summary = ""
+        try:
+            def _get_all_projects():
+                return vector_store.collection.get(include=["metadatas"])
+            all_data = await asyncio.to_thread(_get_all_projects)
+            if all_data and all_data["metadatas"]:
+                all_projects_summary = "\n\n[CANDIDATE PORTFOLIO PROJECTS CATALOG]\n"
+                for meta in all_data["metadatas"]:
+                    techs = []
+                    try:
+                        if meta.get("technologies"):
+                            techs = json.loads(meta["technologies"])
+                    except:
+                        pass
+                    techs_str = ", ".join(techs) if techs else "None listed"
+                    all_projects_summary += f"- Project: {meta.get('title')} (Tech: {techs_str})\n"
+        except Exception as pe:
+            logger.warning(f"Failed to fetch portfolio catalogue for chat: {pe}")
+
+        # 1. Query similar projects in Vector Store for semantic RAG context
+        project_context = ""
+        query_text = request.message if request.message.strip() else "projects"
+        try:
+            similar_projects = await vector_store.query_similar_projects(query_text, limit=3)
+            if similar_projects:
+                project_context = "\n\nRelevant Portfolio Projects (RAG context):\n"
+                for idx, p in enumerate(similar_projects):
+                    # Only include project if similarity score is high enough (e.g. > 0.15)
+                    if p.similarity_score > 0.15:
+                        project_context += (
+                            f"- Project {idx+1}: {p.title}\n"
+                            f"  Description: {p.description}\n"
+                            f"  Technologies: {', '.join(p.technologies)}\n"
+                            f"  Metrics/Achievements: {p.metrics or 'N/A'}\n"
+                        )
+        except Exception as ve:
+            logger.warning(f"Error querying vector store for chat context: {ve}")
+
+        # 2. Build custom system instruction based on candidate context
+        system_instruction = _CHAT_SYSTEM_PROMPT
+
+        if all_projects_summary:
+            system_instruction += all_projects_summary
+
+        if request.profile:
+            p = request.profile
+            skills_str = ", ".join(p.get("skills", [])) or "None listed yet"
+            system_instruction += (
+                f"\n\n[CANDIDATE PROFILE CONTEXT]\n"
+                f"- Name: {p.get('fullName', 'Candidate')}\n"
+                f"- Target Title/Role: {p.get('title', 'Not specified')}\n"
+                f"- Location: {p.get('location', 'Not specified')}\n"
+                f"- Skills: {skills_str}\n"
+                f"- Bio: {p.get('bio', 'None')}\n"
+            )
+
+        if request.applications:
+            system_instruction += "\n\n[CANDIDATE JOB APPLICATIONS TRACKER]\n"
+            for app in request.applications:
+                system_instruction += (
+                    f"- Company: {app.get('company', 'Unknown')}, "
+                    f"Role: {app.get('role', 'Unknown')}, "
+                    f"Status: {app.get('status', 'Applied')}, "
+                    f"Date: {app.get('date', 'N/A')}\n"
+                )
+
+        if request.dsaProgress:
+            system_instruction += "\n\n[CANDIDATE DSA PREPARATION PROGRESS]\n"
+            topics = request.dsaProgress.get("topics", {})
+            if topics:
+                system_instruction += "- Solved counts by topic:\n"
+                for topic, details in topics.items():
+                    system_instruction += f"  * {topic}: {details.get('solved', 0)} solved\n"
+            questions = request.dsaProgress.get("questions", [])
+            if questions:
+                solved = [q for q in questions if q.get("status") == "Solved"]
+                if solved:
+                    system_instruction += "- Recently solved questions:\n"
+                    for q in solved[-5:]:
+                        system_instruction += f"  * {q.get('title')} ({q.get('difficulty', 'Medium')}) on {q.get('platform', 'LeetCode')}\n"
+
+        if request.goals:
+            g = request.goals
+            system_instruction += (
+                f"\n\n[CANDIDATE WEEKLY GOALS & PROGRESS]\n"
+                f"- Weekly Application Target: {g.get('weeklyApplications', 5)}\n"
+                f"- Weekly DSA Question Target: {g.get('weeklyDSAQuestions', 8)}\n"
+                f"- Target Offers: {g.get('targetOffers', 2)}\n"
+            )
+
+        if project_context:
+            system_instruction += project_context
+
+        # 3. Build multi-turn history for Gemini
         history = []
         for msg in request.history:
             role = "user" if msg.role == "user" else "model"
@@ -1003,19 +1115,43 @@ async def chat_with_ai(request: ChatRequest):
                 types.Content(role=role, parts=[types.Part(text=msg.text)])
             )
 
-        # Add the latest user message
+        # 4. Construct current message parts list (supporting multi-modal images)
+        parts = [types.Part(text=request.message)]
+        if request.image:
+            import base64
+            try:
+                img_data = request.image
+                if "," in img_data:
+                    img_data = img_data.split(",", 1)[1]
+                image_bytes = base64.b64decode(img_data)
+                
+                # Default to image/png if not provided
+                mime = request.mime_type or "image/png"
+                parts.append(
+                    types.Part(
+                        inline_data=types.Blob(
+                            mime_type=mime,
+                            data=image_bytes
+                        )
+                    )
+                )
+                logger.info(f"Chat received multimodal input: image byte size: {len(image_bytes)}, type: {mime}")
+            except Exception as ex:
+                logger.error(f"Failed to decode image part in chat: {ex}", exc_info=True)
+
         history.append(
-            types.Content(role="user", parts=[types.Part(text=request.message)])
+            types.Content(role="user", parts=parts)
         )
 
+        # 5. Invoke LLM via semaphored wrapper
         response = await _call_gemini(
             client,
             model=settings.gemini_model,
             contents=history,
             config=types.GenerateContentConfig(
-                system_instruction=_CHAT_SYSTEM_PROMPT,
+                system_instruction=system_instruction,
                 temperature=0.7,
-                max_output_tokens=600,
+                max_output_tokens=800,
             )
         )
 
@@ -1038,3 +1174,81 @@ async def chat_with_ai(request: ChatRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while processing your message."
         )
+
+
+@app.post(
+    "/api/github/analyze",
+    response_model=GithubScoreResponse,
+    status_code=status.HTTP_200_OK
+)
+async def analyze_github_repo(request: GithubRepoRequest):
+    """
+    Ingests and analyzes a public GitHub repository. Returns a quality score,
+    metrics ratings, and technical insights.
+    """
+    if not request.github_url.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GitHub URL cannot be empty."
+        )
+    try:
+        result = await orchestrator.run_github_scorer_agent(request)
+        return result
+    except RateLimitExceeded:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_RATE_LIMIT_RESPONSE["error"],
+        )
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"GitHub analysis failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while analyzing the GitHub repository."
+        )
+
+
+@app.post(
+    "/api/github/chat",
+    response_model=GithubChatResponse,
+    status_code=status.HTTP_200_OK
+)
+async def chat_github_repo(request: GithubChatRequest):
+    """
+    RAG chatbot endpoint for answering questions about a GitHub repository.
+    Strictly answers context-bound questions.
+    """
+    if not request.github_url.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GitHub URL cannot be empty."
+        )
+    if not request.question.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Question cannot be empty."
+        )
+    try:
+        result = await orchestrator.run_github_rag_agent(request)
+        return result
+    except RateLimitExceeded:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=_RATE_LIMIT_RESPONSE["error"],
+        )
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"GitHub RAG chat failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred during repository RAG chat."
+        )
+

@@ -3,26 +3,16 @@ vector_store.py  –  PlacementOS Local Embedding Vector Store
 =============================================================
 HARDENING v2 – Local Embedding Migration
 
-Previous implementation used `gemini-embedding-2` via the Google GenAI SDK
-for every embed_content() call.  This burned Gemini API quota on embeddings
-in *addition* to the 8 LLM agent calls, making it trivially easy to blow
-through the 15-RPM free-tier limit on multi-project ingestion or rapid
-query bursts.
-
 This version replaces the remote Gemini embeddings with a fully LOCAL
 SentenceTransformer model (`all-MiniLM-L6-v2`) via ChromaDB's built-in
-SentenceTransformerEmbeddingFunction.  Key benefits:
+SentenceTransformerEmbeddingFunction. Key benefits:
 
   1. ZERO Gemini API calls for embeddings — the full 15-RPM budget is
-     reserved exclusively for the 8 LLM agent generate_content() calls.
+     reserved exclusively for the LLM agent generate_content() calls.
   2. Sub-millisecond embedding latency (CPU inference, ~80 MB model).
   3. The model is auto-downloaded from HuggingFace Hub on first startup.
-     Subsequent runs use the cached copy (~/.cache/torch/sentence_transformers).
   4. Dimensionality change: gemini-embedding-2 produced 768-dim vectors;
-     all-MiniLM-L6-v2 produces 384-dim vectors.  The collection is
-     force-recreated on init to avoid stale dimension mismatches.
-
-No changes to Pydantic schemas, API contracts, or agent interfaces.
+     all-MiniLM-L6-v2 produces 384-dim vectors.
 """
 
 import os
@@ -34,26 +24,9 @@ import json
 import uuid
 import asyncio
 import logging
-from typing import List, Optional
-
 import chromadb
-from chromadb.api.types import Documents, EmbeddingFunction, Embeddings
-from google import genai
-
-class CustomGeminiEmbeddingFunction(EmbeddingFunction):
-    def __init__(self, api_key: str, model_name: str = "gemini-embedding-2"):
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY is missing!")
-        self.client = genai.Client(api_key=api_key)
-        self.model_name = model_name
-
-    def __call__(self, input: Documents) -> Embeddings:
-        response = self.client.models.embed_content(
-            model=self.model_name,
-            contents=list(input)
-        )
-        return [e.values for e in response.embeddings]
-
+from typing import List, Optional
+from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 from .config import settings
 from .schemas import ProjectIngest, MatchedProject
@@ -64,64 +37,38 @@ logger = logging.getLogger("placementos.vector_store")
 class VectorStoreManager:
     """
     Manages local ChromaDB vector store operations with LOCAL embeddings.
-
     All embedding computation is performed on-device via SentenceTransformers.
-    No Google GenAI API calls are made by this module — the Gemini rate-limit
-    budget is entirely reserved for the LLM agent pipeline in agents.py.
+    No Google GenAI API calls are made by this module.
     """
 
     def __init__(self):
-        # ── 1. Ensure the ChromaDB persistence directory exists ──────────
+        # Ensure the ChromaDB persistence directory exists
         os.makedirs(settings.chroma_db_dir, exist_ok=True)
 
-        # ── 2. Create the local SentenceTransformer embedding function ───
-        # ChromaDB's built-in wrapper handles:
-        #   • Auto-downloading the model from HuggingFace on first run
-        #   • Caching to ~/.cache/torch/sentence_transformers/ for future runs
-        #   • Batched encoding for bulk ingestion
-        #
-        # all-MiniLM-L6-v2:  384-dim, ~80 MB, fast CPU inference, strong
-        # semantic quality for short paragraphs (ideal for project descriptions).
-        logger.info("Initializing Custom Google Gemini embedding model to save RAM...")
-        if not settings.gemini_api_key:
-            logger.warning("GEMINI_API_KEY is missing! Embeddings will fail.")
-            
-        self._embedding_fn = CustomGeminiEmbeddingFunction(
-            api_key=settings.gemini_api_key,
-            model_name="gemini-embedding-2"
+        logger.info("Initializing local SentenceTransformer embedding model 'all-MiniLM-L6-v2'...")
+        self._embedding_fn = SentenceTransformerEmbeddingFunction(
+            model_name="all-MiniLM-L6-v2"
         )
-        logger.info("Custom Gemini embedding model loaded successfully.")
+        logger.info("Local SentenceTransformer embedding model loaded successfully.")
 
-        # ── 3. Initialize persistent ChromaDB client ─────────────────────
+        # Initialize persistent ChromaDB client
         self.chroma_client = chromadb.PersistentClient(path=settings.chroma_db_dir)
 
-        # ── 4. Get or create collection with local embedding function ────
-        # IMPORTANT: We pass the embedding_function here so ChromaDB uses
-        # our local SentenceTransformer for all add() and query() calls
-        # that don't supply pre-computed embeddings.
-        #
-        # If you previously had a collection using gemini-embedding-2 vectors
-        # (768-dim), those vectors are INCOMPATIBLE with the new 384-dim model.
-        # ChromaDB will recreate the collection on next portfolio seeding.
+        # Get or create collection with local embedding function
+        # Recreated to 'portfolio_local_v2' to avoid dim clash (384 vs 768)
         self.collection = self.chroma_client.get_or_create_collection(
-            name="portfolio_local",  # New name to avoid dimension clash with old "portfolio"
+            name="portfolio_local_v2",
             metadata={"hnsw:space": "cosine"},
             embedding_function=self._embedding_fn,
         )
         logger.info(
-            f"ChromaDB collection 'portfolio_local' ready. "
+            f"ChromaDB collection 'portfolio_local_v2' ready. "
             f"Current document count: {self.collection.count()}"
         )
 
     async def add_project(self, project: ProjectIngest) -> str:
         """
         Ingests a project into ChromaDB.
-
-        Embedding computation happens LOCALLY via SentenceTransformer —
-        no Gemini API call, no rate-limit risk.
-
-        Uses asyncio.to_thread to run the blocking ChromaDB + embedding
-        computation off the main event loop.
         """
         project_id = project.id or str(uuid.uuid4())
 
@@ -143,11 +90,7 @@ class VectorStoreManager:
             "metrics": project.metrics or "",
         }
 
-        # Offload the blocking upsert (includes local embedding computation)
-        # to the thread pool so we don't block the async event loop.
         def _sync_upsert():
-            # ChromaDB will call self._embedding_fn internally to compute
-            # the embedding from `documents` — fully local, no API call.
             self.collection.upsert(
                 ids=[project_id],
                 metadatas=[metadata],
@@ -170,70 +113,239 @@ class VectorStoreManager:
         self, query_text: str, limit: int = 3
     ) -> List[MatchedProject]:
         """
-        Performs semantic similarity search on the portfolio collection.
-
-        The query embedding is computed LOCALLY via SentenceTransformer —
-        no Gemini API call, no rate-limit risk.
-
-        Returns top matched project records sorted by similarity descending.
+        Queries ChromaDB for candidate projects semantically matching the query.
         """
-        # Check if database has documents before querying
-        def _sync_count():
-            return self.collection.count()
-
-        count = await asyncio.to_thread(_sync_count)
-        if count == 0:
-            return []
-
-        # Query ChromaDB — embedding of query_text is computed locally
-        # by the SentenceTransformerEmbeddingFunction we attached to the collection.
         def _sync_query():
             return self.collection.query(
-                query_texts=[query_text],  # ChromaDB embeds this locally via our function
+                query_texts=[query_text],
                 n_results=limit,
                 include=["metadatas", "documents", "distances"],
             )
 
         results = await asyncio.to_thread(_sync_query)
 
+        # Map results to Pydantic responses
         matched_projects = []
-        if results and results["ids"] and results["ids"][0]:
-            ids = results["ids"][0]
-            metadatas = results["metadatas"][0]
-            distances = results["distances"][0]
+        if not results or not results["ids"] or not results["ids"][0]:
+            return matched_projects
 
-            for idx in range(len(ids)):
-                meta = metadatas[idx]
+        ids = results["ids"][0]
+        metadatas = results["metadatas"][0]
+        distances = results["distances"][0]
 
-                # ChromaDB cosine distance = 1 - cosine_similarity
-                # So cosine_similarity = 1 - distance
-                similarity = 1.0 - distances[idx]
+        for i in range(len(ids)):
+            meta = metadatas[i]
+            if not meta:
+                continue
 
-                # Safely parse technologies list from JSON string
+            # Convert distance (cosine distance) to similarity score
+            # cosine similarity = 1 - cosine distance
+            similarity = 1.0 - distances[i]
+
+            try:
+                technologies = json.loads(meta.get("technologies", "[]"))
+            except Exception:
                 technologies = []
-                try:
-                    if meta.get("technologies"):
-                        technologies = json.loads(meta["technologies"])
-                except Exception:
-                    pass
 
-                matched_projects.append(
-                    MatchedProject(
-                        id=ids[idx],
-                        title=meta.get("title", ""),
-                        description=meta.get("description", ""),
-                        technologies=technologies,
-                        metrics=meta.get("metrics") or None,
-                        similarity_score=max(0.0, min(1.0, similarity)),
-                    )
+            matched_projects.append(
+                MatchedProject(
+                    id=ids[i],
+                    title=meta.get("title", ""),
+                    description=meta.get("description", ""),
+                    technologies=technologies,
+                    metrics=meta.get("metrics") or None,
+                    similarity_score=max(0.0, min(1.0, similarity)),
                 )
+            )
 
         # Sort highest similarity first
         matched_projects.sort(key=lambda x: x.similarity_score, reverse=True)
         return matched_projects
 
+    async def ingest_github_repo(self, github_url: str) -> dict:
+        """
+        Shallow clones a public GitHub repository, traverses and reads its code/text files,
+        chunks them, and ingests them into a dedicated ChromaDB collection.
+        """
+        import hashlib
+        import tempfile
+        import shutil
+        import subprocess
+        from pathlib import Path
+
+        # 1. Generate unique collection name from repo URL
+        url_hash = hashlib.md5(github_url.lower().strip().encode()).hexdigest()
+        collection_name = f"gh_{url_hash}_v2"
+
+        # Get or create the collection
+        def _get_or_create_col():
+            return self.chroma_client.get_or_create_collection(
+                name=collection_name,
+                metadata={"hnsw:space": "cosine"},
+                embedding_function=self._embedding_fn,
+            )
+
+        col = await asyncio.to_thread(_get_or_create_col)
+
+        # If already ingested, return cached stats
+        def _get_count():
+            return col.count()
+
+        count = await asyncio.to_thread(_get_count)
+        if count > 0:
+            return {
+                "collection_name": collection_name,
+                "chunks_ingested": count,
+                "status": "cached"
+            }
+
+        # 2. Clone the repository shallowly
+        temp_dir = tempfile.mkdtemp(prefix="placementos_gh_")
+        def _clone():
+            res = subprocess.run(
+                ["git", "clone", "--depth", "1", github_url, temp_dir],
+                capture_output=True,
+                text=True,
+                shell=True
+            )
+            if res.returncode != 0:
+                raise Exception(f"Git clone failed: {res.stderr}")
+
+        try:
+            await asyncio.to_thread(_clone)
+        except Exception as e:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            raise e
+
+        # 3. Traverse and read files
+        ALLOWED_EXTENSIONS = {
+            '.py', '.js', '.jsx', '.ts', '.tsx', '.json', '.md', '.html', '.css', 
+            '.java', '.c', '.cpp', '.h', '.hpp', '.cs', '.go', '.rs', '.sh', 
+            '.yml', '.yaml', '.txt', '.ini', '.conf', 'Dockerfile'
+        }
+
+        IGNORED_DIRS = {
+            '.git', 'node_modules', 'dist', 'build', '.next', '.venv', 'venv', 
+            'env', '__pycache__', 'out', 'target', '.idea', '.vscode'
+        }
+
+        documents = []
+        metadatas = []
+        ids = []
+        files_read = 0
+
+        try:
+            for root, dirs, files in os.walk(temp_dir):
+                # Modify dirs in-place to skip ignored directories
+                dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
+
+                for file in files:
+                    file_path = Path(root) / file
+                    ext = file_path.suffix.lower()
+                    if ext in ALLOWED_EXTENSIONS or file_path.name in ALLOWED_EXTENSIONS:
+                        if file_path.stat().st_size > 500 * 1024: # Skip files > 500KB
+                            continue
+                        
+                        try:
+                            content = file_path.read_text(encoding='utf-8', errors='ignore')
+                            relative_path = os.path.relpath(file_path, temp_dir)
+                            
+                            # Chunk
+                            chunks = []
+                            chunk_size = 1500
+                            overlap = 150
+                            start = 0
+                            while start < len(content):
+                                end = start + chunk_size
+                                chunks.append(content[start:end])
+                                start += chunk_size - overlap
+
+                            for idx, chunk in enumerate(chunks):
+                                doc_id = f"{url_hash}_{files_read}_{idx}"
+                                documents.append(chunk)
+                                metadatas.append({
+                                    "source": relative_path,
+                                    "chunk_idx": idx,
+                                    "total_chunks": len(chunks)
+                                })
+                                ids.append(doc_id)
+
+                            files_read += 1
+                            if files_read >= 150: # Cap at 150 files
+                                break
+                        except Exception as fe:
+                            logger.warning(f"Error reading file {file_path}: {fe}")
+                            continue
+                if files_read >= 150:
+                    break
+
+            # 4. Batch Ingest into ChromaDB
+            if documents:
+                batch_size = 500
+                for i in range(0, len(documents), batch_size):
+                    batch_docs = documents[i:i+batch_size]
+                    batch_metas = metadatas[i:i+batch_size]
+                    batch_ids = ids[i:i+batch_size]
+                    
+                    def _sync_batch_add(b_ids, b_metas, b_docs):
+                        col.upsert(
+                            ids=b_ids,
+                            metadatas=b_metas,
+                            documents=b_docs
+                        )
+                    await asyncio.to_thread(_sync_batch_add, batch_ids, batch_metas, batch_docs)
+
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+        return {
+            "collection_name": collection_name,
+            "chunks_ingested": len(documents),
+            "files_processed": files_read,
+            "status": "success"
+        }
+
+    async def query_github_repo(self, github_url: str, query_text: str, limit: int = 5) -> List[dict]:
+        """
+        Queries the repository-specific collection for relevant chunks.
+        """
+        import hashlib
+        url_hash = hashlib.md5(github_url.lower().strip().encode()).hexdigest()
+        collection_name = f"gh_{url_hash}_v2"
+
+        def _sync_query():
+            try:
+                col = self.chroma_client.get_collection(
+                    name=collection_name,
+                    embedding_function=self._embedding_fn
+                )
+                return col.query(
+                    query_texts=[query_text],
+                    n_results=limit,
+                    include=["metadatas", "documents", "distances"]
+                )
+            except Exception:
+                return None
+
+        results = await asyncio.to_thread(_sync_query)
+        if not results or not results["ids"] or not results["ids"][0]:
+            return []
+
+        matched = []
+        ids = results["ids"][0]
+        metadatas = results["metadatas"][0]
+        documents = results["documents"][0]
+        distances = results["distances"][0]
+
+        for idx in range(len(ids)):
+            matched.append({
+                "id": ids[idx],
+                "content": documents[idx],
+                "source": metadatas[idx].get("source", "unknown"),
+                "similarity": 1.0 - distances[idx]
+            })
+        return matched
+
 
 # ── Global singleton ──────────────────────────────────────────────────────────
-# Instantiated at import time.  The SentenceTransformer model is loaded once
-# and shared across all requests for the lifetime of the process.
 vector_store = VectorStoreManager()

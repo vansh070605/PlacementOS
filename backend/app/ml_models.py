@@ -161,6 +161,8 @@ class LocalModelRegistry:
 
     def call_local_llm(self, system_prompt: str, user_input: str, temperature: float = 0.2) -> str:
         """Helper to invoke local generative LLM with standardized prompt wrappers."""
+        if self.device == "cpu":
+            raise RuntimeError("Local LLM is disabled on CPU to prevent server hanging. Falling back to Gemini API.")
         try:
             pipe = self.generative_pipeline
             messages = [

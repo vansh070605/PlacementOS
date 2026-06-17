@@ -15,9 +15,21 @@ class Settings(BaseSettings):
 
     # Gemini API Key (required for agents, but optional during initialization check)
     gemini_api_key: Optional[str] = None
+    
+    # Comma-separated list of Gemini API Keys for rotation pool
+    gemini_api_keys: Optional[str] = None
 
     # Gemini model selection
     gemini_model: str = "gemini-2.5-flash"
+
+    # Groq Settings
+    groq_api_key: Optional[str] = None
+    groq_api_keys: Optional[str] = None
+    groq_model: str = "llama-3.3-70b-versatile"
+    
+    # Active LLM Provider: "gemini" or "groq"
+    llm_provider: str = "gemini"
+
 
     # Local SentenceTransformer model for ChromaDB embeddings.
     # Replaces gemini-embedding-2 to eliminate embedding API calls and
@@ -64,5 +76,25 @@ class Settings(BaseSettings):
             return "all-MiniLM-L6-v2"
         return v
 
+    @property
+    def api_keys_list(self) -> list[str]:
+        """Returns the list of parsed API keys from the configuration."""
+        if self.gemini_api_keys:
+            return [k.strip() for k in self.gemini_api_keys.split(",") if k.strip()]
+        if self.gemini_api_key:
+            return [self.gemini_api_key.strip()]
+        return []
+
+    @property
+    def groq_keys_list(self) -> list[str]:
+        """Returns the list of parsed Groq API keys from the configuration."""
+        if self.groq_api_keys:
+            return [k.strip() for k in self.groq_api_keys.split(",") if k.strip()]
+        if self.groq_api_key:
+            return [self.groq_api_key.strip()]
+        return []
+
 # Instantiate settings singleton
 settings = Settings()
+
+

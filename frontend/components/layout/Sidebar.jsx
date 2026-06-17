@@ -78,6 +78,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, setShowAuthModa
       title: 'AI Copilot Suite',
       items: [
         { id: 'auditor',      label: 'Project Auditor', icon: 'terminal'        },
+        { id: 'github-scorer', label: 'GitHub Scorer', icon: 'star'            },
         { id: 'analyzer',     label: 'JD Analyzer',     icon: 'manage_search'   },
         { id: 'compass',      label: 'Career Compass',  icon: 'explore'         },
         { id: 'ats-scorer',   label: 'ATS Scorer',      icon: 'radar'           },

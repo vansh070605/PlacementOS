@@ -294,3 +294,46 @@ class MockInterviewResponse(BaseModel):
     is_technical: bool = Field(..., description="Whether the next question is technical (true) or behavioral (false).")
 
 
+# ── Agent 11 Schemas (Github Scorer & RAG Chatbot) ──────────────────────────
+
+class GithubRepoRequest(BaseModel):
+    """
+    API request schema for analyzing a GitHub repository.
+    """
+    github_url: str = Field(..., description="The public GitHub repository URL.")
+
+class MetricRating(BaseModel):
+    """
+    Represents rating details for a specific repository aspect.
+    """
+    name: str = Field(..., description="Name of the metric (e.g., Code Quality, Documentation, Testing).")
+    score: int = Field(..., ge=0, le=100, description="Score for this metric, from 0 to 100.")
+    explanation: str = Field(..., description="Explanation/feedback for this metric.")
+
+class GithubScoreResponse(BaseModel):
+    """
+    API response schema containing repository insights and scores.
+    """
+    project_title: str = Field(..., description="Project title.")
+    project_description: str = Field(..., description="Summary description of the project.")
+    overall_score: int = Field(..., ge=0, le=100, description="Overall repository quality score.")
+    metrics: List[MetricRating] = Field(..., description="List of metric breakdowns.")
+    insights: List[str] = Field(..., description="Qualitative technical insights.")
+
+class GithubChatRequest(BaseModel):
+    """
+    API request schema for querying the chatbot about a repository.
+    """
+    github_url: str = Field(..., description="The public GitHub repository URL.")
+    question: str = Field(..., description="The user's question about the repository.")
+    chat_history: Optional[List[ConversationTurn]] = Field(default_factory=list, description="Optional conversation history.")
+
+class GithubChatResponse(BaseModel):
+    """
+    API response schema containing the chatbot's answer.
+    """
+    answer: str = Field(..., description="The response based on repository context.")
+    out_of_context: bool = Field(..., description="Set to true if the question was rejected as out-of-context.")
+
+
+

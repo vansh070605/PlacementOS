@@ -8,6 +8,7 @@ import CareerCompass from './components/features/CareerCompass/CareerCompass';
 import SalaryIntelligence from './components/features/SalaryIntelligence/SalaryIntelligence';
 import CoverLetterForge from './components/features/CoverLetterForge/CoverLetterForge';
 import ProjectAuditor from './components/features/ProjectAuditor/ProjectAuditor';
+import GithubScorer from './components/features/GithubScorer/GithubScorer';
 import Settings from './components/features/Settings/Settings';
 import ATSScorer from './components/features/ATSScorer/ATSScorer';
 import MockInterview from './components/features/MockInterview/MockInterview';
@@ -186,6 +187,8 @@ export default function App() {
         );
       case 'auditor':
         return <ProjectAuditor />;
+      case 'github-scorer':
+        return <GithubScorer />;
       case 'analyzer':
         return <JDAnalyzer />;
       case 'compass':
@@ -218,24 +221,28 @@ export default function App() {
   return (
     <ProfileProvider user={user}>
       <div className="app-container">
-        <OnboardingModal 
-          isOpen={showOnboarding} 
-          onClose={() => setShowOnboarding(false)} 
+        <OnboardingModal
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
         />
-        <AuthOverlay 
-          isOpen={showAuthModal} 
-          onClose={() => setShowAuthModal(false)} 
-          onLoginSuccess={(u) => setUser(u)} 
+        <AuthOverlay
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onLoginSuccess={(u) => setUser(u)}
         />
-        <DashboardLayout 
-          activeTab={activeTab} 
+        <DashboardLayout
+          activeTab={activeTab}
           setActiveTab={setActiveTab}
           user={user}
           setShowAuthModal={setShowAuthModal}
         >
           {renderActiveScreen()}
         </DashboardLayout>
-        <AIChat />
+        <AIChat
+          applications={applications}
+          dsaProgress={dsaProgress}
+          goals={goals}
+        />
       </div>
     </ProfileProvider>
   );
