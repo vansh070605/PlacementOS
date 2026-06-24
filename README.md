@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./frontend/public/images/placementos_banner.png" alt="PlacementOS Banner" width="100%">
 
-  <h1>🎓 PlacementOS</h1>
+  <h1>PlacementOS</h1>
   <p><i>A local-first, AI-powered career command center.</i></p>
 
   <!-- GitHub Badges -->
@@ -27,20 +27,32 @@
   </p>
 
   <p>
-    <a href="#-key-features">Key Features</a> •
-    <a href="#-system-architecture">Architecture</a> •
-    <a href="#-local-setup-guide">Installation</a> •
-    <a href="#-the-multi-agent-orchestration-engine">Agents</a> •
-    <a href="#-contributing">Contributing</a> •
-    <a href="#-support">Support</a>
+    <a href="#key-features">Key Features</a> •
+    <a href="#system-architecture">Architecture</a> •
+    <a href="#installation-guide">Installation</a> •
+    <a href="#orchestration-engine">Agents</a> •
+    <a href="#community--support">Contributing</a> •
+    <a href="#community--support">Support</a>
   </p>
 </div>
 
-PlacementOS is a local-first, AI-powered career command center. It replaces generic job application advice with multi-agent RAG architectures that analyze your actual source code, experience portfolio, and the real-world job market to help you land offers faster, optimize your application funnel, and negotiate higher compensation.
+**PlacementOS** is a comprehensive, local-first career management platform. It transcends traditional job application tracking by leveraging a multi-agent Retrieval-Augmented Generation (RAG) architecture. By actively analyzing your source code, professional portfolio, and real-time job market data, PlacementOS provides targeted insights to optimize your application funnel, accelerate interview preparation, and maximize compensation negotiations.
 
 ---
 
-## 🎨 Visual Tour
+## Table of Contents
+1. [Visual Tour](#visual-tour)
+2. [Key Features](#key-features)
+3. [Orchestration Engine](#orchestration-engine)
+4. [System Architecture](#system-architecture)
+5. [Tech Stack](#tech-stack)
+6. [Installation Guide](#installation-guide)
+7. [Under the Hood](#under-the-hood)
+8. [Community & Support](#community--support)
+
+---
+
+## Visual Tour
 
 <p align="center">
   <img src="./frontend/public/images/dashboard_mockup.png" alt="PlacementOS Bento-Box Dashboard Mockup" width="100%">
@@ -48,47 +60,47 @@ PlacementOS is a local-first, AI-powered career command center. It replaces gene
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-### 👤 Unified Candidate Profile
-At the core of PlacementOS is the **Global Candidate Profile**. Powered by Firebase, you build your profile once—adding your bio, contact info, GitHub/LinkedIn links, and technical skills—and it syncs universally across the entire application in real-time. Instead of constantly uploading a static PDF resume, our suite of AI agents directly consume this living profile as context, converting it dynamically into markdown to inject into prompts, saving you time and ensuring the AI is always operating on your most up-to-date accomplishments. (Of course, manual PDF uploads are still fully supported as an override!)
+### Unified Candidate Profile
+At the core of PlacementOS is the **Global Candidate Profile**, synchronized in real-time via Firebase. Build your profile once—including biometrics, contact details, repository links, and technical competencies. Our suite of AI agents directly consume this living profile as contextual memory, dynamically formatting it into markdown for prompt injection. This eliminates redundant data entry and ensures the AI operates strictly on your latest accomplishments. *(Manual PDF uploads are supported as an override).*
 
-### 📊 Job Application Tracker
-An interactive Kanban board and list system allowing you to organize, track, and prioritize your job application funnel. Track roles by status (Applied, Interviewing, Offered, Rejected), dates, compensation range, and keep notes on interview focus areas.
+### Job Application Tracker
+An interactive Kanban board designed to organize, track, and prioritize your application funnel. Monitor roles by lifecycle status (Applied, Interviewing, Offered, Rejected), track chronological progression, document compensation ranges, and log interview focus areas.
 
-### 📝 DSA & LeetCode Progress Tracker
-A specialized workspace designed to track your Data Structures & Algorithms preparation. It monitors major topics (Arrays, Strings, Trees, Graphs, DP, System Design) and features direct LeetCode integration. Using our built-in LeetCode submissions proxy, you can sync your accepted LeetCode solutions, automatically resolving difficulty parameters and topic tags via a public GraphQL connection.
+### DSA & LeetCode Progress Tracker
+A specialized workspace engineered for Data Structures & Algorithms preparation. It monitors proficiency across core paradigms (Arrays, Strings, Trees, Graphs, DP, System Design). Our built-in LeetCode submissions proxy automatically syncs your accepted solutions, resolving difficulty parameters and topic tags via public GraphQL integrations.
 
-### 💬 Floating AI Career Assistant
-A floating chat interface accessible across all screens. Powered by Gemini, the assistant provides immediate contextual hints for DSA, resume optimization, career advice, and interview question defense, customized by your unified profile and application history.
-
----
-
-## 🤖 The Multi-Agent Orchestration Engine
-
-PlacementOS is powered by a suite of **10 specialized autonomous agents** running on a local FastAPI backend, combining LLM reasoning, semantic search, and custom neural networks.
-
-### 🔄 The RAG Analysis Loop (Agents 1-3)
-1. **Agent 1: JD Extractor**: Asynchronously parses raw Job Description text. Leverages Gemini's structured outputs to extract required hard skills, soft skills, and latent engineering requirements.
-2. **Agent 2: RAG Matcher**: Computes query embeddings to fetch similar project descriptions from ChromaDB. By default, it runs remote **`gemini-embedding-2`** queries (minimizing local RAM requirements) but supports switching to a local **SentenceTransformer (`all-MiniLM-L6-v2`)** model when offline. It retrieves the top 5 most relevant personal projects.
-3. **Agent 3: Synthesis Strategist**: Cross-references requirements with retrieved project metadata. It calculates a strict compatibility score (0-100), outputs a detailed alignment checklist, writes tailored, ATS-friendly resume bullets using the **Google X-Y-Z formula**, and builds a target interview prep study plan.
-
-### ✉️ Target Generative Aids (Agents 4 & 8)
-*   **Agent 4: The Networker (Cold Email/LinkedIn Generator)**: Ingests analysis results and drafts highly personalized LinkedIn outreach sequences (strictly under 300 characters) and cold follow-up emails tailored to Casual, Professional, or Confident tones.
-*   **Agent 8: Cover Letter Forge**: Automatically consumes your **Candidate Profile** and tailored resume bullets to craft compelling, non-generic cover letters. Supports **Professional**, **Story-Driven**, or **Data-First** writing styles.
-
-### 🧭 Career, Code, & ATS Auditors (Agents 5, 6, & 9)
-*   **Agent 5: Career Compass**: Utilizes your unified Profile (or a PDF upload) to map your competencies and identify your top 3 ideal career pathways—complete with an ordered learning roadmap to close skill gaps.
-*   **Agent 6: Project Auditor & Explainer**: Scans local codebase directories, pasted snippets, or clones public GitHub repositories. Generates a structural architectural overview, writes a valid **Mermaid.js** flowchart, creates tough project-defense interview questions with mock answers, and formulates optimization recommendations.
-*   **Agent 9: ATS Scorer**: Simulates a strict Applicant Tracking System (ATS). Compares your profile/resume against a target JD to provide a Match Score (0-100), overall verdict, parsing issue feedback, and lists of matched/missing keywords.
-
-### 📊 Local Machine Learning & Live Practice (Agents 7 & 10)
-*   **Agent 7: Salary Intelligence**: Feeds role title, location, and seniority parameters into a **locally trained TensorFlow/Keras neural network regression model** to predict base salary bands (P25 to P75), total compensations, and equity norms. It also interfaces with Gemini to output a verbatim negotiation script.
-*   **Agent 10: Mock Interview Agent**: Acts as an interactive technical or behavioral interviewer. It consumes the target job description and your candidate profile, evaluates your answers using the STAR method, and asks progressive follow-up questions. Tones can be toggled between **Professional**, **Roast/Critique Reviewer**, and **Encouraging Mentor**.
+### Floating AI Career Assistant
+A pervasive chat interface accessible across all module screens. Powered by Gemini, the assistant provides immediate contextual heuristics for DSA strategies, resume optimization, career trajectories, and interview defense tactics, dynamically scoped to your unified profile.
 
 ---
 
-## 🏗️ System Architecture
+## Orchestration Engine
+
+PlacementOS is driven by a localized FastAPI backend orchestrating **10 specialized autonomous agents**. This system harmonizes Large Language Model (LLM) reasoning, semantic search, and custom neural networks.
+
+### The RAG Analysis Loop (Agents 1-3)
+1. **Agent 1 (JD Extractor):** Asynchronously parses raw Job Description text. Leverages structured outputs to extract explicit hard skills, soft skills, and latent engineering requirements.
+2. **Agent 2 (RAG Matcher):** Computes query embeddings to fetch semantically similar project descriptions from ChromaDB. Defaults to remote `gemini-embedding-2` queries to preserve RAM, with offline fallback to a local `all-MiniLM-L6-v2` SentenceTransformer.
+3. **Agent 3 (Synthesis Strategist):** Cross-references extracted requirements against retrieved project metadata. Calculates a strict compatibility index (0-100), outputs an alignment checklist, drafts tailored resume bullets using the Google X-Y-Z formula, and synthesizes a targeted study plan.
+
+### Target Generative Aids (Agents 4 & 8)
+*   **Agent 4 (The Networker):** Ingests analysis results to draft highly personalized LinkedIn outreach sequences (under 300 characters) and cold email campaigns tailored to Casual, Professional, or Confident tonalities.
+*   **Agent 8 (Cover Letter Forge):** Consumes the Candidate Profile and tailored resume bullets to programmatically generate compelling, non-generic cover letters supporting Professional, Story-Driven, or Data-First structures.
+
+### Career, Code, & ATS Auditors (Agents 5, 6, & 9)
+*   **Agent 5 (Career Compass):** Utilizes the unified profile to map competencies against ideal career pathways, outputting an ordered learning roadmap to bridge identified skill gaps.
+*   **Agent 6 (Project Auditor):** Scans local codebase directories or public GitHub repositories. Generates architectural overviews, writes valid `Mermaid.js` flowcharts, formulates defensive interview questions, and provides optimization recommendations.
+*   **Agent 9 (ATS Scorer):** Simulates an Applicant Tracking System (ATS) parsing engine. Compares the profile against target JDs to generate a Match Score, parsing heuristics, and granular keyword gap analysis.
+
+### Local Machine Learning & Live Practice (Agents 7 & 10)
+*   **Agent 7 (Salary Intelligence):** Feeds parameters into a locally trained TensorFlow/Keras neural network regression model to predict base salary bands (P25-P75), total compensation, and equity norms, supplemented by a generated negotiation script.
+*   **Agent 10 (Mock Interviewer):** Functions as an interactive technical or behavioral interviewer. Evaluates responses using the STAR method and dynamically generates progressive follow-up questions.
+
+---
+
+## System Architecture
 
 ```mermaid
 graph TD
@@ -143,28 +155,27 @@ graph TD
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend (Bento-Box Design System)
-*   **React 19 & Vite 8**: High-performance rendering and hot-module reloading.
-*   **Tailwind CSS v4**: Utility-first styling toolchain integrated into Vite.
-*   **Vanilla CSS 3**: Custom layout components and interactive designs leveraging HSL tokens, glassmorphism, dynamic micro-animations, and theme variables.
-*   **Firebase SDK**: Secure authentication and real-time syncing of the Candidate Profile.
-*   **React Context API**: Global state management (`ProfileContext`) for seamless agent data sharing.
+*   **React 19 & Vite 8:** High-performance rendering and hot-module reloading.
+*   **Tailwind CSS v4:** Utility-first styling toolchain integrated into Vite.
+*   **Vanilla CSS 3:** Custom layout components leveraging HSL tokens, glassmorphism, dynamic micro-animations, and theme variables.
+*   **Firebase SDK:** Secure authentication and real-time syncing.
+*   **React Context API:** Global state management for seamless agent data sharing.
 
 ### Backend (Local-First AI & ML)
-*   **FastAPI**: Asynchronous, high-performance Python web framework.
-*   **Google GenAI SDK**: Utilizing **`gemini-1.5-flash`** by default (with configuration support for `gemini-2.5-flash` / `gemini-1.5-pro`) for multi-agent reasoning, safety filtering, and JSON schemas.
-*   **PyTorch & Hugging Face Transformers**: Powers local token classification (BERT NER), sentence embeddings, Cross-Encoders, and local Generative Causal Language Models (Qwen).
-*   **Scikit-Learn**: Used for classical machine learning pipelines (Random Forest classification for Career Compass).
-*   **ChromaDB**: SQLite-backed local vector database for indexing and searching your career portfolio.
-*   **Custom Gemini Embedding Function**: Runs remote `gemini-embedding-2` calls to preserve local RAM usage (optional configuration for local `all-MiniLM-L6-v2` SentenceTransformers).
-*   **TensorFlow & Keras**: Local model inference engine supporting neural networks trained on market compensation datasets.
-*   **pdfplumber**: Python package for local PDF text extraction.
+*   **FastAPI:** Asynchronous, high-performance Python web framework.
+*   **Google GenAI SDK:** Configured for `gemini-1.5-flash` for multi-agent reasoning, safety filtering, and JSON schema enforcement.
+*   **PyTorch & Hugging Face:** Powers local token classification (BERT NER), sentence embeddings, Cross-Encoders, and local Causal Language Models (Qwen).
+*   **Scikit-Learn:** Classical machine learning pipelines (Random Forest classification).
+*   **ChromaDB:** SQLite-backed local vector database for portfolio indexing.
+*   **TensorFlow & Keras:** Local model inference engine supporting neural networks trained on market compensation datasets.
+*   **pdfplumber:** Python package for local PDF text extraction.
 
 ---
 
-## 💻 Local Setup Guide
+## Installation Guide
 
 ### 1. Clone the Repository
 ```bash
@@ -191,8 +202,7 @@ cd PlacementOS
    ```bash
    pip install -r requirements.txt
    ```
-4. Set up environment variables:
-   Create a `backend/.env` file in the `backend/` folder:
+4. Configure environment variables in `backend/.env`:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
    GEMINI_MODEL=gemini-1.5-flash
@@ -206,10 +216,10 @@ cd PlacementOS
    ```bash
    uvicorn app.main:app --reload --port 8000
    ```
-   > **Note:** On startup, the backend automatically reads `portfolio.json`, generates embeddings using the configured embedding function, and indexes them in ChromaDB. Ensure your `GEMINI_API_KEY` is configured.
+   > **Note:** On startup, the backend reads `portfolio.json`, generates embeddings, and indexes them in ChromaDB.
 
 ### 3. Frontend Setup
-1. In a new terminal, navigate to the project root:
+1. Navigate to the project root in a new terminal:
    ```bash
    cd frontend
    ```
@@ -217,8 +227,7 @@ cd PlacementOS
    ```bash
    npm install
    ```
-3. Set up frontend environment variables:
-   Create a `.env` file in the `frontend/` directory:
+3. Configure environment variables in `frontend/.env`:
    ```env
    VITE_FIREBASE_API_KEY=your_firebase_api_key
    VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
@@ -232,50 +241,45 @@ cd PlacementOS
    npm run dev
    ```
 
-### 4. Run the Application
-Open `http://localhost:5173` in your browser. The app runs locally, storing your trackers in Firebase and vector data inside `backend/data/chroma`.
+Open `http://localhost:5173` in your browser. The application runs locally, storing trackers in Firebase and vector data inside `backend/data/chroma`.
 
 ---
 
-## 🛡️ Under the Hood
+## Under the Hood
 
 ### Asynchronous Multi-Agent Chaining
-Each agent in the pipeline relies on the official `google-genai` SDK using `gemini-1.5-flash`'s structured JSON output mode. By providing Pydantic response models, PlacementOS guarantees output structure validation. All Gemini calls are throttled and protected from rate-limiting at a central entry point.
+Each agent in the pipeline relies on the official `google-genai` SDK using structured JSON output modes. By enforcing Pydantic response models, PlacementOS guarantees output structure validation. All external LLM calls are throttled and protected from rate-limiting at a centralized entry point.
 
 ### Concurrency Throttling & Protections
-*   **Zero-Footprint Embeddings**: Offloads embedding tasks to the Gemini API (`gemini-embedding-2`) by default to dramatically reduce server RAM usage, making it deployable on low-spec cloud platforms.
-*   **Concurrency Throttling**: An `asyncio.Semaphore(3)` cap prevents more than 3 agents from calling Gemini concurrently.
-*   **Exponential Backoff**: Wrapped with `tenacity` retries (up to 5 attempts, doubling wait times) specifically targeted at `429 Resource Exhausted` exceptions.
-*   **Strict Security Posture**: Implements strict Gemini `safety_settings` against block thresholds to prevent prompt injections or policy violations.
+*   **Zero-Footprint Embeddings:** Offloads embedding tasks to the Gemini API (`gemini-embedding-2`) by default, drastically reducing server RAM usage for low-spec deployment.
+*   **Concurrency Throttling:** An `asyncio.Semaphore(3)` cap prevents concurrent threshold breaches.
+*   **Exponential Backoff:** Implemented via `tenacity` retries (up to 5 attempts) specifically targeted at `429 Resource Exhausted` exceptions.
+*   **Strict Security Posture:** Implements strict Gemini `safety_settings` to prevent prompt injections and policy violations.
 
 ### Local Neural Network Compensation Analysis
-The Salary Intelligence page references a local Deep Learning regression model compiled with Keras. Feature columns like `role`, `location`, and `seniority` are preprocessed via one-hot encoding, matching the training schema configured in `backend/scripts/train_salary_dl_model.py`. This prediction system runs entirely offline on your local machine, protecting user privacy.
+The Salary Intelligence module references a local Deep Learning regression model compiled with Keras. Feature columns (`role`, `location`, `seniority`) are preprocessed via one-hot encoding, strictly matching the training schema configured in `backend/scripts/train_salary_dl_model.py`. This system operates entirely offline, prioritizing user privacy.
 
-### Local Hybrid AI & Model Registry (Local Fallbacks)
-To ensure reliable operation under offline conditions, API rate limits, or for maximum privacy, PlacementOS includes a centralized `LocalModelRegistry` that lazily loads local models onto CUDA (GPU) if available, or CPU:
-*   **Local Generative LLM**: A Hugging Face pipeline wrapping `Qwen/Qwen2.5-1.5B-Instruct` is used locally for agent inference (e.g., Mock Interview Agent 10) with automatic fallback to Gemini.
-*   **ATS Cross-Encoder Scorer**: Employs `cross-encoder/ms-marco-MiniLM-L-6-v2` locally for high-precision semantic matching between resumes and JDs (Agent 9).
-*   **Career Compass Classifier**: Uses a Scikit-Learn `RandomForestClassifier` pipeline to predict matching job families based on candidate profile keyword vectors (Agent 5).
-*   **BERT NER Extractor**: Utilizes `dslim/bert-base-NER` for local entity extraction on job descriptions (skills, roles, locations) for JD Extractor (Agent 1).
-*   **Keras MLP Regression**: Powers offline Salary Intelligence predictions with one-hot encoded categorization (Agent 7).
-
----
-
-## 🤝 Contributing
-We welcome contributions from the community! To ensure a smooth process, please read our [Contributing Guide](CONTRIBUTING.md) before getting started. By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+### Local Hybrid AI & Model Registry (Fallbacks)
+To ensure reliability under offline constraints or API rate limits, PlacementOS utilizes a centralized `LocalModelRegistry` that lazily loads models onto CUDA (GPU) or CPU:
+*   **Generative LLM:** Hugging Face pipeline wrapping `Qwen/Qwen2.5-1.5B-Instruct` for local agent inference.
+*   **ATS Cross-Encoder Scorer:** Employs `cross-encoder/ms-marco-MiniLM-L-6-v2` for high-precision semantic matching.
+*   **Career Compass Classifier:** Scikit-Learn `RandomForestClassifier` pipeline predicting job families based on keyword vectors.
+*   **BERT NER Extractor:** `dslim/bert-base-NER` for local entity extraction on job descriptions.
 
 ---
 
-## 📄 License
+## Community & Support
+
+### Contributing
+We welcome contributions from the community. Please review our [Contributing Guide](CONTRIBUTING.md) to understand our development workflow, branch naming rules, and pull request guidelines. By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+### License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-## 💬 Support
-Having trouble? We're here to help!
-- Check our [Support Document](SUPPORT.md)
+### Support
+Encountered an issue or have a question?
+- Read our [Support Document](SUPPORT.md)
 - Open an [Issue](https://github.com/vansh070605/PlacementOS/issues)
 
 ---
-
-*Built as a personal career command center to conquer the modern job market.*
+*Built to conquer the modern job market.*
