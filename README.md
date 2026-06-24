@@ -1,19 +1,40 @@
-# PlacementOS
-
-<p align="center">
+<div align="center">
   <img src="./frontend/public/images/placementos_banner.png" alt="PlacementOS Banner" width="100%">
-</p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/React-19-blue?logo=react&logoColor=white" alt="React">
-  <img src="https://img.shields.io/badge/Tailwind--CSS-v4-38bdf8?logo=tailwindcss&logoColor=white" alt="TailwindCSS">
-  <img src="https://img.shields.io/badge/FastAPI-0.110%2B-green?logo=fastapi&logoColor=white" alt="FastAPI">
-  <img src="https://img.shields.io/badge/Gemini-1.5--flash%20/%202.5--flash-violet?logo=google&logoColor=white" alt="Gemini">
-  <img src="https://img.shields.io/badge/ChromaDB-VectorDB-orange" alt="ChromaDB">
-  <img src="https://img.shields.io/badge/Firebase-Auth%20%26%20Sync-yellow?logo=firebase&logoColor=white" alt="Firebase">
-  <img src="https://img.shields.io/badge/TensorFlow-Neural%20Net-red?logo=tensorflow&logoColor=white" alt="TensorFlow">
-</p>
+  <h1>🎓 PlacementOS</h1>
+  <p><i>A local-first, AI-powered career command center.</i></p>
+
+  <!-- GitHub Badges -->
+  <p>
+    <a href="https://github.com/vansh070605/PlacementOS/stargazers"><img src="https://img.shields.io/github/stars/vansh070605/PlacementOS?style=for-the-badge&color=ffd700" alt="Stars"></a>
+    <a href="https://github.com/vansh070605/PlacementOS/network/members"><img src="https://img.shields.io/github/forks/vansh070605/PlacementOS?style=for-the-badge&color=00aaff" alt="Forks"></a>
+    <a href="https://github.com/vansh070605/PlacementOS/issues"><img src="https://img.shields.io/github/issues/vansh070605/PlacementOS?style=for-the-badge&color=ff5555" alt="Issues"></a>
+    <a href="https://github.com/vansh070605/PlacementOS/blob/main/LICENSE"><img src="https://img.shields.io/github/license/vansh070605/PlacementOS?style=for-the-badge&color=44cc11" alt="License"></a>
+    <a href="https://github.com/vansh070605/PlacementOS/graphs/contributors"><img src="https://img.shields.io/github/contributors/vansh070605/PlacementOS?style=for-the-badge&color=ff8800" alt="Contributors"></a>
+    <a href="https://github.com/vansh070605/PlacementOS/commits/main"><img src="https://img.shields.io/github/last-commit/vansh070605/PlacementOS?style=for-the-badge&color=9933cc" alt="Last Commit"></a>
+  </p>
+
+  <!-- Tech Stack Badges -->
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white" alt="Python">
+    <img src="https://img.shields.io/badge/React-19-blue?logo=react&logoColor=white" alt="React">
+    <img src="https://img.shields.io/badge/Tailwind--CSS-v4-38bdf8?logo=tailwindcss&logoColor=white" alt="TailwindCSS">
+    <img src="https://img.shields.io/badge/FastAPI-0.110%2B-green?logo=fastapi&logoColor=white" alt="FastAPI">
+    <img src="https://img.shields.io/badge/Gemini-1.5--flash%20/%202.5--flash-violet?logo=google&logoColor=white" alt="Gemini">
+    <img src="https://img.shields.io/badge/ChromaDB-VectorDB-orange" alt="ChromaDB">
+    <img src="https://img.shields.io/badge/Firebase-Auth%20%26%20Sync-yellow?logo=firebase&logoColor=white" alt="Firebase">
+    <img src="https://img.shields.io/badge/TensorFlow-Neural%20Net-red?logo=tensorflow&logoColor=white" alt="TensorFlow">
+  </p>
+
+  <p>
+    <a href="#-key-features">Key Features</a> •
+    <a href="#-system-architecture">Architecture</a> •
+    <a href="#-local-setup-guide">Installation</a> •
+    <a href="#-the-multi-agent-orchestration-engine">Agents</a> •
+    <a href="#-contributing">Contributing</a> •
+    <a href="#-support">Support</a>
+  </p>
+</div>
 
 PlacementOS is a local-first, AI-powered career command center. It replaces generic job application advice with multi-agent RAG architectures that analyze your actual source code, experience portfolio, and the real-world job market to help you land offers faster, optimize your application funnel, and negotiate higher compensation.
 
@@ -147,7 +168,7 @@ graph TD
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/PlacementOS.git
+git clone https://github.com/vansh070605/PlacementOS.git
 cd PlacementOS
 ```
 
@@ -237,5 +258,24 @@ To ensure reliable operation under offline conditions, API rate limits, or for m
 *   **Career Compass Classifier**: Uses a Scikit-Learn `RandomForestClassifier` pipeline to predict matching job families based on candidate profile keyword vectors (Agent 5).
 *   **BERT NER Extractor**: Utilizes `dslim/bert-base-NER` for local entity extraction on job descriptions (skills, roles, locations) for JD Extractor (Agent 1).
 *   **Keras MLP Regression**: Powers offline Salary Intelligence predictions with one-hot encoded categorization (Agent 7).
+
+---
+
+## 🤝 Contributing
+We welcome contributions from the community! To ensure a smooth process, please read our [Contributing Guide](CONTRIBUTING.md) before getting started. By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 💬 Support
+Having trouble? We're here to help!
+- Check our [Support Document](SUPPORT.md)
+- Open an [Issue](https://github.com/vansh070605/PlacementOS/issues)
+
+---
 
 *Built as a personal career command center to conquer the modern job market.*
