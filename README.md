@@ -82,17 +82,17 @@ flowchart LR
     classDef output fill:#10b981,stroke:#047857,color:#fff,stroke-width:2px,rx:8px,ry:8px
 
     %% Primary Inputs
-    JD[📄 Job Description] ::: input
-    Profile[👤 Global Profile] ::: input
-    Code[💻 Local Codebase] ::: input
+    JD["📄 Job Description"] ::: input
+    Profile["👤 Global Profile"] ::: input
+    Code["💻 Local Codebase"] ::: input
 
     %% Database
-    Chroma[(ChromaDB Vector Store)] ::: db
+    Chroma[("ChromaDB Vector Store")] ::: db
 
     %% Orchestration Engine
-    A1[⚙️ Agent 1: JD Extractor] ::: agent
-    A2[🧠 Agent 2: RAG Matcher] ::: agent
-    A3[🎯 Agent 3: Synthesis Strategist] ::: agent
+    A1["⚙️ Agent 1: JD Extractor"] ::: agent
+    A2["🧠 Agent 2: RAG Matcher"] ::: agent
+    A3["🎯 Agent 3: Synthesis Strategist"] ::: agent
     
     %% RAG Pipeline Flow
     JD --> A1
@@ -102,26 +102,26 @@ flowchart LR
     Profile --> A3
 
     %% Output Generation Flow
-    A3 --> A4[🤝 Agent 4: The Networker] ::: agent
-    A3 --> A8[✍️ Agent 8: Cover Letter Forge] ::: agent
-    A4 --> O1[LinkedIn DMs] ::: output
-    A8 --> O2[Cover Letters] ::: output
+    A3 --> A4["🤝 Agent 4: The Networker"] ::: agent
+    A3 --> A8["✍️ Agent 8: Cover Letter Forge"] ::: agent
+    A4 --> O1["LinkedIn DMs"] ::: output
+    A8 --> O2["Cover Letters"] ::: output
 
     %% Career & Code Auditors
-    Profile --> A5[🧭 Agent 5: Career Compass] ::: agent
-    Profile --> A9[📊 Agent 9: ATS Scorer] ::: agent
-    Code --> A6[🔍 Agent 6: Project Auditor] ::: agent
+    Profile --> A5["🧭 Agent 5: Career Compass"] ::: agent
+    Profile --> A9["📊 Agent 9: ATS Scorer"] ::: agent
+    Code --> A6["🔍 Agent 6: Project Auditor"] ::: agent
     
-    A5 --> O3[Career Roadmaps] ::: output
-    A9 --> O4[Match Score] ::: output
-    A6 --> O5[Code Review & Flowcharts] ::: output
+    A5 --> O3["Career Roadmaps"] ::: output
+    A9 --> O4["Match Score"] ::: output
+    A6 --> O5["Code Review & Flowcharts"] ::: output
 
     %% Interview & Salary Intel
-    O5 --> A10[🎙️ Agent 10: Mock Interviewer] ::: agent
-    A10 --> O6[Live Practice] ::: output
+    O5 --> A10["🎙️ Agent 10: Mock Interviewer"] ::: agent
+    A10 --> O6["Live Practice"] ::: output
     
-    JD --> A7[💰 Agent 7: Salary Intel] ::: agent
-    A7 --> O7[Neural Net Prediction] ::: output
+    JD --> A7["💰 Agent 7: Salary Intel"] ::: agent
+    A7 --> O7["Neural Net Prediction"] ::: output
 ```
 
 ---
