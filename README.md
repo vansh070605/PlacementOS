@@ -74,54 +74,54 @@ PlacementOS is driven by a localized FastAPI backend orchestrating **10 speciali
 ## System Architecture
 
 ```mermaid
-graph TD
-  %% ── LAYER 1: PRIMARY INPUTS ──
-  subgraph Inputs [1. Primary Inputs]
-    A[Raw Job Description]
-    H[Global Profile / Resume]
-    J[Local Codebase / Git URL]
-    L[Role & Location]
-  end
+flowchart LR
+    %% Modern Styling
+    classDef input fill:#1e293b,stroke:#475569,color:#fff,stroke-width:2px,rx:8px,ry:8px
+    classDef agent fill:#6366f1,stroke:#4338ca,color:#fff,stroke-width:2px,rx:8px,ry:8px
+    classDef db fill:#0ea5e9,stroke:#0369a1,color:#fff,stroke-width:2px,rx:8px,ry:8px
+    classDef output fill:#10b981,stroke:#047857,color:#fff,stroke-width:2px,rx:8px,ry:8px
 
-  %% ── LAYER 2: SYSTEM TRACKERS & UTILITIES ──
-  subgraph Utilities [2. Trackers & AI Assistant]
-    LC[LeetCode API] <-->|GraphQL Proxy| T_DSA[DSA Progress Tracker]
-    T_JOB[Job Application Tracker] -->|Firebase Sync| H
-    CB[Floating AI Chatbot] <-->|Gemini-Powered Q&A| H
-  end
+    %% Primary Inputs
+    JD[📄 Job Description] ::: input
+    Profile[👤 Global Profile] ::: input
+    Code[💻 Local Codebase] ::: input
 
-  %% ── LAYER 3: MULTI-AGENT ORCHESTRATION & RAG ──
-  subgraph Agents [3. Multi-Agent Orchestration & RAG]
-    %% JD Analysis RAG Flow
-    A -->|Agent 1: JD Extractor| B(Parsed Requirements)
-    B -->|Agent 2: RAG Matcher| C(Query Vector Database)
-    D[(ChromaDB Vector Store)] <-->|Semantic Search| C
-    C -->|Agent 3: Synthesis Strategist| E[Tailored Resumes, Gap Checklist & Study Plan]
+    %% Database
+    Chroma[(ChromaDB Vector Store)] ::: db
 
-    %% Code, Career, & ATS Auditors
-    H -->|Agent 5: Career Compass| I[3 Ranked Career Paths & Roadmaps]
-    H -->|Agent 9: ATS Scorer| ATS[Match Score & Missing Keywords]
-    J -->|Agent 6: Project Auditor| K[Code Audit & Mermaid Flowcharts]
-    L -->|Agent 7: Salary Intelligence| M[Local Neural Net Prediction & Negotiation Script]
-  end
+    %% Orchestration Engine
+    A1[⚙️ Agent 1: JD Extractor] ::: agent
+    A2[🧠 Agent 2: RAG Matcher] ::: agent
+    A3[🎯 Agent 3: Synthesis Strategist] ::: agent
+    
+    %% RAG Pipeline Flow
+    JD --> A1
+    A1 --> A2
+    A2 <--> Chroma
+    A2 --> A3
+    Profile --> A3
 
-  %% ── LAYER 4: GENERATIVE OUTPUTS & INTERACTIVE PRACTICE ──
-  subgraph Outputs [4. Generative Outputs & Practice]
-    E -->|Agent 4: The Networker| F[LinkedIn Outreach & DMs]
-    E -->|Agent 8: Cover Letter Forge| G[Tailored Cover Letters]
-    E & H -->|Agent 10: Mock Interview Agent| IA[Interactive STAR Mock Interview]
-  end
+    %% Output Generation Flow
+    A3 --> A4[🤝 Agent 4: The Networker] ::: agent
+    A3 --> A8[✍️ Agent 8: Cover Letter Forge] ::: agent
+    A4 --> O1[LinkedIn DMs] ::: output
+    A8 --> O2[Cover Letters] ::: output
 
-  %% Invisible alignment links to force strict vertical layout stacking
-  Inputs ~~~ Utilities
-  Utilities ~~~ Agents
-  Agents ~~~ Outputs
+    %% Career & Code Auditors
+    Profile --> A5[🧭 Agent 5: Career Compass] ::: agent
+    Profile --> A9[📊 Agent 9: ATS Scorer] ::: agent
+    Code --> A6[🔍 Agent 6: Project Auditor] ::: agent
+    
+    A5 --> O3[Career Roadmaps] ::: output
+    A9 --> O4[Match Score] ::: output
+    A6 --> O5[Code Review & Flowcharts] ::: output
 
-  style D fill:#f96,stroke:#333,stroke-width:2px
-  style E fill:#9cf,stroke:#333,stroke-width:2px
-  style K fill:#bbf,stroke:#333,stroke-width:2px
-  style M fill:#fbf,stroke:#333,stroke-width:2px
-  style IA fill:#bbf,stroke:#333,stroke-width:2px
+    %% Interview & Salary Intel
+    O5 --> A10[🎙️ Agent 10: Mock Interviewer] ::: agent
+    A10 --> O6[Live Practice] ::: output
+    
+    JD --> A7[💰 Agent 7: Salary Intel] ::: agent
+    A7 --> O7[Neural Net Prediction] ::: output
 ```
 
 ---
