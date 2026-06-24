@@ -72,7 +72,6 @@ PlacementOS is driven by a localized FastAPI backend orchestrating **10 speciali
 ---
 
 ## System Architecture
-
 ```mermaid
 flowchart LR
     %% Modern Styling
@@ -82,17 +81,17 @@ flowchart LR
     classDef output fill:#10b981,stroke:#047857,color:#fff,stroke-width:2px,rx:8px,ry:8px
 
     %% Primary Inputs
-    JD["📄 Job Description"] ::: input
-    Profile["👤 Global Profile"] ::: input
-    Code["💻 Local Codebase"] ::: input
+    JD["📄 Job Description"]
+    Profile["👤 Global Profile"]
+    Code["💻 Local Codebase"]
 
     %% Database
-    Chroma[("ChromaDB Vector Store")] ::: db
+    Chroma[("ChromaDB Vector Store")]
 
     %% Orchestration Engine
-    A1["⚙️ Agent 1: JD Extractor"] ::: agent
-    A2["🧠 Agent 2: RAG Matcher"] ::: agent
-    A3["🎯 Agent 3: Synthesis Strategist"] ::: agent
+    A1["⚙️ Agent 1: JD Extractor"]
+    A2["🧠 Agent 2: RAG Matcher"]
+    A3["🎯 Agent 3: Synthesis Strategist"]
     
     %% RAG Pipeline Flow
     JD --> A1
@@ -102,26 +101,49 @@ flowchart LR
     Profile --> A3
 
     %% Output Generation Flow
-    A3 --> A4["🤝 Agent 4: The Networker"] ::: agent
-    A3 --> A8["✍️ Agent 8: Cover Letter Forge"] ::: agent
-    A4 --> O1["LinkedIn DMs"] ::: output
-    A8 --> O2["Cover Letters"] ::: output
+    A4["🤝 Agent 4: The Networker"]
+    A8["✍️ Agent 8: Cover Letter Forge"]
+    O1["LinkedIn DMs"]
+    O2["Cover Letters"]
+
+    A3 --> A4
+    A3 --> A8
+    A4 --> O1
+    A8 --> O2
 
     %% Career & Code Auditors
-    Profile --> A5["🧭 Agent 5: Career Compass"] ::: agent
-    Profile --> A9["📊 Agent 9: ATS Scorer"] ::: agent
-    Code --> A6["🔍 Agent 6: Project Auditor"] ::: agent
+    A5["🧭 Agent 5: Career Compass"]
+    A9["📊 Agent 9: ATS Scorer"]
+    A6["🔍 Agent 6: Project Auditor"]
+    O3["Career Roadmaps"]
+    O4["Match Score"]
+    O5["Code Review & Flowcharts"]
+
+    Profile --> A5
+    Profile --> A9
+    Code --> A6
     
-    A5 --> O3["Career Roadmaps"] ::: output
-    A9 --> O4["Match Score"] ::: output
-    A6 --> O5["Code Review & Flowcharts"] ::: output
+    A5 --> O3
+    A9 --> O4
+    A6 --> O5
 
     %% Interview & Salary Intel
-    O5 --> A10["🎙️ Agent 10: Mock Interviewer"] ::: agent
-    A10 --> O6["Live Practice"] ::: output
+    A10["🎙️ Agent 10: Mock Interviewer"]
+    O6["Live Practice"]
+    A7["💰 Agent 7: Salary Intel"]
+    O7["Neural Net Prediction"]
+
+    O5 --> A10
+    A10 --> O6
     
-    JD --> A7["💰 Agent 7: Salary Intel"] ::: agent
-    A7 --> O7["Neural Net Prediction"] ::: output
+    JD --> A7
+    A7 --> O7
+
+    %% Apply Classes
+    class JD,Profile,Code input
+    class Chroma db
+    class A1,A2,A3,A4,A5,A6,A7,A8,A9,A10 agent
+    class O1,O2,O3,O4,O5,O6,O7 output
 ```
 
 ---
