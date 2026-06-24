@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="./frontend/public/images/placementos_banner.png" alt="PlacementOS Banner" width="100%">
-
   <h1>PlacementOS</h1>
   <p><i>A local-first, AI-powered career command center.</i></p>
 
@@ -25,40 +23,13 @@
     <img src="https://img.shields.io/badge/Firebase-Auth%20%26%20Sync-yellow?logo=firebase&logoColor=white" alt="Firebase">
     <img src="https://img.shields.io/badge/TensorFlow-Neural%20Net-red?logo=tensorflow&logoColor=white" alt="TensorFlow">
   </p>
-
-  <p>
-    <a href="#key-features">Key Features</a> •
-    <a href="#system-architecture">Architecture</a> •
-    <a href="#installation-guide">Installation</a> •
-    <a href="#orchestration-engine">Agents</a> •
-    <a href="#community--support">Contributing</a> •
-    <a href="#community--support">Support</a>
-  </p>
 </div>
 
 **PlacementOS** is a comprehensive, local-first career management platform. It transcends traditional job application tracking by leveraging a multi-agent Retrieval-Augmented Generation (RAG) architecture. By actively analyzing your source code, professional portfolio, and real-time job market data, PlacementOS provides targeted insights to optimize your application funnel, accelerate interview preparation, and maximize compensation negotiations.
 
 ---
 
-## Table of Contents
-1. [Visual Tour](#visual-tour)
-2. [Key Features](#key-features)
-3. [Orchestration Engine](#orchestration-engine)
-4. [System Architecture](#system-architecture)
-5. [Tech Stack](#tech-stack)
-6. [Installation Guide](#installation-guide)
-7. [Under the Hood](#under-the-hood)
-8. [Community & Support](#community--support)
 
----
-
-## Visual Tour
-
-<p align="center">
-  <img src="./frontend/public/images/dashboard_mockup.png" alt="PlacementOS Bento-Box Dashboard Mockup" width="100%">
-</p>
-
----
 
 ## Key Features
 
