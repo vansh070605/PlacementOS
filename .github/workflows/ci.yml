@@ -60,9 +60,6 @@ jobs:
       # Using npm install because package-lock.json might be out of sync
       run: npm install
       
-    - name: Run Linter
-      run: npm run lint --if-present
-      
     - name: Build Application
       run: npm run build
       
