@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
-    "firebase": "^12.15.0",
+    "firebase": "^12.16.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "qrcode.react": "^4.2.0",
